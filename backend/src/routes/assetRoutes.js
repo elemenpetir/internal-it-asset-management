@@ -5,6 +5,7 @@ const roleMiddleware = require("../middleware/roleMiddleware");
 const router = express.Router();
 
 router.get("/", authMiddleware, assetController.getAssets);
+router.get("/:id", authMiddleware, assetController.getAssetById);
 router.post(
   "/",
   authMiddleware,
@@ -12,4 +13,4 @@ router.post(
   assetController.createAsset,
 );
 
-module.exports = router
+module.exports = router;

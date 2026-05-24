@@ -23,6 +23,28 @@ const getAssets = async () => {
   return rows;
 };
 
+const getAssetById = async (id) => {
+  const sql = `SELECT assets.id, 
+    assets.asset_code, 
+    assets.name, 
+    assets.category_id, 
+    asset_categories.name AS category_name, 
+    assets.brand,
+    assets.model,
+    assets.serial_number,
+    assets.purchase_date,
+    assets.status,
+    assets.location,
+    assets.notes,
+    assets.created_at,
+    assets.updated_at
+    FROM assets 
+    JOIN asset_categories ON asset_categories.id = assets.category_id
+    WHERE assets.id = ?`;
+  const [rows] = await db.query(sql, [id]);
+  return rows[0];
+};
+
 const createAsset = async (data) => {
   const sql = `INSERT INTO assets
     (asset_code, name, category_id, brand, model, serial_number, purchase_date, location, notes)
@@ -36,14 +58,15 @@ const createAsset = async (data) => {
     data.serial_number,
     data.purchase_date,
     data.location,
-    data.notes || null
+    data.notes || null,
   ];
 
-  const [result] = await db.query(sql, values)
-  return result
+  const [result] = await db.query(sql, values);
+  return result;
 };
 
 module.exports = {
   getAssets,
+  getAssetById,
   createAsset,
 };

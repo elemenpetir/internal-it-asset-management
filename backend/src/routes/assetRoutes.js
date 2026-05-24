@@ -12,5 +12,11 @@ router.post(
   roleMiddleware("asset_admin", "manager"),
   assetController.createAsset,
 );
+router.put(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("asset_admin", "manager"),
+  assetController.updateAsset,
+);
 
 module.exports = router;

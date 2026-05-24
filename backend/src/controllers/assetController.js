@@ -97,8 +97,80 @@ const createAsset = async (req, res, next) => {
   }
 };
 
+const updateAsset = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      asset_code,
+      name,
+      category_id,
+      brand,
+      model,
+      serial_number,
+      purchase_date,
+      location,
+      notes,
+    } = req.body;
+
+    if (
+      !asset_code ||
+      !name ||
+      !category_id ||
+      !brand ||
+      !model ||
+      !serial_number ||
+      !purchase_date ||
+      !location 
+    ) {
+      return res.status(400).json({
+        status: "failed",
+        message:
+          "asset_code, name, category_id, brand, model, serial_number, purchase_date, and location are required"
+      });
+    }
+
+    const result = await assetModel.updateAsset(id, {
+      asset_code,
+      name,
+      category_id,
+      brand,
+      model,
+      serial_number,
+      purchase_date,
+      location,
+      notes,
+    });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        status: "failed",
+        message: "asset not found",
+      });
+    }
+    return res.status(200).json({
+      status: "success",
+      message: "update asset successfully",
+      data: {
+        id: Number(id),
+        asset_code,
+        name,
+        category_id,
+        brand,
+        model,
+        serial_number,
+        purchase_date,
+        location,
+        notes,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAssets,
   getAssetById,
   createAsset,
+  updateAsset,
 };

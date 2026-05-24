@@ -94,9 +94,18 @@ const updateAsset = async (id, data) => {
   return result;
 };
 
+const updateStatus = async (id, status) => {
+    const sql = `UPDATE assets SET
+    status = ? WHERE id = ?`
+    const values = [status, id]
+    const [result] = await db.query(sql, values)
+    return result
+}
+
 module.exports = {
   getAssets,
   getAssetById,
   createAsset,
   updateAsset,
+  updateStatus,
 };

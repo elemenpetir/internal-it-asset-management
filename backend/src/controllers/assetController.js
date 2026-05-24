@@ -121,12 +121,12 @@ const updateAsset = async (req, res, next) => {
       !model ||
       !serial_number ||
       !purchase_date ||
-      !location 
+      !location
     ) {
       return res.status(400).json({
         status: "failed",
         message:
-          "asset_code, name, category_id, brand, model, serial_number, purchase_date, and location are required"
+          "asset_code, name, category_id, brand, model, serial_number, purchase_date, and location are required",
       });
     }
 
@@ -168,9 +168,56 @@ const updateAsset = async (req, res, next) => {
   }
 };
 
+const updateStatus = async (req, res, next) => {
+  try {
+    const {id} = req.params;
+    const {status} = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        status: "failed",
+        message: "status is required",
+      });
+    }
+
+    const validateStatus = [
+      "available",
+      "assigned",
+      "under_maintenance",
+      "retired",
+    ];
+    if (!validateStatus.includes(status)) {
+      return res.status(400).json({
+        status: "failed",
+        message: "status must be one of: available, assigned, under_maintenance, retired",
+      });
+    }
+
+    const result = await assetModel.updateStatus(id, status);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        status: "failed",
+        message: "asset not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "update status successfully",
+      data: {
+        id: Number(id),
+        status
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAssets,
   getAssetById,
   createAsset,
   updateAsset,
+  updateStatus,
 };

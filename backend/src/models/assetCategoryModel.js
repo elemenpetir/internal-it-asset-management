@@ -8,8 +8,8 @@ const getAssetCategories = async() => {
 
 const createAssetCategory = async (name) => {
     const sql = 'INSERT INTO asset_categories (name) VALUES (?)'
-    const [results] = await db.query(sql, [name])
-    return results
+    const [result] = await db.query(sql, [name])
+    return result
 }
 
 module.exports = {

@@ -16,15 +16,15 @@ const findEmployeeForActivation = async(email, employeeNum) => {
 const createUserForEmployeeActivation = async (data) => {
     const sql = 'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)'
     const values = [data.name, data.email, data.password, data.role]
-    const [results] = await db.query(sql, values)
-    return results
+    const [result] = await db.query(sql, values)
+    return result
 }
 
 const linkEmployeeToUser = async(employeeId, userId) => {
     const sql = 'UPDATE employees SET user_id = ? WHERE id = ?'
     const values = [userId, employeeId]
-    const [results] = await db.query(sql, values)
-    return results
+    const [result] = await db.query(sql, values)
+    return result
 }
 
 module.exports = {

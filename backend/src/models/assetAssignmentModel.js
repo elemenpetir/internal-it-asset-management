@@ -22,8 +22,26 @@ const getAssetAssignments = async () => {
     JOIN users ON asset_assignments.assigned_by = users.id
     ORDER BY asset_assignments.id DESC`;
 
-    const [rows] = await db.query(sql)
-    return rows
+  const [rows] = await db.query(sql);
+  return rows;
+};
+
+const getAssetAssignmentById = async (id) => {
+  const sql = `SELECT 
+      id,
+      asset_id,
+      employee_id,
+      assigned_by,
+      assigned_at,
+      returned_at,
+      status,
+      notes,
+      created_at,
+      updated_at
+    FROM asset_assignments
+    WHERE id = ?`;
+  const [rows] = await db.query(sql, [id]);
+  return rows[0];
 };
 
 const createAssetAssignment = async (data) => {
@@ -39,7 +57,16 @@ const createAssetAssignment = async (data) => {
   return result;
 };
 
+const returnAssetAssignment = async (id) => {
+  const sql = `UPDATE asset_assignments SET status = 'returned', returned_at = current_timestamp
+  WHERE id = ?`
+  const [result] = await db.query(sql, [id])
+  return result
+}
+
 module.exports = {
   getAssetAssignments,
+  getAssetAssignmentById,
   createAssetAssignment,
+  returnAssetAssignment
 };

@@ -11,5 +11,6 @@ router.post(
   roleMiddleware("asset_admin", "manager"),
   assetAssignmentController.createAssetAssignment,
 );
+router.patch('/:id/return', authMiddleware, roleMiddleware('asset_admin', 'manager'), assetAssignmentController.returnAssetAssignment)
 
 module.exports = router

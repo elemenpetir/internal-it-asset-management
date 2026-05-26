@@ -73,7 +73,45 @@ const createAssetAssignment = async (req, res, next) => {
   }
 };
 
+const returnAssetAssignment = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const assignment = await assetAssignmentModel.getAssetAssignmentById(id);
+    if (!assignment) {
+      return res.status(404).json({
+        status: "failed",
+        message: "assignment not found",
+      });
+    }
+
+    if (assignment.status !== "active") {
+      return res.status(400).json({
+        status: "failed",
+        message: "assignment has already been returned",
+      });
+    }
+
+    await assetAssignmentModel.returnAssetAssignment(id);
+    await assetModel.updateStatus(assignment.asset_id, "available");
+
+    return res.status(200).json({
+      status: "success",
+      message: "return asset successfully",
+      data: {
+        id: assignment.id,
+        asset_id: assignment.asset_id,
+        employee_id: assignment.employee_id,
+        status: "returned",
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAssetAssignments,
   createAssetAssignment,
+  returnAssetAssignment,
 };

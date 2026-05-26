@@ -86,38 +86,44 @@ const createAssetAssignmentWithTransaction = async (data) => {
 
     const updateSql = `UPDATE assets 
     SET status = 'assigned' WHERE id = ?`;
-    await connection.query(updateSql, [data.asset_id])
+    await connection.query(updateSql, [data.asset_id]);
 
-    await connection.commit()
+    await connection.commit();
 
-    return assignmentResult
-
+    return assignmentResult;
   } catch (error) {
-    await connection.rollback()
-    throw error
+    await connection.rollback();
+    throw error;
   } finally {
-    connection.release()
+    connection.release();
   }
 };
 
-const createAssetAssignment = async (data) => {
-  const sql = `INSERT INTO asset_assignments
-    (asset_id, employee_id, assigned_by, notes) VALUES (?, ?, ?, ?)`;
-  const values = [
-    data.asset_id,
-    data.employee_id,
-    data.assigned_by,
-    data.notes || null,
-  ];
-  const [result] = await db.query(sql, values);
-  return result;
-};
+const returnAssetAssignmentWithTransaction = async (assignmentId, assetId) => {
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
 
-const returnAssetAssignment = async (id) => {
-  const sql = `UPDATE asset_assignments SET status = 'returned', returned_at = current_timestamp
-  WHERE id = ?`;
-  const [result] = await db.query(sql, [id]);
-  return result;
+    const updateAssignmentSql = `UPDATE asset_assignments 
+      SET status = 'returned', returned_at = current_timestamp
+      WHERE id = ?`;
+    const [assignmentResult] = await connection.query(updateAssignmentSql, [
+      assignmentId,
+    ]);
+
+    const updateAssetSql = `UPDATE assets 
+    SET status = 'available' WHERE id = ?`;
+    await connection.query(updateAssetSql, [assetId]);
+
+    await connection.commit();
+
+    return assignmentResult;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 };
 
 module.exports = {
@@ -125,6 +131,5 @@ module.exports = {
   getAssetAssignmentById,
   getAssetAssignmentDetailById,
   createAssetAssignmentWithTransaction,
-  createAssetAssignment,
-  returnAssetAssignment,
+  returnAssetAssignmentWithTransaction,
 };

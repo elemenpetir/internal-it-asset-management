@@ -113,8 +113,7 @@ const returnAssetAssignment = async (req, res, next) => {
       });
     }
 
-    await assetAssignmentModel.returnAssetAssignment(id);
-    await assetModel.updateStatus(assignment.asset_id, "available");
+    await assetAssignmentModel.returnAssetAssignmentWithTransaction(id, assignment.asset_id);
 
     return res.status(200).json({
       status: "success",

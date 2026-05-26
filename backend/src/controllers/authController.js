@@ -6,7 +6,7 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: "failed",
         message: "email and password are required",
       });
@@ -83,15 +83,17 @@ const activateEmployee = async (req, res, next) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const role = "employee";
     const newUser = {
       name: employee.name,
       email: employee.email,
       password: hashedPassword,
       role,
     };
-    const createdUser =
-      await userModel.createUserForEmployeeActivation(newUser);
-    await userModel.linkEmployeeToUser(employee.id, createdUser.insertId);
+    const createdUser = await userModel.activateEmployeeWithTransaction(
+      employee.id,
+      newUser,
+    );
 
     return res.status(201).json({
       status: "success",
@@ -101,7 +103,7 @@ const activateEmployee = async (req, res, next) => {
           id: createdUser.insertId,
           name: employee.name,
           email: employee.email,
-          role: "employee",
+          role,
         },
       },
     });

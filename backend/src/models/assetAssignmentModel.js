@@ -65,9 +65,40 @@ const getAssetAssignmentDetailById = async (id) => {
     JOIN employees ON asset_assignments.employee_id = employees.id
     JOIN users ON asset_assignments.assigned_by = users.id
     WHERE asset_assignments.id = ?`;
-  const [rows] = await db.query(sql, [id])
-  return rows[0]
-}
+  const [rows] = await db.query(sql, [id]);
+  return rows[0];
+};
+
+const createAssetAssignmentWithTransaction = async (data) => {
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const insertSql = `INSERT INTO asset_assignments
+    (asset_id, employee_id, assigned_by, notes) VALUES (?, ?, ?, ?)`;
+    const insertValues = [
+      data.asset_id,
+      data.employee_id,
+      data.assigned_by,
+      data.notes || null,
+    ];
+    const [assignmentResult] = await connection.query(insertSql, insertValues);
+
+    const updateSql = `UPDATE assets 
+    SET status = 'assigned' WHERE id = ?`;
+    await connection.query(updateSql, [data.asset_id])
+
+    await connection.commit()
+
+    return assignmentResult
+
+  } catch (error) {
+    await connection.rollback()
+    throw error
+  } finally {
+    connection.release()
+  }
+};
 
 const createAssetAssignment = async (data) => {
   const sql = `INSERT INTO asset_assignments
@@ -84,15 +115,16 @@ const createAssetAssignment = async (data) => {
 
 const returnAssetAssignment = async (id) => {
   const sql = `UPDATE asset_assignments SET status = 'returned', returned_at = current_timestamp
-  WHERE id = ?`
-  const [result] = await db.query(sql, [id])
-  return result
-}
+  WHERE id = ?`;
+  const [result] = await db.query(sql, [id]);
+  return result;
+};
 
 module.exports = {
   getAssetAssignments,
   getAssetAssignmentById,
   getAssetAssignmentDetailById,
+  createAssetAssignmentWithTransaction,
   createAssetAssignment,
-  returnAssetAssignment
+  returnAssetAssignment,
 };

@@ -72,13 +72,12 @@ const createAssetAssignment = async (req, res, next) => {
       });
     }
 
-    const result = await assetAssignmentModel.createAssetAssignment({
+    const result = await assetAssignmentModel.createAssetAssignmentWithTransaction({
       asset_id,
       employee_id,
       assigned_by,
       notes,
     });
-    await assetModel.updateStatus(asset_id, "assigned");
     return res.status(201).json({
       status: "success",
       message: "asset assigned successfully",

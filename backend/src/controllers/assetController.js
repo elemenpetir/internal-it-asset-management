@@ -64,7 +64,7 @@ const createAsset = async (req, res, next) => {
       });
     }
 
-    const result = await assetModel.createAsset({
+    const result = await assetModel.createAssetWithAuditLog({
       asset_code,
       name,
       category_id,
@@ -74,6 +74,7 @@ const createAsset = async (req, res, next) => {
       purchase_date,
       location,
       notes,
+      changed_by: req.user.id,
     });
 
     return res.status(201).json({
@@ -170,8 +171,8 @@ const updateAsset = async (req, res, next) => {
 
 const updateStatus = async (req, res, next) => {
   try {
-    const {id} = req.params;
-    const {status} = req.body;
+    const { id } = req.params;
+    const { status } = req.body;
 
     if (!status) {
       return res.status(400).json({
@@ -189,7 +190,8 @@ const updateStatus = async (req, res, next) => {
     if (!validateStatus.includes(status)) {
       return res.status(400).json({
         status: "failed",
-        message: "status must be one of: available, assigned, under_maintenance, retired",
+        message:
+          "status must be one of: available, assigned, under_maintenance, retired",
       });
     }
 
@@ -206,7 +208,7 @@ const updateStatus = async (req, res, next) => {
       message: "update status successfully",
       data: {
         id: Number(id),
-        status
+        status,
       },
     });
   } catch (error) {

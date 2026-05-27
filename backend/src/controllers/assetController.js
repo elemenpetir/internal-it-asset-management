@@ -131,7 +131,7 @@ const updateAsset = async (req, res, next) => {
       });
     }
 
-    const result = await assetModel.updateAsset(id, {
+    const result = await assetModel.updateAssetWithAuditLog(id, {
       asset_code,
       name,
       category_id,
@@ -141,8 +141,9 @@ const updateAsset = async (req, res, next) => {
       purchase_date,
       location,
       notes,
+      changed_by: req.user.id
     });
-    if (result.affectedRows === 0) {
+    if (!result || result.affectedRows === 0) {
       return res.status(404).json({
         status: "failed",
         message: "asset not found",

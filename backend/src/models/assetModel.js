@@ -45,26 +45,6 @@ const getAssetById = async (id) => {
   return rows[0];
 };
 
-const createAsset = async (data) => {
-  const sql = `INSERT INTO assets
-    (asset_code, name, category_id, brand, model, serial_number, purchase_date, location, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-  const values = [
-    data.asset_code,
-    data.name,
-    data.category_id,
-    data.brand,
-    data.model,
-    data.serial_number,
-    data.purchase_date,
-    data.location,
-    data.notes || null,
-  ];
-
-  const [result] = await db.query(sql, values);
-  return result;
-};
-
 const createAssetWithAuditLog = async (data) => {
   const connection = await db.getConnection();
   try {
@@ -107,16 +87,16 @@ const createAssetWithAuditLog = async (data) => {
       }),
       data.changed_by,
     ];
-    await connection.query(insertAuditLogSql, auditLogValues)
+    await connection.query(insertAuditLogSql, auditLogValues);
 
-    await connection.commit()
+    await connection.commit();
 
-    return assetResult
+    return assetResult;
   } catch (error) {
-    await connection.rollback()
-    throw error
+    await connection.rollback();
+    throw error;
   } finally {
-    connection.release()
+    connection.release();
   }
 };
 
@@ -149,6 +129,93 @@ const updateAsset = async (id, data) => {
   return result;
 };
 
+const updateAssetWithAuditLog = async (id, data) => {
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [oldRows] = await connection.query(
+      `SELECT 
+        id,
+        asset_code,
+        name,
+        category_id,
+        brand,
+        model,
+        serial_number,
+        purchase_date,
+        status,
+        location,
+        notes
+      FROM assets
+      WHERE id = ?`,
+      [id],
+    );
+    const oldAsset = oldRows[0];
+    if (!oldAsset) {
+      await connection.rollback();
+      return null;
+    }
+
+    const updateSql = `UPDATE assets SET
+      asset_code = ?, 
+      name = ?, 
+      category_id = ?, 
+      brand = ?, 
+      model = ?, 
+      serial_number = ?, 
+      purchase_date = ?, 
+      location = ?, 
+      notes = ?
+      WHERE id = ?`;
+    const updateValues = [
+      data.asset_code,
+      data.name,
+      data.category_id,
+      data.brand,
+      data.model,
+      data.serial_number,
+      data.purchase_date,
+      data.location,
+      data.notes || null,
+      id,
+    ];
+    const [resultUpdate] = await connection.query(updateSql, updateValues);
+
+    const auditSql = `INSERT INTO audit_logs
+      (entity_type, entity_id, action, old_value, new_value, changed_by)
+      VALUES (?, ?, ?, ?, ?, ?)`;
+    const newValue = {
+      asset_code: data.asset_code,
+      name: data.name,
+      category_id: data.category_id,
+      brand: data.brand,
+      model: data.model,
+      serial_number: data.serial_number,
+      purchase_date: data.purchase_date,
+      location: data.location,
+      notes: data.notes || null,
+    };
+    await connection.query(auditSql, [
+      'asset',
+      id,
+      'UPDATE_ASSET',
+      JSON.stringify(oldAsset),
+      JSON.stringify(newValue),
+      data.changed_by,
+    ]);
+
+    await connection.commit()
+
+    return resultUpdate
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
 const updateStatus = async (id, status) => {
   const sql = `UPDATE assets SET
     status = ? WHERE id = ?`;
@@ -160,8 +227,8 @@ const updateStatus = async (id, status) => {
 module.exports = {
   getAssets,
   getAssetById,
-  createAsset,
   createAssetWithAuditLog,
   updateAsset,
+  updateAssetWithAuditLog,
   updateStatus,
 };

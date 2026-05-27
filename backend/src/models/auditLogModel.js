@@ -1,21 +1,23 @@
 const db = require('../config/db');
 
-const createAuditLog = async (data) => {
-    const sql = `INSERT INTO audit_logs
-    (entity_type, entity_id, action, old_value, new_value, changed_by)
-    VALUES (?, ?, ?, ?, ?, ?)`
-    const values = [
-        data.entity_type,
-        data.entity_id,
-        data.action,
-        data.old_value ? JSON.stringify(data.old_value) : null,
-        data.new_value ? JSON.stringify(data.new_value) : null,
-        data.changed_by
-    ]
-    const [result] = await db.query(sql, values)
-    return result
+const getAuditLogs = async () => {
+    const sql = `SELECT 
+      audit_logs.id,
+      audit_logs.entity_type,
+      audit_logs.entity_id,
+      audit_logs.action,
+      audit_logs.old_value,
+      audit_logs.new_value,
+      audit_logs.changed_by,
+      users.name AS changed_by_name,
+      audit_logs.created_at
+    FROM audit_logs
+    JOIN users ON audit_logs.changed_by = users.id
+    ORDER BY audit_logs.id DESC`
+    const [rows] = await db.query(sql)
+    return rows
 }
 
 module.exports = {
-    createAuditLog,
+    getAuditLogs,
 }

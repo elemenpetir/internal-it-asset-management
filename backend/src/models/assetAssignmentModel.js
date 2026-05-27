@@ -88,6 +88,24 @@ const createAssetAssignmentWithTransaction = async (data) => {
     SET status = 'assigned' WHERE id = ?`;
     await connection.query(updateSql, [data.asset_id]);
 
+    const auditSql = `INSERT INTO audit_logs
+      (entity_type, entity_id, action, old_value, new_value, changed_by)
+      VALUES (?, ?, ?, ?, ?, ?)`;
+    await connection.query(auditSql, [
+      "asset_assignment",
+      assignmentResult.insertId,
+      "ASSIGN_ASSET",
+      null,
+      JSON.stringify({
+        asset_id: data.asset_id,
+        employee_id: data.employee_id,
+        assigned_by: data.assigned_by,
+        notes: data.notes || null,
+        asset_status: "assigned",
+      }),
+      data.assigned_by,
+    ]);
+
     await connection.commit();
 
     return assignmentResult;
@@ -99,7 +117,11 @@ const createAssetAssignmentWithTransaction = async (data) => {
   }
 };
 
-const returnAssetAssignmentWithTransaction = async (assignmentId, assetId) => {
+const returnAssetAssignmentWithTransaction = async (
+  assignmentId,
+  assetId,
+  changeBy,
+) => {
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
@@ -112,8 +134,28 @@ const returnAssetAssignmentWithTransaction = async (assignmentId, assetId) => {
     ]);
 
     const updateAssetSql = `UPDATE assets 
-    SET status = 'available' WHERE id = ?`;
+      SET status = 'available' WHERE id = ?`;
     await connection.query(updateAssetSql, [assetId]);
+
+    const auditSql = `INSERT INTO audit_logs
+      (entity_type, entity_id, action, old_value, new_value, changed_by)
+      VALUES (?, ?, ?, ?, ?, ?)`;
+    await connection.query(auditSql, [
+      "asset_assignment",
+      assignmentId,
+      "RETURN_ASSET",
+      JSON.stringify({
+        asset_id: assetId,
+        status: "active",
+        asset_status: "assigned",
+      }),
+      JSON.stringify({
+        asset_id: assetId,
+        status: "returned",
+        asset_status: "available",
+      }),
+      changeBy,
+    ]);
 
     await connection.commit();
 

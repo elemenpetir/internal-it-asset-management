@@ -26,7 +26,7 @@ const getAssetAssignmentById = async (req, res, next) => {
         message: "assignment not found",
       });
     }
-    
+
     return res.status(200).json({
       status: "success",
       message: "get detail asset assignment successfully",
@@ -72,12 +72,13 @@ const createAssetAssignment = async (req, res, next) => {
       });
     }
 
-    const result = await assetAssignmentModel.createAssetAssignmentWithTransaction({
-      asset_id,
-      employee_id,
-      assigned_by,
-      notes,
-    });
+    const result =
+      await assetAssignmentModel.createAssetAssignmentWithTransaction({
+        asset_id,
+        employee_id,
+        assigned_by,
+        notes,
+      });
     return res.status(201).json({
       status: "success",
       message: "asset assigned successfully",
@@ -113,7 +114,11 @@ const returnAssetAssignment = async (req, res, next) => {
       });
     }
 
-    await assetAssignmentModel.returnAssetAssignmentWithTransaction(id, assignment.asset_id);
+    await assetAssignmentModel.returnAssetAssignmentWithTransaction(
+      id,
+      assignment.asset_id,
+      req.user.id,
+    );
 
     return res.status(200).json({
       status: "success",

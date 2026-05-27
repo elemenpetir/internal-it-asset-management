@@ -100,35 +100,6 @@ const createAssetWithAuditLog = async (data) => {
   }
 };
 
-const updateAsset = async (id, data) => {
-  const sql = `UPDATE assets SET
-    asset_code = ?, 
-    name = ?, 
-    category_id = ?, 
-    brand = ?, 
-    model = ?, 
-    serial_number = ?, 
-    purchase_date = ?, 
-    location = ?, 
-    notes = ?
-    WHERE id = ?`;
-  const values = [
-    data.asset_code,
-    data.name,
-    data.category_id,
-    data.brand,
-    data.model,
-    data.serial_number,
-    data.purchase_date,
-    data.location,
-    data.notes || null,
-    id,
-  ];
-
-  const [result] = await db.query(sql, values);
-  return result;
-};
-
 const updateAssetWithAuditLog = async (id, data) => {
   const connection = await db.getConnection();
   try {
@@ -228,7 +199,6 @@ module.exports = {
   getAssets,
   getAssetById,
   createAssetWithAuditLog,
-  updateAsset,
   updateAssetWithAuditLog,
   updateStatus,
 };

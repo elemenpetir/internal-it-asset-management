@@ -1,10 +1,14 @@
 import './App.css'
+import Header from './components/Header'
+import Navbar from './components/Navbar'
+import Dashboard from './pages/Dashboard'
 
 function App() {
   return (
-    <div>
-      <h1>Internal IT Asset Management</h1>
-      <p>React frontend setup is working</p>
+    <div className='app'>
+      <Header />
+      <Navbar />
+      <Dashboard />
     </div>
   )
 }

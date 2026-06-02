@@ -2,7 +2,7 @@ import DashboardCard from "../components/DashboardCard";
 
 function Dashboard() {
   return (
-    <main className="mt-8">
+    <section>
       <div>
         <h2 className="text-xl font-semibold text-slate-900">
           Dashboard Overview
@@ -37,7 +37,7 @@ function Dashboard() {
           description="Undergoing active repair"
         />
       </div>
-    </main>
+    </section>
   );
 }
 

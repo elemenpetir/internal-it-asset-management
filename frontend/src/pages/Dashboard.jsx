@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 
 function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
   const [dashboardCards, setDashboardCards] = useState([]);
 
   useEffect(() => {
@@ -42,16 +41,6 @@ function Dashboard() {
         <p className="rounded-xl border border-slate-200 bg-white p-5 text-slate-600 shadow-sm">
           Loading dashboard data...
         </p>
-      </section>
-    );
-  }
-
-  if (hasError) {
-    return (
-      <section>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-red-700">
-          Failed to load dashboard data.
-        </div>
       </section>
     );
   }

@@ -1,9 +1,40 @@
 import DashboardCard from "../components/DashboardCard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function Dashboard() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [dashboardCards, setDashboardCards] = useState([]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      const dummyCards = [
+        {
+          title: "Total Assets",
+          value: "1,284",
+          description: "Across 14 global locations",
+        },
+        {
+          title: "Available",
+          value: "156",
+          description: "Ready for assignment",
+        },
+        {
+          title: "Assigned",
+          value: "1,104",
+          description: "Currently used by employees",
+        },
+        {
+          title: "Maintenance",
+          value: "24",
+          description: "Undergoing active repair",
+        },
+      ];
+
+      setDashboardCards(dummyCards);
+      setIsLoading(false);
+    }, 1000);
+  }, []);
 
   if (isLoading) {
     return (
@@ -24,7 +55,7 @@ function Dashboard() {
       </section>
     );
   }
-  
+
   return (
     <section>
       <div>
@@ -36,46 +67,15 @@ function Dashboard() {
         </p>
       </div>
 
-      <div className="mt-4 flex gap-3">
-        <button
-          onClick={() => setIsLoading(true)}
-          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Simulate Loading
-        </button>
-
-        <button
-          onClick={() => setHasError(true)}
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
-        >
-          Simulate Error
-        </button>
-      </div>
-
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <DashboardCard
-          title="Total Assets"
-          value="1,284"
-          description="Across 14 global locations"
-        />
-
-        <DashboardCard
-          title="Available"
-          value="156"
-          description="Ready for assignment"
-        />
-
-        <DashboardCard
-          title="Assigned"
-          value="1,104"
-          description="Currently used by employees"
-        />
-
-        <DashboardCard
-          title="Maintenance"
-          value="24"
-          description="Undergoing active repair"
-        />
+        {dashboardCards.map((card) => (
+          <DashboardCard
+            key={card.title}
+            title={card.title}
+            value={card.value}
+            description={card.description}
+          />
+        ))}
       </div>
     </section>
   );

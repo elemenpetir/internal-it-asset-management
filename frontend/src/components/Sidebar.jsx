@@ -1,3 +1,12 @@
+import { NavLink } from "react-router-dom";
+
+const navLinkClass = ({ isActive }) =>
+  `block rounded-lg px-4 py-2 text-sm font-medium ${
+    isActive
+      ? "bg-indigo-600 text-white"
+      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+  }`;
+
 function Sidebar() {
   return (
     <aside className="min-h-screen w-64 border-r border-slate-200 bg-slate-900 text-white">
@@ -9,44 +18,29 @@ function Sidebar() {
       <nav className="p-4">
         <ul className="space-y-1">
           <li>
-            <a
-              href="#"
-              className="block rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white"
-            >
+            <NavLink to="/" className={navLinkClass}>
               Dashboard
-            </a>
+            </NavLink>
           </li>
           <li>
-            <a
-              href="#"
-              className="block rounded-lg px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
-            >
+            <NavLink to="/assets" className={navLinkClass}>
               Asset Inventory
-            </a>
+            </NavLink>
           </li>
           <li>
-            <a
-              href="#"
-              className="block rounded-lg px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
-            >
-              Risk Assessment
-            </a>
+            <NavLink to="/assignments" className={navLinkClass}>
+              Assignments
+            </NavLink>
           </li>
           <li>
-            <a
-              href="#"
-              className="block rounded-lg px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
-            >
+            <NavLink to="/maintenance" className={navLinkClass}>
               Maintenance
-            </a>
+            </NavLink>
           </li>
           <li>
-            <a
-              href="#"
-              className="block rounded-lg px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
-            >
+            <NavLink to="/audit-logs" className={navLinkClass}>
               Audit Logs
-            </a>
+            </NavLink>
           </li>
         </ul>
       </nav>
@@ -54,4 +48,4 @@ function Sidebar() {
   );
 }
 
-export default Sidebar
+export default Sidebar;

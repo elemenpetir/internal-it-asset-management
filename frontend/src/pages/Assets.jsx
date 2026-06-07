@@ -1,4 +1,4 @@
-import StatusBadge from "../components/StatusBagde";
+import StatusBadge from "../components/StatusBadge";
 import { useState } from "react";
 
 const dummyAssets = [
@@ -136,6 +136,9 @@ export default function Assets() {
             )}
           </tbody>
         </table>
+        <div className="border-t border-slate-100 px-5 py-3 text-sm text-slate-500">
+          Showing {filteredAssets.length} of {dummyAssets.length} assets
+        </div>
       </div>
     </section>
   );

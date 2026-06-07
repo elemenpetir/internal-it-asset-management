@@ -1,4 +1,5 @@
 import DashboardCard from "../components/DashboardCard";
+import PageHeader from '../components/PageHeader'
 import { useEffect, useState } from "react";
 
 function Dashboard() {
@@ -47,14 +48,10 @@ function Dashboard() {
 
   return (
     <section>
-      <div>
-        <h2 className="text-xl font-semibold text-slate-900">
-          Dashboard Overview
-        </h2>
-        <p className="mt-2 text-slate-600">
-          Monitor asset status, assignment activity, and risk indicators.
-        </p>
-      </div>
+      <PageHeader
+        title="Dashboard Overview"
+        description="Monitor asset status, assignment activity, and risk indicators."
+      />
 
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {dashboardCards.map((card) => (

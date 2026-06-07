@@ -1,4 +1,5 @@
 import StatusBadge from "../components/StatusBadge";
+import PageHeader from "../components/PageHeader";
 import { useState } from "react";
 
 const dummyAssets = [
@@ -62,11 +63,10 @@ export default function Assets() {
 
   return (
     <section>
-      <h2 className="text-xl font-semibold text-slate-900">Asset Inventory</h2>
-      <p className="mt-2 text-slate-600">
-        Monitor, update, and track all IT hardware assets.
-      </p>
-
+      <PageHeader
+        title="Asset Inventory"
+        description="Monitor, update, and track all IT hardware assets."
+      />
       <div className="mt-6 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
         <input
           type="text"

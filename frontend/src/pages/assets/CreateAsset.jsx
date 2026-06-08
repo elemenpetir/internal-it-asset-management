@@ -250,6 +250,7 @@ export default function CreateAsset() {
         <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
+            onClick={() => navigate("/assets")}
             className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
             Cancel

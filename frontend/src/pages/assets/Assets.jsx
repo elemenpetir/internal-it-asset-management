@@ -1,7 +1,7 @@
 import StatusBadge from "../../components/ui/StatusBadge";
 import PageHeader from "../../components/ui/PageHeader";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function Assets() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -10,6 +10,8 @@ export default function Assets() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const token = localStorage.getItem("token");
+  const location = useLocation();
+  const successMessage = location.state?.successMessage;
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -95,6 +97,12 @@ export default function Assets() {
         </Link>
       </div>
 
+      {successMessage && (
+        <div className="mt-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+          {successMessage}
+        </div>
+      )}
+      
       <div className="mt-6 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
         <input
           type="text"

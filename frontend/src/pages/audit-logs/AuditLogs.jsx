@@ -1,4 +1,4 @@
-import PageHeader from '../components/PageHeader'
+import PageHeader from '../../components/ui/PageHeader'
 
 export default function AuditLogs() {
   return (

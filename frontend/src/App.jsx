@@ -1,12 +1,12 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
-import Topbar from "./components/Topbar";
-import Sidebar from "./components/Sidebar";
-import Dashboard from "./pages/Dashboard";
-import Assets from './pages/Assets'
-import Assignments from './pages/Assignments'
-import AuditLogs from './pages/AuditLogs'
-import Maintenance from './pages/Maintenance'
+import Topbar from "./components/layout/Topbar";
+import Sidebar from "./components/layout/Sidebar";
+import Dashboard from "./pages/dashboard/Dashboard";
+import Assets from './pages/assets/Assets'
+import Assignments from './pages/assignments/Assignments'
+import AuditLogs from './pages/audit-logs/AuditLogs'
+import Maintenance from './pages/maintenance/Maintenance'
 
 function App() {
   return (

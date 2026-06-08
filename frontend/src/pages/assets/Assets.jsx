@@ -1,5 +1,5 @@
-import StatusBadge from "../components/StatusBadge";
-import PageHeader from "../components/PageHeader";
+import StatusBadge from "../../components/ui/StatusBadge";
+import PageHeader from "../../components/ui/PageHeader";
 import { useEffect, useState } from "react";
 
 export default function Assets() {

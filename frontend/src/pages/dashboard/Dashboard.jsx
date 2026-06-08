@@ -1,5 +1,5 @@
-import DashboardCard from "../components/DashboardCard";
-import PageHeader from '../components/PageHeader'
+import DashboardCard from "../../components/ui/DashboardCard";
+import PageHeader from '../../components/ui/PageHeader'
 import { useEffect, useState } from "react";
 
 function Dashboard() {

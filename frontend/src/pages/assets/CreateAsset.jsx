@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageHeader from "../../components/ui/PageHeader";
 
 export default function CreateAsset() {
@@ -13,6 +13,39 @@ export default function CreateAsset() {
     location: "",
     notes: "",
   });
+  const [categories, setCategories] = useState([]);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(true);
+  const [categoryError, setCategoryError] = useState("");
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(
+          "http://localhost:3000/api/asset-categories",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || "failed to fetch categories");
+        }
+
+        setCategories(result.data);
+      } catch (error) {
+        setCategoryError(error.message);
+      } finally {
+        setIsCategoryLoading(false);
+      }
+    }
+    fetchCategories();
+  }, []);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -77,11 +110,20 @@ export default function CreateAsset() {
               onChange={handleChange}
               className="mt-2 w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             >
-              <option value="">Select category</option>
-              <option value="1">Laptop</option>
-              <option value="2">Monitor</option>
-              <option value="3">Printer</option>
+              <option value="">
+                {isCategoryLoading
+                  ? "loading categories..."
+                  : "Select Category"}
+              </option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
             </select>
+            {categoryError && (
+              <p className="mt-2 text-sm text-red-600">{categoryError}</p>
+            )}
           </div>
 
           <div>

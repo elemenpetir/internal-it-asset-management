@@ -1,7 +1,7 @@
 import StatusBadge from "../../components/ui/StatusBadge";
 import PageHeader from "../../components/ui/PageHeader";
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Assets() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -11,6 +11,7 @@ export default function Assets() {
   const [errorMessage, setErrorMessage] = useState("");
   const token = localStorage.getItem("token");
   const location = useLocation();
+  const navigate = useNavigate();
   const successMessage = location.state?.successMessage;
 
   useEffect(() => {
@@ -37,6 +38,12 @@ export default function Assets() {
 
     fetchAssets();
   }, [token]);
+
+  useEffect(() => {
+    if (successMessage) {
+      navigate(location.pathname, { replace: true });
+    }
+  }, [successMessage, navigate, location.pathname]);
 
   const filteredAssets = assets.filter((asset) => {
     const matchesSearch =
@@ -102,7 +109,7 @@ export default function Assets() {
           {successMessage}
         </div>
       )}
-      
+
       <div className="mt-6 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
         <input
           type="text"

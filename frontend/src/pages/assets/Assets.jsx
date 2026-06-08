@@ -1,6 +1,7 @@
 import StatusBadge from "../../components/ui/StatusBadge";
 import PageHeader from "../../components/ui/PageHeader";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function Assets() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -80,10 +81,19 @@ export default function Assets() {
 
   return (
     <section>
-      <PageHeader
-        title="Asset Inventory"
-        description="Monitor, update, and track all IT hardware assets."
-      />
+      <div className="flex items-end justify-between gap-4">
+        <PageHeader
+          title="Asset Inventory"
+          description="Monitor, update, and track all IT hardware assets."
+        />
+
+        <Link
+          to="/assets/new"
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+        >
+          + New Asset
+        </Link>
+      </div>
 
       <div className="mt-6 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
         <input

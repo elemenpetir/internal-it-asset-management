@@ -7,6 +7,7 @@ import Assets from './pages/assets/Assets'
 import Assignments from './pages/assignments/Assignments'
 import AuditLogs from './pages/audit-logs/AuditLogs'
 import Maintenance from './pages/maintenance/Maintenance'
+import CreateAsset from './pages/assets/CreateAsset'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/assets" element={<Assets />} />
+              <Route path="/assets/new" element={<CreateAsset />} />
               <Route path="/assignments" element={<Assignments />} />
               <Route path="/maintenance" element={<Maintenance />} />
               <Route path="/audit-logs" element={<AuditLogs />} />

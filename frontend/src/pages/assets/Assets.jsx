@@ -150,8 +150,13 @@ export default function Assets() {
             {filteredAssets.length > 0 ? (
               filteredAssets.map((asset) => (
                 <tr key={asset.id} className="hover:bg-slate-50">
-                  <td className="px-5 py-4 font-medium text-indigo-600">
-                    {asset.asset_code}
+                  <td className="px-5 py-4 font-medium">
+                    <Link
+                      to={`/assets/${asset.id}`}
+                      className="text-indigo-600 hover:text-indigo-800 hover:underline"
+                    >
+                      {asset.asset_code}
+                    </Link>
                   </td>
                   <td className="px-5 py-4 text-slate-800">{asset.name}</td>
                   <td className="px-5 py-4 text-slate-600">

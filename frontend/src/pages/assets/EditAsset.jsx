@@ -21,6 +21,7 @@ export default function EditAsset() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
     async function loadEditData() {
@@ -76,6 +77,44 @@ export default function EditAsset() {
     loadEditData();
   }, [id]);
 
+  function validateForm() {
+    const errors = {};
+
+    if (!formData.asset_code.trim()) {
+      errors.asset_code = "Asset code is required.";
+    }
+
+    if (!formData.name.trim()) {
+      errors.name = "Asset name is required.";
+    }
+
+    if (!formData.category_id) {
+      errors.category_id = "Category is required.";
+    }
+
+    if (!formData.brand.trim()) {
+      errors.brand = "Brand is required.";
+    }
+
+    if (!formData.model.trim()) {
+      errors.model = "Model is required.";
+    }
+
+    if (!formData.serial_number.trim()) {
+      errors.serial_number = "Serial number is required.";
+    }
+
+    if (!formData.purchase_date) {
+      errors.purchase_date = "Purchase date is required.";
+    }
+
+    if (!formData.location.trim()) {
+      errors.location = "Location is required.";
+    }
+
+    return errors;
+  }
+
   function handleChange() {
     const { name, value } = event.target;
 
@@ -83,10 +122,26 @@ export default function EditAsset() {
       ...formData,
       [name]: value,
     });
+
+    setValidationErrors({
+      ...validationErrors,
+      [name]: "",
+    });
   }
 
   async function handleSubmit() {
     event.preventDefault();
+
+    const errors = validateForm();
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      setSubmitError("");
+      return;
+    }
+
+    setValidationErrors({});
+
     try {
       setIsSubmitting(true);
       setSubmitError("");
@@ -171,6 +226,11 @@ export default function EditAsset() {
               onChange={handleChange}
               className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
+            {validationErrors.asset_code && (
+              <p className="mt-2 text-sm text-red-600">
+                {validationErrors.asset_code}
+              </p>
+            )}
           </div>
 
           <div>
@@ -184,6 +244,11 @@ export default function EditAsset() {
               onChange={handleChange}
               className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
+            {validationErrors.name && (
+              <p className="mt-2 text-sm text-red-600">
+                {validationErrors.name}
+              </p>
+            )}
           </div>
 
           <div>
@@ -202,6 +267,11 @@ export default function EditAsset() {
                   {category.name}
                 </option>
               ))}
+              {validationErrors.category_id && (
+                <p className="mt-2 text-sm text-red-600">
+                  {validationErrors.category_id}
+                </p>
+              )}
             </select>
           </div>
 
@@ -216,6 +286,11 @@ export default function EditAsset() {
               onChange={handleChange}
               className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
+            {validationErrors.brand && (
+              <p className="mt-2 text-sm text-red-600">
+                {validationErrors.brand}
+              </p>
+            )}
           </div>
 
           <div>
@@ -229,6 +304,11 @@ export default function EditAsset() {
               onChange={handleChange}
               className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
+            {validationErrors.model && (
+              <p className="mt-2 text-sm text-red-600">
+                {validationErrors.model}
+              </p>
+            )}
           </div>
 
           <div>
@@ -242,6 +322,11 @@ export default function EditAsset() {
               onChange={handleChange}
               className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
+            {validationErrors.serial_number && (
+              <p className="mt-2 text-sm text-red-600">
+                {validationErrors.serial_number}
+              </p>
+            )}
           </div>
 
           <div>
@@ -255,6 +340,11 @@ export default function EditAsset() {
               onChange={handleChange}
               className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
+            {validationErrors.purchase_date && (
+              <p className="mt-2 text-sm text-red-600">
+                {validationErrors.purchase_date}
+              </p>
+            )}
           </div>
 
           <div>
@@ -268,6 +358,11 @@ export default function EditAsset() {
               onChange={handleChange}
               className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
+            {validationErrors.location && (
+              <p className="mt-2 text-sm text-red-600">
+                {validationErrors.location}
+              </p>
+            )}
           </div>
         </div>
 

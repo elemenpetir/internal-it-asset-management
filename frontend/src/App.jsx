@@ -9,6 +9,7 @@ import AuditLogs from './pages/audit-logs/AuditLogs'
 import Maintenance from './pages/maintenance/Maintenance'
 import CreateAsset from './pages/assets/CreateAsset'
 import AssetDetail from './pages/assets/AssetDetail'
+import EditAsset from './pages/assets/EditAsset'
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
               <Route path="/assets" element={<Assets />} />
               <Route path="/assets/new" element={<CreateAsset />} />
               <Route path="/assets/:id" element={<AssetDetail />} />
+              <Route path="/assets/:id/edit" element={<EditAsset />} />
               <Route path="/assignments" element={<Assignments />} />
               <Route path="/maintenance" element={<Maintenance />} />
               <Route path="/audit-logs" element={<AuditLogs />} />

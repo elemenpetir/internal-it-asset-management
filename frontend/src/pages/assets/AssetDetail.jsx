@@ -127,12 +127,19 @@ export default function AssetDetail() {
           </p>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-6 flex gap-3">
           <Link
             to="/assets"
             className="inline-flex rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
             Back to Asset Inventory
+          </Link>
+
+          <Link
+            to={`/assets/${asset.id}/edit`}
+            className="inline-flex rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            Edit Asset
           </Link>
         </div>
       </div>

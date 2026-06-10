@@ -1,8 +1,9 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PageHeader from "../../components/ui/PageHeader";
 
 export default function EditAsset() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [formData, setFormData] = useState({
     asset_code: "",
@@ -18,6 +19,8 @@ export default function EditAsset() {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     async function loadEditData() {
@@ -82,6 +85,39 @@ export default function EditAsset() {
     });
   }
 
+  async function handleSubmit() {
+    event.preventDefault();
+    try {
+      setIsSubmitting(true);
+      setSubmitError("");
+
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:3000/api/assets/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...formData,
+          category_id: Number(formData.category_id),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to update asset");
+      }
+
+      navigate(`/assets/${id}`);
+    } catch (error) {
+      setSubmitError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   if (isLoading) {
     return (
       <section>
@@ -119,7 +155,10 @@ export default function EditAsset() {
         description="Update existing IT asset information."
       />
 
-      <form className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <form
+        onSubmit={handleSubmit}
+        className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
         <div className="grid gap-5 md:grid-cols-2">
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-700">
@@ -245,6 +284,12 @@ export default function EditAsset() {
           />
         </div>
 
+        {submitError && (
+          <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {submitError}
+          </div>
+        )}
+
         <div className="mt-6 flex gap-3">
           <Link
             to={`/assets/${id}`}
@@ -254,10 +299,11 @@ export default function EditAsset() {
           </Link>
 
           <button
-            type="button"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            type="submit"
+            disabled={isSubmitting}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
           >
-            Save Changes
+            {isSubmitting ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </form>

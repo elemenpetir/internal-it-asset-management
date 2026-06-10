@@ -12,7 +12,7 @@ export default function Assets() {
   const token = localStorage.getItem("token");
   const location = useLocation();
   const navigate = useNavigate();
-  const successMessage = location.state?.successMessage;
+  const [flashMessage] = useState(location.state?.successMessage || "");
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -40,10 +40,10 @@ export default function Assets() {
   }, [token]);
 
   useEffect(() => {
-    if (successMessage) {
-      navigate(location.pathname, { replace: true });
+    if (location.state?.successMessage) {
+      navigate(location.pathname, { replace: true, state: null });
     }
-  }, [successMessage, navigate, location.pathname]);
+  }, [location.state, location.pathname, navigate]);
 
   const filteredAssets = assets.filter((asset) => {
     const matchesSearch =
@@ -104,9 +104,9 @@ export default function Assets() {
         </Link>
       </div>
 
-      {successMessage && (
+      {flashMessage && (
         <div className="mt-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-          {successMessage}
+          {flashMessage}
         </div>
       )}
 

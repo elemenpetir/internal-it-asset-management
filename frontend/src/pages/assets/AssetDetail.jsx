@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import StatusBadge from "../../components/ui/StatusBadge";
 import PageHeader from "../../components/ui/PageHeader";
@@ -8,6 +8,9 @@ export default function AssetDetail() {
   const [asset, setAsset] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [flashMessage] = useState(location.state?.successMessage || "");
 
   useEffect(() => {
     async function fetchAssetDetail() {
@@ -36,6 +39,12 @@ export default function AssetDetail() {
 
     fetchAssetDetail();
   }, [id]);
+
+  useEffect(() => {
+    if (location.state?.successMessage) {
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.state, location.pathname, navigate]);
 
   if (isLoading) {
     return (
@@ -73,6 +82,12 @@ export default function AssetDetail() {
         title="Asset Detail"
         description="View detailed information for a selected IT asset."
       />
+
+      {flashMessage && (
+        <div className="mt-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+          {flashMessage}
+        </div>
+      )}
 
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-5">

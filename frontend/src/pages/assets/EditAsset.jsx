@@ -165,7 +165,11 @@ export default function EditAsset() {
         throw new Error(result.message || "Failed to update asset");
       }
 
-      navigate(`/assets/${id}`);
+      navigate(`/assets/${id}`, {
+        state: {
+          successMessage: "Asset updated successfully.",
+        },
+      });
     } catch (error) {
       setSubmitError(error.message);
     } finally {

@@ -141,7 +141,7 @@ const updateAsset = async (req, res, next) => {
       purchase_date,
       location,
       notes,
-      changed_by: req.user.id
+      changed_by: req.user.id,
     });
     if (!result || result.affectedRows === 0) {
       return res.status(404).json({
@@ -196,7 +196,11 @@ const updateStatus = async (req, res, next) => {
       });
     }
 
-    const result = await assetModel.updateStatus(id, status);
+    const result = await assetModel.updateAssetStatusWithAuditLog(
+      id,
+      status,
+      req.user.id,
+    );
     if (result.affectedRows === 0) {
       return res.status(404).json({
         status: "failed",

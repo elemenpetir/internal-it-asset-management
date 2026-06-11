@@ -187,12 +187,62 @@ const updateAssetWithAuditLog = async (id, data) => {
   }
 };
 
-const updateStatus = async (id, status) => {
-  const sql = `UPDATE assets SET
-    status = ? WHERE id = ?`;
-  const values = [status, id];
-  const [result] = await db.query(sql, values);
-  return result;
+const updateAssetStatusWithAuditLog = async (id, status, changedBy) => {
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [oldRows] = await connection.query(
+      `SELECT 
+        id,
+        asset_code,
+        name,
+        status
+      FROM assets
+      WHERE id = ?`,
+      [id],
+    );
+
+    const oldAsset = oldRows[0];
+
+    if (!oldAsset) {
+      await connection.rollback();
+      return null;
+    }
+
+    const updateSql = `UPDATE assets SET
+      status = ?
+      WHERE id = ?`;
+
+    const [resultUpdate] = await connection.query(updateSql, [status, id]);
+
+    const auditSql = `INSERT INTO audit_logs
+      (entity_type, entity_id, action, old_value, new_value, changed_by)
+      VALUES (?, ?, ?, ?, ?, ?)`;
+
+    await connection.query(auditSql, [
+      "asset",
+      id,
+      "UPDATE_ASSET_STATUS",
+      JSON.stringify({
+        status: oldAsset.status,
+      }),
+      JSON.stringify({
+        status,
+      }),
+      changedBy,
+    ]);
+
+    await connection.commit();
+
+    return resultUpdate;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 };
 
 module.exports = {
@@ -200,5 +250,5 @@ module.exports = {
   getAssetById,
   createAssetWithAuditLog,
   updateAssetWithAuditLog,
-  updateStatus,
+  updateAssetStatusWithAuditLog,
 };

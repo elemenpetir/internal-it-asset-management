@@ -1,5 +1,6 @@
 import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { formatDateForDisplay } from "../../utils/date";
 import StatusBadge from "../../components/ui/StatusBadge";
 import PageHeader from "../../components/ui/PageHeader";
 
@@ -125,7 +126,7 @@ export default function AssetDetail() {
           <div>
             <p className="text-sm font-medium text-slate-500">Purchase Date</p>
             <p className="mt-1 text-sm text-slate-900">
-              {asset.purchase_date?.slice(0, 10)}
+              {formatDateForDisplay(asset.purchase_date)}
             </p>
           </div>
 

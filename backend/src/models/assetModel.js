@@ -9,7 +9,7 @@ const getAssets = async () => {
     assets.brand,
     assets.model,
     assets.serial_number,
-    assets.purchase_date,
+    DATE_FORMAT(assets.purchase_date, '%Y-%m-%d') AS purchase_date,
     assets.status,
     assets.location,
     assets.notes,
@@ -32,7 +32,7 @@ const getAssetById = async (id) => {
     assets.brand,
     assets.model,
     assets.serial_number,
-    assets.purchase_date,
+    DATE_FORMAT(assets.purchase_date, '%Y-%m-%d') AS purchase_date,
     assets.status,
     assets.location,
     assets.notes,
@@ -168,17 +168,17 @@ const updateAssetWithAuditLog = async (id, data) => {
       notes: data.notes || null,
     };
     await connection.query(auditSql, [
-      'asset',
+      "asset",
       id,
-      'UPDATE_ASSET',
+      "UPDATE_ASSET",
       JSON.stringify(oldAsset),
       JSON.stringify(newValue),
       data.changed_by,
     ]);
 
-    await connection.commit()
+    await connection.commit();
 
-    return resultUpdate
+    return resultUpdate;
   } catch (error) {
     await connection.rollback();
     throw error;

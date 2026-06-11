@@ -1,5 +1,6 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { formatDateForInput } from "../../utils/date";
 import PageHeader from "../../components/ui/PageHeader";
 
 export default function EditAsset() {
@@ -62,7 +63,7 @@ export default function EditAsset() {
           brand: assetResult.data.brand || "",
           model: assetResult.data.model || "",
           serial_number: assetResult.data.serial_number || "",
-          purchase_date: assetResult.data.purchase_date?.slice(0, 10) || "",
+          purchase_date: formatDateForInput(assetResult.data.purchase_date),
           location: assetResult.data.location || "",
           notes: assetResult.data.notes || "",
         });
@@ -129,7 +130,7 @@ export default function EditAsset() {
     });
   }
 
-  async function handleSubmit() {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const errors = validateForm();

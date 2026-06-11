@@ -205,6 +205,13 @@ export default function AssetDetail() {
           </p>
         </div>
 
+        {asset.status === "retired" && (
+          <div className="mt-6 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+            This asset is retired and kept for historical records. Editing is
+            disabled.
+          </div>
+        )}
+
         <div className="mt-6 flex gap-3 items-center justify-between">
           <Link
             to="/assets"
@@ -214,12 +221,14 @@ export default function AssetDetail() {
           </Link>
 
           <div className="flex gap-3">
-            <Link
-              to={`/assets/${asset.id}/edit`}
-              className="inline-flex rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-            >
-              Edit Asset
-            </Link>
+            {asset.status !== "retired" && (
+              <Link
+                to={`/assets/${asset.id}/edit`}
+                className="inline-flex rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+              >
+                Edit Asset
+              </Link>
+            )}
 
             {asset.status !== "retired" && (
               <button

@@ -12,6 +12,9 @@ export default function AssetDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const [flashMessage] = useState(location.state?.successMessage || "");
+  const [isRetiring, setIsRetiring] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const [localSuccessMessage, setLocalSuccessMessage] = useState("");
 
   useEffect(() => {
     async function fetchAssetDetail() {
@@ -46,6 +49,53 @@ export default function AssetDetail() {
       navigate(location.pathname, { replace: true, state: null });
     }
   }, [location.state, location.pathname, navigate]);
+
+  async function handleRetireAsset() {
+    const confirmed = window.confirm(
+      "Are you sure you want to retire this asset?",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setIsRetiring(true);
+      setActionError("");
+      setLocalSuccessMessage("");
+
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:3000/api/assets/${id}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            status: "retired",
+          }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to retire asset");
+      }
+
+      setAsset({
+        ...asset,
+        status: "retired",
+      });
+
+      setLocalSuccessMessage("Asset retired successfully.");
+    } catch (error) {
+      setActionError(error.message);
+    } finally {
+      setIsRetiring(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -87,6 +137,18 @@ export default function AssetDetail() {
       {flashMessage && (
         <div className="mt-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
           {flashMessage}
+        </div>
+      )}
+
+      {localSuccessMessage && (
+        <div className="mt-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+          {localSuccessMessage}
+        </div>
+      )}
+
+      {actionError && (
+        <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          {actionError}
         </div>
       )}
 
@@ -143,7 +205,7 @@ export default function AssetDetail() {
           </p>
         </div>
 
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex gap-3 items-center justify-between">
           <Link
             to="/assets"
             className="inline-flex rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
@@ -151,12 +213,25 @@ export default function AssetDetail() {
             Back to Asset Inventory
           </Link>
 
-          <Link
-            to={`/assets/${asset.id}/edit`}
-            className="inline-flex rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-          >
-            Edit Asset
-          </Link>
+          <div className="flex gap-3">
+            <Link
+              to={`/assets/${asset.id}/edit`}
+              className="inline-flex rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              Edit Asset
+            </Link>
+
+            {asset.status !== "retired" && (
+              <button
+                type="button"
+                onClick={handleRetireAsset}
+                disabled={isRetiring}
+                className="inline-flex rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isRetiring ? "Retiring..." : "Retire Asset"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </section>

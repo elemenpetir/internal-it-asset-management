@@ -127,18 +127,21 @@ export default function Assignments() {
 
       const token = localStorage.getItem("token");
 
-      const response = await fetch("http://localhost:3000/api/asset-assignments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        "http://localhost:3000/api/asset-assignments",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            asset_id: Number(formData.asset_id),
+            employee_id: Number(formData.employee_id),
+            notes: formData.notes,
+          }),
         },
-        body: JSON.stringify({
-          asset_id: Number(formData.asset_id),
-          employee_id: Number(formData.employee_id),
-          notes: formData.notes,
-        }),
-      });
+      );
 
       const result = await response.json();
 
@@ -327,6 +330,68 @@ export default function Assignments() {
                 {employees.length}
               </p>
             </div>
+          </div>
+
+          <div className="mt-6 overflow-hidden rounded-xl border border-slate-200">
+            <table className="w-full border-collapse text-left text-sm">
+              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Asset</th>
+                  <th className="px-4 py-3 font-semibold">Employee</th>
+                  <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold">Assigned At</th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-slate-100">
+                {assignments.length > 0 ? (
+                  assignments.map((assignment) => (
+                    <tr key={assignment.id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3 text-slate-800">
+                        <div className="font-medium">
+                          {assignment.asset_code ||
+                            `Asset #${assignment.asset_id}`}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {assignment.asset_name || "-"}
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3 text-slate-800">
+                        <div className="font-medium">
+                          {assignment.employee_name ||
+                            `Employee #${assignment.employee_id}`}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {assignment.employee_number || "-"}
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3">
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+                          {assignment.status}
+                        </span>
+                      </td>
+
+                      <td className="px-4 py-3 text-slate-600">
+                        {assignment.assigned_at
+                          ? assignment.assigned_at.slice(0, 10)
+                          : "-"}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="4"
+                      className="px-4 py-8 text-center text-slate-500"
+                    >
+                      No assignments found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

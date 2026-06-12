@@ -7,6 +7,15 @@ export default function Assignments() {
   const [employees, setEmployees] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [formData, setFormData] = useState({
+    asset_id: "",
+    employee_id: "",
+    notes: "",
+  });
+  const [validationErrors, setValidationErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     async function loadAssignmentData() {
@@ -69,6 +78,98 @@ export default function Assignments() {
     (asset) => asset.status === "available",
   );
 
+  function handleChange(event) {
+    const { name, value } = event.target;
+
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+
+    setValidationErrors({
+      ...validationErrors,
+      [name]: "",
+    });
+  }
+
+  function validateForm() {
+    const errors = {};
+
+    if (!formData.asset_id) {
+      errors.asset_id = "Asset is required.";
+    }
+
+    if (!formData.employee_id) {
+      errors.employee_id = "Employee is required.";
+    }
+
+    return errors;
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    const errors = validateForm();
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      setSubmitError("");
+      setSuccessMessage("");
+      return;
+    }
+
+    setValidationErrors({});
+
+    try {
+      setIsSubmitting(true);
+      setSubmitError("");
+      setSuccessMessage("");
+
+      const token = localStorage.getItem("token");
+
+      const response = await fetch("http://localhost:3000/api/asset-assignments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          asset_id: Number(formData.asset_id),
+          employee_id: Number(formData.employee_id),
+          notes: formData.notes,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to assign asset");
+      }
+
+      setSuccessMessage("Asset assigned successfully.");
+
+      setFormData({
+        asset_id: "",
+        employee_id: "",
+        notes: "",
+      });
+
+      setAssignments([result.data, ...assignments]);
+
+      setAssets(
+        assets.map((asset) =>
+          asset.id === Number(formData.asset_id)
+            ? { ...asset, status: "assigned" }
+            : asset,
+        ),
+      );
+    } catch (error) {
+      setSubmitError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   if (isLoading) {
     return (
       <section>
@@ -115,12 +216,17 @@ export default function Assignments() {
             Select an available asset and assign it to an active employee.
           </p>
 
-          <div className="mt-5 space-y-4">
+          <form onSubmit={handleSubmit} className="mt-5 space-y-4">
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700">
                 Asset
               </label>
-              <select className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+              <select
+                name="asset_id"
+                value={formData.asset_id}
+                onChange={handleChange}
+                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              >
                 <option value="">Select available asset</option>
                 {availableAssets.map((asset) => (
                   <option key={asset.id} value={asset.id}>
@@ -128,13 +234,23 @@ export default function Assignments() {
                   </option>
                 ))}
               </select>
+              {validationErrors.asset_id && (
+                <p className="mt-2 text-sm text-red-600">
+                  {validationErrors.asset_id}
+                </p>
+              )}
             </div>
 
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700">
                 Employee
               </label>
-              <select className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+              <select
+                name="employee_id"
+                value={formData.employee_id}
+                onChange={handleChange}
+                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              >
                 <option value="">Select employee</option>
                 {employees.map((employee) => (
                   <option key={employee.id} value={employee.id}>
@@ -142,6 +258,11 @@ export default function Assignments() {
                   </option>
                 ))}
               </select>
+              {validationErrors.employee_id && (
+                <p className="mt-2 text-sm text-red-600">
+                  {validationErrors.employee_id}
+                </p>
+              )}
             </div>
 
             <div>
@@ -149,19 +270,35 @@ export default function Assignments() {
                 Notes
               </label>
               <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
                 rows="3"
                 placeholder="Optional assignment notes..."
                 className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
               />
             </div>
 
+            {successMessage && (
+              <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+                {successMessage}
+              </div>
+            )}
+
+            {submitError && (
+              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                {submitError}
+              </div>
+            )}
+
             <button
-              type="button"
-              className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
             >
-              Assign Asset
+              {isSubmitting ? "Assigning..." : "Assign Asset"}
             </button>
-          </div>
+          </form>
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">

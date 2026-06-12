@@ -7,6 +7,7 @@ const assetRoutes = require("./routes/assetRoutes");
 const assetAssignmentRoutes = require("./routes/assetAssignmentRoutes");
 const auditLogRoutes = require("./routes/auditLogRoutes");
 const errorMiddleware = require("./middleware/errorMiddleware");
+const employeeRoutes = require("./routes/employeeRoutes");
 
 app.use(
   cors({
@@ -22,6 +23,7 @@ app.use("/api/asset-categories", assetCategoryRoutes);
 app.use("/api/assets", assetRoutes);
 app.use("/api/asset-assignments", assetAssignmentRoutes);
 app.use("/api/audit-logs", auditLogRoutes);
+app.use("/api/employees", employeeRoutes);
 app.use(errorMiddleware);
 
 module.exports = app;

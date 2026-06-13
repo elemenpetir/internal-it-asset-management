@@ -16,6 +16,8 @@ export default function Assignments() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [returningId, setReturningId] = useState(null);
+  const [actionError, setActionError] = useState("");
 
   useEffect(() => {
     async function loadAssignmentData() {
@@ -170,6 +172,64 @@ export default function Assignments() {
       setSubmitError(error.message);
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleReturnAssignment(assignment) {
+    const confirmed = window.confirm(
+      `Return asset ${assignment.asset_code} from ${assignment.employee_name}?`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setReturningId(assignment.id);
+      setActionError("");
+      setSuccessMessage("");
+
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:3000/api/asset-assignments/${assignment.id}/return`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to return asset");
+      }
+
+      setAssignments((currentAssignments) =>
+        currentAssignments.map((item) =>
+          item.id === assignment.id
+            ? {
+                ...item,
+                status: "returned",
+                returned_at: new Date().toISOString(),
+              }
+            : item,
+        ),
+      );
+
+      setAssets((currentAssets) =>
+        currentAssets.map((asset) =>
+          asset.id === assignment.asset_id
+            ? { ...asset, status: "available" }
+            : asset,
+        ),
+      );
+
+      setSuccessMessage("Asset returned successfully.");
+    } catch (error) {
+      setActionError(error.message);
+    } finally {
+      setReturningId(null);
     }
   }
 
@@ -332,6 +392,11 @@ export default function Assignments() {
             </div>
           </div>
 
+          {actionError && (
+            <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {actionError}
+            </div>
+          )}
           <div className="mt-6 overflow-hidden rounded-xl border border-slate-200">
             <table className="w-full border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
@@ -340,6 +405,7 @@ export default function Assignments() {
                   <th className="px-4 py-3 font-semibold">Employee</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
                   <th className="px-4 py-3 font-semibold">Assigned At</th>
+                  <th className="px-4 py-3 font-semibold">Action</th>
                 </tr>
               </thead>
 
@@ -378,12 +444,29 @@ export default function Assignments() {
                           ? assignment.assigned_at.slice(0, 10)
                           : "-"}
                       </td>
+
+                      <td className="px-4 py-3">
+                        {assignment.status === "active" ? (
+                          <button
+                            type="button"
+                            onClick={() => handleReturnAssignment(assignment)}
+                            disabled={returningId === assignment.id}
+                            className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100"
+                          >
+                            {returningId === assignment.id
+                              ? "Returning..."
+                              : "Return Asset"}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-slate-400">—</span>
+                        )}
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
                     <td
-                      colSpan="4"
+                      colSpan="5"
                       className="px-4 py-8 text-center text-slate-500"
                     >
                       No assignments found.

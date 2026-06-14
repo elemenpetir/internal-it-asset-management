@@ -4,6 +4,8 @@ export default function StatusBadge({ status }) {
     assigned: "bg-blue-50 text-blue-700 border-blue-200",
     under_maintenance: "bg-amber-50 text-amber-700 border-amber-200",
     retired: "bg-red-50 text-red-700 border-red-200",
+    active: "bg-blue-50 text-blue-700 border-blue-200",
+    returned: "bg-slate-50 text-slate-700 border-slate-200",
   };
 
   const statusLabels = {
@@ -11,6 +13,8 @@ export default function StatusBadge({ status }) {
     assigned: "Assigned",
     under_maintenance: "Under Maintenance",
     retired: "Retired",
+    active: "Active",
+    returned: "Returned",
   };
 
   return (

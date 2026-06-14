@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
 
 export default function Assignments() {
@@ -414,10 +415,13 @@ export default function Assignments() {
                   assignments.map((assignment) => (
                     <tr key={assignment.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 text-slate-800">
-                        <div className="font-medium">
+                        <Link
+                          to={`/assignments/${assignment.id}`}
+                          className="font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+                        >
                           {assignment.asset_code ||
                             `Asset #${assignment.asset_id}`}
-                        </div>
+                        </Link>
                         <div className="text-xs text-slate-500">
                           {assignment.asset_name || "-"}
                         </div>

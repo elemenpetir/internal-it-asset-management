@@ -7,6 +7,12 @@ const findEmployeeById = async (id) => {
   return rows[0];
 };
 
+const getEmployeeByUserId = async (user_id) => {
+  const sql = `SELECT id FROM employees WHERE user_id = ?`;
+  const [rows] = await db.query(sql, [user_id]);
+  return rows[0];
+};
+
 const getActiveEmployees = async () => {
   const sql = `SELECT 
     id,
@@ -26,5 +32,6 @@ const getActiveEmployees = async () => {
 
 module.exports = {
   findEmployeeById,
+  getEmployeeByUserId,
   getActiveEmployees,
 };

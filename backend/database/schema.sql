@@ -1,5 +1,5 @@
 -- Create table departments
-CREATE TABLE departments (
+CREATE TABLE IF NOT EXISTS departments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -7,7 +7,7 @@ CREATE TABLE departments (
 );
 
 -- Create table users
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
@@ -18,7 +18,7 @@ CREATE TABLE users (
 );
 
 -- Create table employees
-CREATE TABLE employees (
+CREATE TABLE IF NOT EXISTS employees (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE employees (
 );
 
 -- Create table asset categories
-CREATE TABLE asset_categories (
+CREATE TABLE IF NOT EXISTS asset_categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -42,7 +42,7 @@ CREATE TABLE asset_categories (
 );
 
 -- Create table asset
-CREATE TABLE assets (
+CREATE TABLE IF NOT EXISTS assets (
     id INT AUTO_INCREMENT PRIMARY KEY,
     asset_code VARCHAR(50) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE assets (
 );
 
 -- Create table asset assignments
-CREATE TABLE asset_assignments (
+CREATE TABLE IF NOT EXISTS asset_assignments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     asset_id INT NOT NULL,
     employee_id INT NOT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE asset_assignments (
 );
 
 -- Create table audit logs
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     entity_type VARCHAR(50) NOT NULL,
     entity_id INT NOT NULL,
@@ -87,4 +87,21 @@ CREATE TABLE audit_logs (
     changed_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_audit_logs_user FOREIGN KEY (changed_by) REFERENCES users(id)
+);
+
+-- Create table maintenance_requests
+CREATE TABLE IF NOT EXISTS maintenance_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    asset_id INT NOT NULL,
+    requested_by INT NOT NULL,
+    issue_description TEXT NOT NULL,
+    status ENUM('reported', 'in_progress', 'completed', 'canceled') DEFAULT 'reported',
+    handled_by INT NULL,
+    resolution_note TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP NULL,
+    CONSTRAINT fk_maintenance_request_asset FOREIGN KEY (asset_id) REFERENCES assets(id),
+    CONSTRAINT fk_maintenance_request_employee FOREIGN KEY (requested_by) REFERENCES employees(id),
+    CONSTRAINT fk_maintenance_request_user FOREIGN KEY (handled_by) REFERENCES users(id)
 );

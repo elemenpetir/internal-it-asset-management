@@ -74,6 +74,14 @@ const getMaintenanceRequestsByEmployeeId = async (employee_id) => {
   return rows;
 };
 
+const getActiveMaintenanceRequestByAssetId = async (asset_id) => {
+  const sql = `SELECT id FROM maintenance_requests 
+    WHERE asset_id = ? 
+    AND status IN ('reported', 'in_progress')`;
+  const [rows] = await db.query(sql, [asset_id]);
+  return rows[0];
+};
+
 const createMaintenanceRequestWithTransaction = async (data) => {
   const connection = await db.getConnection();
   try {
@@ -178,6 +186,7 @@ module.exports = {
   getAllMaintenanceRequest,
   getMaintenanceRequestById,
   getMaintenanceRequestsByEmployeeId,
+  getActiveMaintenanceRequestByAssetId,
   createMaintenanceRequestWithTransaction,
   updateMaintenanceRequestStatusWithTransaction,
 };

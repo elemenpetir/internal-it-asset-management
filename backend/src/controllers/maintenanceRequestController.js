@@ -1,6 +1,6 @@
 const maintenanceRequestModel = require("../models/maintenanceRequestModel");
 const employeeModel = require("../models/employeeModel");
-const assetAssignmentModel = require('../models/assetAssignmentModel')
+const assetAssignmentModel = require("../models/assetAssignmentModel");
 
 const getAllMaintenanceRequests = async (req, res, next) => {
   try {
@@ -85,13 +85,22 @@ const createMaintenanceRequest = async (req, res, next) => {
       }
       requested_by = employee.id;
     } else if (req.user.role === "asset_admin") {
-      if (!req.body.requested_by) {
+      if (!req.body.employee_number) {
         return res.status(400).json({
           status: "failed",
-          message: "requested_by is required",
+          message: "employee_number is required",
         });
       }
-      requested_by = req.body.requested_by;
+      const employee = await employeeModel.getEmployeeByEmployeeNumber(
+        req.body.employee_number,
+      );
+      if (!employee) {
+        return res.status(404).json({
+          status: "failed",
+          message: "employee not found",
+        });
+      }
+      requested_by = employee.id;
     }
 
     if (!asset_id || !issue_description) {
@@ -110,6 +119,17 @@ const createMaintenanceRequest = async (req, res, next) => {
       return res.status(400).json({
         status: "failed",
         message: "asset is not assigned to you",
+      });
+    }
+
+    const activeRequest =
+      await maintenanceRequestModel.getActiveMaintenanceRequestByAssetId(
+        asset_id,
+      );
+    if (activeRequest) {
+      return res.status(400).json({
+        status: "failed",
+        message: "asset already has an active maintenance request",
       });
     }
 

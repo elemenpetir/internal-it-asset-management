@@ -70,6 +70,38 @@ const getMyMaintenanceRequest = async (req, res, next) => {
   }
 };
 
+const getMyActiveAssets = async (req, res, next) => {
+  try {
+    let employee_id;
+    const employee = await employeeModel.getEmployeeByUserId(req.user.id);
+    if (!employee) {
+      return res.status(404).json({
+        status: "failed",
+        message: "employee not found",
+      });
+    }
+    employee_id = employee.id;
+
+    const myActiveAssets =
+      await assetAssignmentModel.getActiveAssetsByEmployeeId(employee_id);
+
+    if (!myActiveAssets || myActiveAssets.length === 0) {
+      return res.status(404).json({
+        status: "failed",
+        message: "my active assets not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "get my active assets successfully",
+      data: myActiveAssets,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const createMaintenanceRequest = async (req, res, next) => {
   try {
     const { asset_id, issue_description } = req.body;
@@ -199,6 +231,7 @@ module.exports = {
   getAllMaintenanceRequests,
   getMaintenanceRequestById,
   getMyMaintenanceRequest,
+  getMyActiveAssets,
   createMaintenanceRequest,
   updateMaintenanceRequestStatus,
 };

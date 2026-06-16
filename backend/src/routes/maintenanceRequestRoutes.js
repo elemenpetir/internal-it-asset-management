@@ -21,6 +21,11 @@ router.get(
   authMiddleware,
   maintenanceRequestController.getMaintenanceRequestById,
 );
+router.get(
+  "/my-assets",
+  authMiddleware,
+  maintenanceRequestController.getMyActiveAssets,
+);
 router.post(
   "/",
   authMiddleware,

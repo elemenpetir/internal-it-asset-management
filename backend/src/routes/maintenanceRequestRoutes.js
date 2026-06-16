@@ -27,5 +27,11 @@ router.post(
   roleMiddleware("employee", "asset_admin"),
   maintenanceRequestController.createMaintenanceRequest,
 );
+router.patch(
+  "/:id/status",
+  authMiddleware,
+  roleMiddleware("asset_admin"),
+  maintenanceRequestController.updateMaintenanceRequestStatus,
+);
 
 module.exports = router;

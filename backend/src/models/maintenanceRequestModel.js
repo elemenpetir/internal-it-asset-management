@@ -119,9 +119,65 @@ const createMaintenanceRequestWithTransaction = async (data) => {
   }
 };
 
+const updateMaintenanceRequestStatusWithTransaction = async (data) => {
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    let updateFields = "status = ?";
+    let updateValues = [data.status];
+
+    if (data.status === "in_progress") {
+      updateFields += ", handled_by = ?";
+      updateValues.push(data.handled_by);
+    }
+
+    if (data.status === "completed") {
+      updateFields += ", resolution_note = ?, completed_at = CURRENT_TIMESTAMP";
+      updateValues.push(data.resolution_note);
+    }
+
+    updateValues.push(data.id);
+
+    const [currentData] = await connection.query(
+      "SELECT status FROM maintenance_requests WHERE id = ?",
+      [data.id],
+    );
+    const old_status = currentData[0].status;
+
+    const updateSql = `UPDATE maintenance_requests SET ${updateFields} WHERE id = ?`;
+    const [updateMaintenanceRequestResult] = await connection.query(
+      updateSql,
+      updateValues,
+    );
+
+    const auditSql = `INSERT INTO audit_logs
+      (entity_type, entity_id, action, old_value, new_value, changed_by)
+      VALUES (?, ?, ?, ?, ?, ?)`;
+    await connection.query(auditSql, [
+      "maintenance_requests",
+      data.id,
+      "UPDATE_STATUS",
+      JSON.stringify({ status: old_status }),
+      JSON.stringify({ status: data.status }),
+      data.handled_by,
+    ]);
+
+    await connection.commit();
+
+    return updateMaintenanceRequestResult;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
 module.exports = {
   getAllMaintenanceRequest,
   getMaintenanceRequestById,
   getMaintenanceRequestsByEmployeeId,
   createMaintenanceRequestWithTransaction,
+  updateMaintenanceRequestStatusWithTransaction,
 };

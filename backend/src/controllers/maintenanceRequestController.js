@@ -46,10 +46,12 @@ const getMyMaintenanceRequest = async (req, res, next) => {
         message: "employee not found",
       });
     }
-    requested_by = employee.id
+    requested_by = employee.id;
 
     const maintenanceRequest =
-      await maintenanceRequestModel.getMaintenanceRequestsByEmployeeId(requested_by);
+      await maintenanceRequestModel.getMaintenanceRequestsByEmployeeId(
+        requested_by,
+      );
     if (!maintenanceRequest) {
       return res.status(404).json({
         status: "failed",
@@ -119,9 +121,51 @@ const createMaintenanceRequest = async (req, res, next) => {
   }
 };
 
+const updateMaintenanceRequestStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status, resolution_note } = req.body;
+    const handled_by = req.user.id;
+    const statusList = ["in_progress", "completed", "canceled"];
+
+    if (!statusList.includes(status)) {
+      return res.status(400).json({
+        status: "failed",
+        message: "status must be in_progress, completed, or canceled",
+      });
+    }
+
+    if (status === "completed") {
+      if (!resolution_note) {
+        return res.status(400).json({
+          status: "failed",
+          message: "resolution note are required",
+        });
+      }
+    }
+
+    const result =
+      await maintenanceRequestModel.updateMaintenanceRequestStatusWithTransaction(
+        { status, handled_by, resolution_note, id },
+      );
+
+    return res.status(200).json({
+      status: "success",
+      message: "maintenance request status updated successfully",
+      data: {
+        id,
+        status,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAllMaintenanceRequests,
   getMaintenanceRequestById,
   getMyMaintenanceRequest,
   createMaintenanceRequest,
+  updateMaintenanceRequestStatus,
 };

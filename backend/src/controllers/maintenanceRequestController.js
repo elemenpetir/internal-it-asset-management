@@ -73,14 +73,31 @@ const getMyMaintenanceRequest = async (req, res, next) => {
 const getMyActiveAssets = async (req, res, next) => {
   try {
     let employee_id;
-    const employee = await employeeModel.getEmployeeByUserId(req.user.id);
-    if (!employee) {
-      return res.status(404).json({
-        status: "failed",
-        message: "employee not found",
-      });
-    }
-    employee_id = employee.id;
+    if (req.user.role === "employee") {
+      const employee = await employeeModel.getEmployeeByUserId(req.user.id);
+      if (!employee) {
+        return res.status(404).json({
+          status: "failed",
+          message: "employee not found",
+        });
+      }
+      employee_id = employee.id;
+    } if (!req.body.employee_number) {
+        return res.status(400).json({
+          status: "failed",
+          message: "employee_number is required",
+        });
+      }
+      const employee = await employeeModel.getEmployeeByEmployeeNumber(
+        req.body.employee_number,
+      );
+      if (!employee) {
+        return res.status(404).json({
+          status: "failed",
+          message: "employee not found",
+        });
+      }
+      employee_id = employee.id;
 
     const myActiveAssets =
       await assetAssignmentModel.getActiveAssetsByEmployeeId(employee_id);

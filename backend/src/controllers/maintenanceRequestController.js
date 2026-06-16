@@ -1,5 +1,6 @@
 const maintenanceRequestModel = require("../models/maintenanceRequestModel");
 const employeeModel = require("../models/employeeModel");
+const assetAssignmentModel = require('../models/assetAssignmentModel')
 
 const getAllMaintenanceRequests = async (req, res, next) => {
   try {
@@ -97,6 +98,18 @@ const createMaintenanceRequest = async (req, res, next) => {
       return res.status(400).json({
         status: "failed",
         message: "asset id and issue description are required",
+      });
+    }
+
+    const activeAssignment =
+      await assetAssignmentModel.getActiveAssignmentByAssetAndEmployee(
+        asset_id,
+        requested_by,
+      );
+    if (!activeAssignment) {
+      return res.status(400).json({
+        status: "failed",
+        message: "asset is not assigned to you",
       });
     }
 

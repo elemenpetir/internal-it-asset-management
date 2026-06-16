@@ -71,6 +71,16 @@ const getAssetAssignmentDetailById = async (id) => {
   return rows[0];
 };
 
+const getActiveAssignmentByAssetAndEmployee = async (asset_id, employee_id) => {
+  const sql = `SELECT id FROM asset_assignments
+    WHERE asset_id = ? 
+    AND employee_id = ?
+    AND status = 'active'`;
+
+    const [rows] = await db.query(sql, [asset_id, employee_id])
+    return rows[0]
+};
+
 const createAssetAssignmentWithTransaction = async (data) => {
   const connection = await db.getConnection();
   try {
@@ -174,6 +184,7 @@ module.exports = {
   getAssetAssignments,
   getAssetAssignmentById,
   getAssetAssignmentDetailById,
+  getActiveAssignmentByAssetAndEmployee,
   createAssetAssignmentWithTransaction,
   returnAssetAssignmentWithTransaction,
 };

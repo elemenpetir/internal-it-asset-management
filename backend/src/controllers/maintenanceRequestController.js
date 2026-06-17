@@ -82,7 +82,8 @@ const getMyActiveAssets = async (req, res, next) => {
         });
       }
       employee_id = employee.id;
-    } if (!req.body.employee_number) {
+    }else if (req.user.role === "asset_admin"){
+      if (!req.body.employee_number) {
         return res.status(400).json({
           status: "failed",
           message: "employee_number is required",
@@ -98,6 +99,7 @@ const getMyActiveAssets = async (req, res, next) => {
         });
       }
       employee_id = employee.id;
+    }
 
     const myActiveAssets =
       await assetAssignmentModel.getActiveAssetsByEmployeeId(employee_id);

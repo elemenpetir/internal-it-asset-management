@@ -17,14 +17,15 @@ router.get(
   maintenanceRequestController.getMyMaintenanceRequest,
 );
 router.get(
+  "/my-assets",
+  authMiddleware,
+  roleMiddleware("employee", "asset_admin"),
+  maintenanceRequestController.getMyActiveAssets,
+);
+router.get(
   "/:id/detail",
   authMiddleware,
   maintenanceRequestController.getMaintenanceRequestById,
-);
-router.get(
-  "/my-assets",
-  authMiddleware,
-  maintenanceRequestController.getMyActiveAssets,
 );
 router.post(
   "/",

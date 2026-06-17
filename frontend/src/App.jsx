@@ -7,6 +7,7 @@ import Assets from "./pages/assets/Assets";
 import Assignments from "./pages/assignments/Assignments";
 import AuditLogs from "./pages/audit-logs/AuditLogs";
 import Maintenance from "./pages/maintenance/Maintenance";
+import MaintenanceDetail from "./pages/maintenance/MaintenanceDetail";
 import CreateAsset from "./pages/assets/CreateAsset";
 import AssetDetail from "./pages/assets/AssetDetail";
 import EditAsset from "./pages/assets/EditAsset";
@@ -31,6 +32,7 @@ function App() {
               <Route path="/assignments" element={<Assignments />} />
               <Route path="/assignments/:id" element={<AssignmentDetail />} />
               <Route path="/maintenance" element={<Maintenance />} />
+              <Route path="/maintenance/:id" element={<MaintenanceDetail />} />
               <Route path="/audit-logs" element={<AuditLogs />} />
             </Routes>
           </div>

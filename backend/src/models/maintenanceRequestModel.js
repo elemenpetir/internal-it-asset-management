@@ -55,11 +55,14 @@ const getMaintenanceRequestById = async (id) => {
 };
 
 const getMaintenanceRequestsByEmployeeId = async (employee_id) => {
-  const sql = `SELECT maintenance_requests.id,
+  const sql = `SELECT 
+      maintenance_requests.id,
       maintenance_requests.asset_id,
       assets.name AS asset_name,
+      assets.asset_code,
       maintenance_requests.requested_by,
       employees.name AS requested_by_name,
+      employees.employee_number,
       maintenance_requests.issue_description,
       maintenance_requests.status,
       maintenance_requests.handled_by,

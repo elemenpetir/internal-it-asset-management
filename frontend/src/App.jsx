@@ -4,14 +4,15 @@ import Topbar from "./components/layout/Topbar";
 import Sidebar from "./components/layout/Sidebar";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Assets from "./pages/assets/Assets";
-import Assignments from "./pages/assignments/Assignments";
-import AuditLogs from "./pages/audit-logs/AuditLogs";
-import Maintenance from "./pages/maintenance/Maintenance";
-import MaintenanceDetail from "./pages/maintenance/MaintenanceDetail";
 import CreateAsset from "./pages/assets/CreateAsset";
 import AssetDetail from "./pages/assets/AssetDetail";
 import EditAsset from "./pages/assets/EditAsset";
+import Assignments from "./pages/assignments/Assignments";
 import AssignmentDetail from "./pages/assignments/AssignmentDetail";
+import Maintenance from "./pages/maintenance/Maintenance";
+import CreateMaintenance from "./pages/maintenance/CreateMaintenance";
+import MaintenanceDetail from "./pages/maintenance/MaintenanceDetail";
+import AuditLogs from "./pages/audit-logs/AuditLogs";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
               <Route path="/assignments" element={<Assignments />} />
               <Route path="/assignments/:id" element={<AssignmentDetail />} />
               <Route path="/maintenance" element={<Maintenance />} />
+              <Route path="/maintenance/new" element={<CreateMaintenance />} />
               <Route path="/maintenance/:id" element={<MaintenanceDetail />} />
               <Route path="/audit-logs" element={<AuditLogs />} />
             </Routes>

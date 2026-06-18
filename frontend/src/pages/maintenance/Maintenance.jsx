@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getRoleFromToken } from "../../utils/auth";
 import PageHeader from "../../components/ui/PageHeader";
 import StatusBadge from "../../components/ui/StatusBadge";
 
@@ -12,12 +13,14 @@ export default function Maintenance() {
     async function loadMaintenanceData() {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(
-          "http://localhost:3000/api/maintenance-requests",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
+        const role = getRoleFromToken();
+        const endpoint =
+          role === "employee"
+            ? "http://localhost:3000/api/maintenance-requests/my-requests"
+            : "http://localhost:3000/api/maintenance-requests";
+        const response = await fetch(`${endpoint}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const result = await response.json();
         if (!response.ok) {
           throw new Error(
@@ -78,6 +81,16 @@ export default function Maintenance() {
         title="Maintenance Requests"
         description="Track and manage asset maintenance requests."
       />
+
+      <div className="mt-6 flex items-center justify-between">
+        <div /> {/* spacer */}
+        <Link
+          to="/maintenance/new"
+          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+        >
+          + New Request
+        </Link>
+      </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">

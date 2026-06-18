@@ -16,7 +16,7 @@ router.get(
   roleMiddleware("employee"),
   maintenanceRequestController.getMyMaintenanceRequest,
 );
-router.get(
+router.post(
   "/my-assets",
   authMiddleware,
   roleMiddleware("employee", "asset_admin"),

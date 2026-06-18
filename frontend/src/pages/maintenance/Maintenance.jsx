@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
-import StatusBadge from '../../components/ui/StatusBadge'
+import StatusBadge from "../../components/ui/StatusBadge";
 
 export default function Maintenance() {
   const [maintenanceRequests, setMaintenanceRequests] = useState([]);
@@ -117,7 +118,9 @@ export default function Maintenance() {
                 maintenanceRequests.map((request) => (
                   <tr key={request.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-mono text-xs text-indigo-600 font-bold">
-                      #{request.id}
+                      <Link to={`/maintenance/${request.id}`}>
+                        #{request.id}
+                      </Link>
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-slate-800">
@@ -144,7 +147,7 @@ export default function Maintenance() {
                         : "-"}
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={request.status}/>
+                      <StatusBadge status={request.status} />
                     </td>
                   </tr>
                 ))

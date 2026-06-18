@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { getRoleFromToken } from "../../utils/auth";
 import PageHeader from "../../components/ui/PageHeader";
 import StatusBadge from "../../components/ui/StatusBadge";
 
@@ -13,6 +14,7 @@ export default function MaintenanceDetail() {
   const [successMessage, setSuccessMessage] = useState("");
   const [formStatus, setFormStatus] = useState("");
   const [resolutionNote, setResolutionNote] = useState("");
+  const role = getRoleFromToken();
 
   const statusOptions = {
     reported: ["in_progress", "canceled"],
@@ -256,7 +258,7 @@ export default function MaintenanceDetail() {
           </div>
 
           {/* Update Status */}
-          {statusOptions[maintenanceRequest.status] && (
+          {statusOptions[maintenanceRequest.status] && role === "asset_admin" && (
             <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="mb-4 text-base font-semibold text-slate-900">
                 Update Status

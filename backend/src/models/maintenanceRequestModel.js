@@ -155,16 +155,29 @@ const updateMaintenanceRequestStatusWithTransaction = async (data) => {
     updateValues.push(data.id);
 
     const [currentData] = await connection.query(
-      "SELECT status FROM maintenance_requests WHERE id = ?",
+      "SELECT status, asset_id FROM maintenance_requests WHERE id = ?",
       [data.id],
     );
     const old_status = currentData[0].status;
+    const asset_id = currentData[0].asset_id;
 
     const updateSql = `UPDATE maintenance_requests SET ${updateFields} WHERE id = ?`;
     const [updateMaintenanceRequestResult] = await connection.query(
       updateSql,
       updateValues,
     );
+
+    let assetStatus;
+    if (data.status === "in_progress") assetStatus = "under_maintenance";
+    if (data.status === "completed" || data.status === "canceled")
+      assetStatus = "assigned";
+
+    if (assetStatus) {
+      await connection.query("UPDATE assets SET status = ? WHERE id = ?", [
+        assetStatus,
+        asset_id,
+      ]);
+    }
 
     const auditSql = `INSERT INTO audit_logs
       (entity_type, entity_id, action, old_value, new_value, changed_by)

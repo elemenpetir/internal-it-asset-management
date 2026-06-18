@@ -82,7 +82,7 @@ const getMyActiveAssets = async (req, res, next) => {
         });
       }
       employee_id = employee.id;
-    }else if (req.user.role === "asset_admin"){
+    } else if (req.user.role === "asset_admin") {
       if (!req.body.employee_number) {
         return res.status(400).json({
           status: "failed",
@@ -228,10 +228,9 @@ const updateMaintenanceRequestStatus = async (req, res, next) => {
       }
     }
 
-    const result =
-      await maintenanceRequestModel.updateMaintenanceRequestStatusWithTransaction(
-        { status, handled_by, resolution_note, id },
-      );
+    await maintenanceRequestModel.updateMaintenanceRequestStatusWithTransaction(
+      { status, handled_by, resolution_note, id },
+    );
 
     return res.status(200).json({
       status: "success",

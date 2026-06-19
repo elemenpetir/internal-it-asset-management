@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getRoleFromToken } from "../../utils/auth";
 import PageHeader from "../../components/ui/PageHeader";
 import StatusBadge from "../../components/ui/StatusBadge";
@@ -8,6 +8,9 @@ export default function Maintenance() {
   const [maintenanceRequests, setMaintenanceRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [flashMessage] = useState(location.state?.successMessage || "");
 
   useEffect(() => {
     async function loadMaintenanceData() {
@@ -36,6 +39,12 @@ export default function Maintenance() {
     }
     loadMaintenanceData();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.successMessage) {
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.state, location.pathname, navigate]);
 
   const reportedCount = maintenanceRequests.filter(
     (r) => r.status === "reported",
@@ -91,6 +100,12 @@ export default function Maintenance() {
           + New Request
         </Link>
       </div>
+
+      {flashMessage && (
+        <div className="mt-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+          {flashMessage}
+        </div>
+      )}
 
       <div className="mt-6 grid gap-4 md:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">

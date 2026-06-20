@@ -1,39 +1,64 @@
 import DashboardCard from "../../components/ui/DashboardCard";
-import PageHeader from '../../components/ui/PageHeader'
+import PageHeader from "../../components/ui/PageHeader";
 import { useEffect, useState } from "react";
 
 function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
-  const [dashboardCards, setDashboardCards] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [overview, setOverview] = useState([]);
 
   useEffect(() => {
-    setTimeout(() => {
-      const dummyCards = [
-        {
-          title: "Total Assets",
-          value: "1,284",
-          description: "Across 14 global locations",
-        },
-        {
-          title: "Available",
-          value: "156",
-          description: "Ready for assignment",
-        },
-        {
-          title: "Assigned",
-          value: "1,104",
-          description: "Currently used by employees",
-        },
-        {
-          title: "Maintenance",
-          value: "24",
-          description: "Undergoing active repair",
-        },
-      ];
+    const fetchOverview = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          "http://localhost:3000/api/analytics/overview",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
 
-      setDashboardCards(dummyCards);
-      setIsLoading(false);
-    }, 1000);
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(
+            result.message || "failed to fetch analytics overview",
+          );
+        }
+
+        const data = result.data;
+        const cards = [
+          {
+            title: "Total Assets",
+            value: data.total_assets,
+            description: "All registered assets",
+          },
+          {
+            title: "Available",
+            value: data.available,
+            description: "Ready for assignment",
+          },
+          {
+            title: "Assigned",
+            value: data.assigned,
+            description: "Currently used by employees",
+          },
+          {
+            title: "Under Maintenance",
+            value: data.under_maintenance,
+            description: "Undergoing active repair",
+          },
+        ];
+
+        setOverview(cards);
+      } catch (error) {
+        setErrorMessage(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchOverview();
   }, []);
 
   if (isLoading) {
@@ -46,6 +71,21 @@ function Dashboard() {
     );
   }
 
+  if (errorMessage) {
+    return (
+      <section>
+        <PageHeader
+          title="Dashboard Overview"
+          description="Monitor asset status, assignment activity, and risk indicators."
+        />
+
+        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-5 text-red-700">
+          {errorMessage}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section>
       <PageHeader
@@ -54,7 +94,7 @@ function Dashboard() {
       />
 
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {dashboardCards.map((card) => (
+        {overview.map((card) => (
           <DashboardCard
             key={card.title}
             title={card.title}

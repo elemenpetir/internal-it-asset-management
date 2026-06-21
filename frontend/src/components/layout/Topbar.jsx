@@ -1,7 +1,26 @@
 import { useState } from "react";
+import { getRoleFromToken } from "../../utils/auth";
+
+const roleLabels = {
+  asset_admin: "Asset Admin",
+  manager: "Manager",
+  employee: "Employee",
+};
+
+function getInitials(name) {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
 
 function Topbar() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const name = localStorage.getItem("name") || "User";
+  const role = getRoleFromToken();
 
   return (
     <header className="border-b border-slate-200 bg-white px-8 py-4">
@@ -28,12 +47,12 @@ function Topbar() {
           </button>
 
           <div className="text-right">
-            <p className="text-sm font-semibold text-slate-900">IT Admin</p>
-            <p className="text-xs text-slate-500">Asset Manager</p>
+            <p className="text-sm font-semibold text-slate-900">{name}</p>
+            <p className="text-xs text-slate-500">{roleLabels[role] || role}</p>
           </div>
 
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
-            RA
+            {getInitials(name)}
           </div>
         </div>
       </div>

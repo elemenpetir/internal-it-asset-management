@@ -1,6 +1,7 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Assets from "./pages/assets/Assets";
 import CreateAsset from "./pages/assets/CreateAsset";
@@ -19,7 +20,13 @@ function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
 
-      <Route element={<AppLayout />}>
+      <Route
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/" element={<Dashboard />} />
         <Route path="/assets" element={<Assets />} />
         <Route path="/assets/new" element={<CreateAsset />} />

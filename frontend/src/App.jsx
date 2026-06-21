@@ -14,11 +14,13 @@ import CreateMaintenance from "./pages/maintenance/CreateMaintenance";
 import MaintenanceDetail from "./pages/maintenance/MaintenanceDetail";
 import AuditLogs from "./pages/audit-logs/AuditLogs";
 import Login from "./pages/auth/LoginPage";
+import ActivateAccount from "./pages/auth/ActivatePage";
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/activate-account" element={<ActivateAccount />} />
 
       <Route
         element={

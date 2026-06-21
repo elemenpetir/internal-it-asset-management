@@ -1,21 +1,32 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-export default function Login() {
+export default function ActivateAccount() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [flashMessage] = useState(location.state?.successMessage || "");
   const [email, setEmail] = useState("");
+  const [employeeNumber, setEmployeeNumber] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!email || !password) {
-      setErrorMessage("Email and password are required.");
+    if (!email || !employeeNumber || !password || !confirmPassword) {
+      setErrorMessage("All fields are required.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setErrorMessage("Password must be at least 8 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match.");
       return;
     }
 
@@ -23,33 +34,31 @@ export default function Login() {
       setIsSubmitting(true);
       setErrorMessage("");
 
-      const response = await fetch("http://localhost:3000/api/auth/login", {
+      const response = await fetch("http://localhost:3000/api/auth/activate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          email,
+          employee_number: employeeNumber,
+          password,
+        }),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Login failed");
+        throw new Error(result.message || "Activation failed");
       }
 
-      localStorage.setItem("token", result.data.token);
-
-      navigate("/");
+      navigate("/login", {
+        state: { successMessage: "Account activated. Please sign in." },
+      });
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
       setIsSubmitting(false);
     }
   }
-
-  useEffect(() => {
-    if (location.state?.successMessage) {
-      navigate(location.pathname, { replace: true, state: null });
-    }
-  }, [location.state, location.pathname, navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
@@ -67,23 +76,17 @@ export default function Login() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
               />
             </svg>
           </div>
           <h2 className="mt-4 text-lg font-semibold text-slate-900">
-            Welcome Back
+            Activate Your Account
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Enter your credentials to access IT Ops Central
+          <p className="mt-1 text-center text-sm text-slate-500">
+            Set your password to complete your profile registration.
           </p>
         </div>
-
-        {flashMessage && (
-          <div className="mt-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-            {flashMessage}
-          </div>
-        )}
 
         <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -102,7 +105,20 @@ export default function Login() {
 
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700">
-                Password
+                Employee ID
+              </label>
+              <input
+                type="text"
+                value={employeeNumber}
+                onChange={(e) => setEmployeeNumber(e.target.value)}
+                placeholder="EMP-0001"
+                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                New Password
               </label>
               <div className="relative">
                 <input
@@ -122,6 +138,32 @@ export default function Login() {
               </div>
             </div>
 
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Confirm New Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full rounded-lg border border-slate-200 px-4 py-2 pr-10 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
+                >
+                  {showConfirmPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+
+            <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
+              Password must be at least 8 characters long.
+            </p>
+
             {errorMessage && (
               <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
                 {errorMessage}
@@ -133,18 +175,18 @@ export default function Login() {
               disabled={isSubmitting}
               className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
             >
-              {isSubmitting ? "Signing in..." : "Sign In"}
+              {isSubmitting ? "Activating..." : "Activate Account"}
             </button>
           </form>
         </div>
 
         <p className="mt-6 text-center text-sm text-slate-500">
-          Don't have an account?{" "}
+          Already have an account?{" "}
           <Link
-            to="/activate-account"
+            to="/login"
             className="font-medium text-indigo-600 hover:text-indigo-700"
           >
-            Activate your account
+            Sign in
           </Link>
         </p>
       </div>

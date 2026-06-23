@@ -11,4 +11,11 @@ router.get(
   analyticsController.getOverview,
 );
 
-module.exports = router
+router.get(
+  "/high-risk-assets",
+  authMiddleware,
+  roleMiddleware("asset_admin", "manager"),
+  analyticsController.getHighRiskAssets,
+);
+
+module.exports = router;

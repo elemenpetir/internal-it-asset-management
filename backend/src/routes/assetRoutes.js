@@ -1,8 +1,9 @@
-const assetController = require("../controllers/assetController");
 const express = require("express");
+const router = express.Router();
+const assetController = require("../controllers/assetController");
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
-const router = express.Router();
+const analyticsController = require("../controllers/analyticsController");
 
 router.get("/", authMiddleware, assetController.getAssets);
 router.post(
@@ -23,6 +24,12 @@ router.put(
   authMiddleware,
   roleMiddleware("asset_admin", "manager"),
   assetController.updateAsset,
+);
+router.get(
+  "/:id/risk-score",
+  authMiddleware,
+  roleMiddleware("asset_admin", "manager"),
+  analyticsController.getAssetRiskScore,
 );
 
 module.exports = router;

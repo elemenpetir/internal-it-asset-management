@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 
 const navLinkClass = ({ isActive }) =>
-  `flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium pr-12 ${
+  `flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium pr-7 ${
     isActive
       ? "bg-indigo-600 text-white"
       : "text-slate-300 hover:bg-slate-800 hover:text-white"

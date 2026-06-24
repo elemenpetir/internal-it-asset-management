@@ -1,13 +1,8 @@
-const {
-  getAssetOverview,
-  getRiskScoreData,
-  getAllRiskScoreData,
-  calculateRiskScore,
-} = require("../models/analyticsModel");
+const analyticsModel = require("../models/analyticsModel");
 
 const getOverview = async (req, res, next) => {
   try {
-    const rows = await getAssetOverview();
+    const rows = await analyticsModel.getAssetOverview();
 
     const overview = {
       total_assets: 0,
@@ -35,7 +30,7 @@ const getOverview = async (req, res, next) => {
 const getAssetRiskScore = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const assetData = await getRiskScoreData(id);
+    const assetData = await analyticsModel.getRiskScoreData(id);
 
     if (!assetData) {
       return res
@@ -43,7 +38,8 @@ const getAssetRiskScore = async (req, res, next) => {
         .json({ status: "failed", message: "Asset not found" });
     }
 
-    const { risk_score, risk_level } = calculateRiskScore(assetData);
+    const { risk_score, risk_level } =
+      analyticsModel.calculateRiskScore(assetData);
 
     return res.status(200).json({
       status: "success",
@@ -72,11 +68,12 @@ const getAssetRiskScore = async (req, res, next) => {
 
 const getHighRiskAssets = async (req, res, next) => {
   try {
-    const allAssets = await getAllRiskScoreData();
+    const allAssets = await analyticsModel.getAllRiskScoreData();
 
     const highRisk = allAssets
       .map((asset) => {
-        const { risk_score, risk_level } = calculateRiskScore(asset);
+        const { risk_score, risk_level } =
+          analyticsModel.calculateRiskScore(asset);
         return {
           asset_id: asset.id,
           asset_code: asset.asset_code,
@@ -100,8 +97,50 @@ const getHighRiskAssets = async (req, res, next) => {
   }
 };
 
+const getAssetsByDepartmentController = async (req, res, next) => {
+  try {
+    const rows = await analyticsModel.getAssetsByDepartment();
+    return res.status(200).json({
+      status: "success",
+      message: "get assets by department successfully",
+      data: rows,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getAssetsByCategoryController = async (req, res, next) => {
+  try {
+    const rows = await analyticsModel.getAssetsByCategory();
+    return res.status(200).json({
+      status: "success",
+      message: "get assets by category successfully",
+      data: rows,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getMaintenanceSummaryController = async (req, res, next) => {
+  try {
+    const rows = await analyticsModel.getMaintenanceSummary();
+    return res.status(200).json({
+      status: "success",
+      message: "get maintenance summary successfully",
+      data: rows,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getOverview,
   getAssetRiskScore,
   getHighRiskAssets,
+  getAssetsByDepartmentController,
+  getAssetsByCategoryController,
+  getMaintenanceSummaryController,
 };

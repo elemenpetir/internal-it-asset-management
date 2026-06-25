@@ -15,6 +15,8 @@ import MaintenanceDetail from "./pages/maintenance/MaintenanceDetail";
 import AuditLogs from "./pages/audit-logs/AuditLogs";
 import Login from "./pages/auth/LoginPage";
 import ActivateAccount from "./pages/auth/ActivatePage";
+import Employees from "./pages/employees/Employees";
+import Departments from "./pages/departments/Departments";
 
 function App() {
   return (
@@ -40,6 +42,8 @@ function App() {
         <Route path="/maintenance/new" element={<CreateMaintenance />} />
         <Route path="/maintenance/:id" element={<MaintenanceDetail />} />
         <Route path="/audit-logs" element={<AuditLogs />} />
+        <Route path="/employees" element={<Employees />} />
+        <Route path="/departments" element={<Departments />} />
       </Route>
     </Routes>
   );

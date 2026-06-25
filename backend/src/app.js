@@ -10,6 +10,7 @@ const auditLogRoutes = require("./routes/auditLogRoutes");
 const employeeRoutes = require("./routes/employeeRoutes");
 const maintenanceRequestRoutes = require("./routes/maintenanceRequestRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
+const departmentRoutes = require("./routes/departmentRoutes");
 
 app.use(
   cors({
@@ -28,6 +29,7 @@ app.use("/api/audit-logs", auditLogRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/maintenance-requests", maintenanceRequestRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/departments", departmentRoutes);
 app.use(errorMiddleware);
 
 module.exports = app;

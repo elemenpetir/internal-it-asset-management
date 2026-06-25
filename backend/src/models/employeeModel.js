@@ -36,9 +36,54 @@ const getActiveEmployees = async () => {
   return rows;
 };
 
+const createEmployee = async ({
+  name,
+  email,
+  employee_number,
+  department_id,
+  position,
+}) => {
+  const sql = `INSERT INTO employees (name, email, employee_number, department_id, position, status)
+    VALUES (?, ?, ?, ?, ?, 'active')`;
+  const [result] = await db.query(sql, [
+    name,
+    email,
+    employee_number,
+    department_id,
+    position,
+  ]);
+  return result.insertId;
+};
+
+const updateEmployee = async (
+  id,
+  { name, email, position, department_id, status },
+) => {
+  const sql = `UPDATE employees SET name = ?, email = ?, position = ?, department_id = ?, status = ?
+    WHERE id = ?`;
+  const [result] = await db.query(sql, [
+    name,
+    email,
+    position,
+    department_id,
+    status,
+    id,
+  ]);
+  return result.affectedRows;
+};
+
+const deleteEmployee = async (id) => {
+  const sql = `UPDATE employees SET status = 'inactive' WHERE id = ?`;
+  const [result] = await db.query(sql, [id]);
+  return result.affectedRows;
+};
+
 module.exports = {
   findEmployeeById,
   getEmployeeByUserId,
   getActiveEmployees,
   getEmployeeByEmployeeNumber,
+  createEmployee,
+  updateEmployee,
+  deleteEmployee,
 };

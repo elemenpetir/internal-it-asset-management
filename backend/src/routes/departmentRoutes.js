@@ -1,33 +1,27 @@
 const express = require("express");
 const router = express.Router();
-const employeeController = require("../controllers/employeeController");
+const departmentController = require("../controllers/departmentController");
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 
-router.get("/", authMiddleware, employeeController.getEmployees);
-router.get(
-  "/:id",
-  authMiddleware,
-  roleMiddleware("asset_admin", "manager"),
-  employeeController.getEmployeeDetail,
-);
+router.get("/", authMiddleware, departmentController.getDepartments);
 router.post(
   "/",
   authMiddleware,
   roleMiddleware("asset_admin"),
-  employeeController.createEmployee,
+  departmentController.createDepartment,
 );
 router.put(
   "/:id",
   authMiddleware,
   roleMiddleware("asset_admin"),
-  employeeController.updateEmployee,
+  departmentController.updateDepartment,
 );
 router.delete(
   "/:id",
   authMiddleware,
   roleMiddleware("asset_admin"),
-  employeeController.deleteEmployee,
+  departmentController.deleteDepartment,
 );
 
 module.exports = router;

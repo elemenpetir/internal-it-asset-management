@@ -1,7 +1,7 @@
 const db = require("../config/db");
 
-const getAssets = async () => {
-  const sql = `SELECT assets.id, 
+const getAssets = async ({ status, category_id } = {}) => {
+  let sql = `SELECT assets.id, 
     assets.asset_code, 
     assets.name, 
     assets.category_id, 
@@ -16,10 +16,28 @@ const getAssets = async () => {
     assets.created_at,
     assets.updated_at
     FROM assets
-    JOIN asset_categories ON asset_categories.id = assets.category_id
-    ORDER BY assets.id DESC`;
+    JOIN asset_categories ON asset_categories.id = assets.category_id`;
 
-  const [rows] = await db.query(sql);
+  const conditions = [];
+  const values = [];
+
+  if (status) {
+    conditions.push("assets.status = ?");
+    values.push(status);
+  }
+
+  if (category_id) {
+    conditions.push("assets.category_id = ?");
+    values.push(category_id);
+  }
+
+  if (conditions.length > 0) {
+    sql += " WHERE " + conditions.join(" AND ");
+  }
+
+  sql += " ORDER BY assets.id DESC";
+
+  const [rows] = await db.query(sql, values);
   return rows;
 };
 

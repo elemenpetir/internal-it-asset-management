@@ -2,7 +2,8 @@ const assetModel = require("../models/assetModel");
 
 const getAssets = async (req, res, next) => {
   try {
-    const rows = await assetModel.getAssets();
+    const { status, category_id } = req.query;
+    const rows = await assetModel.getAssets({ status, category_id });
     return res.status(200).json({
       status: "success",
       message: "get all data successfully",

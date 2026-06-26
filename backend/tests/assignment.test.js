@@ -17,9 +17,7 @@ beforeAll(async () => {
   const assetRes = await request(app)
     .get("/api/assets?status=available")
     .set("Authorization", `Bearer ${adminToken}`);
-  availableAssetId = assetRes.body.data.find(
-    (a) => a.status === "available",
-  )?.id;
+  availableAssetId = assetRes.body.data[0]?.id;
 
   // Ambil employee pertama
   const empRes = await request(app)
@@ -38,8 +36,7 @@ describe("ASSIGNMENT API", () => {
         employee_id: employeeId,
         notes: "Test assignment",
       });
-
-    console.log(res.body);
+      
     expect(res.statusCode).toBe(201);
     expect(res.body.status).toBe("success");
   });

@@ -96,6 +96,25 @@ const getActiveAssetsByEmployeeId = async (employee_id) => {
   return rows;
 };
 
+const getAssignmentsByEmployeeUserId = async (user_id) => {
+  const sql = `SELECT 
+    asset_assignments.id,
+    asset_assignments.asset_id,
+    assets.name AS asset_name,
+    assets.asset_code,
+    asset_assignments.assigned_at,
+    asset_assignments.returned_at,
+    asset_assignments.status,
+    asset_assignments.notes
+    FROM asset_assignments
+    JOIN assets ON assets.id = asset_assignments.asset_id
+    JOIN employees ON employees.id = asset_assignments.employee_id
+    WHERE employees.user_id = ?
+    ORDER BY asset_assignments.assigned_at DESC`;
+  const [rows] = await db.query(sql, [user_id]);
+  return rows;
+};
+
 const createAssetAssignmentWithTransaction = async (data) => {
   const connection = await db.getConnection();
   try {
@@ -201,6 +220,7 @@ module.exports = {
   getAssetAssignmentDetailById,
   getActiveAssetsByEmployeeId,
   getActiveAssignmentByAssetAndEmployee,
+  getAssignmentsByEmployeeUserId,
   createAssetAssignmentWithTransaction,
   returnAssetAssignmentWithTransaction,
 };

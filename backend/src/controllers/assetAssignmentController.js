@@ -37,6 +37,21 @@ const getAssetAssignmentById = async (req, res, next) => {
   }
 };
 
+const getMyAssignments = async (req, res, next) => {
+  try {
+    const user_id = req.user.id;
+    const rows =
+      await assetAssignmentModel.getAssignmentsByEmployeeUserId(user_id);
+    return res.status(200).json({
+      status: "success",
+      message: "get my assignments successfully",
+      data: rows,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const createAssetAssignment = async (req, res, next) => {
   try {
     const { asset_id, employee_id, notes } = req.body;
@@ -138,6 +153,7 @@ const returnAssetAssignment = async (req, res, next) => {
 module.exports = {
   getAssetAssignments,
   getAssetAssignmentById,
+  getMyAssignments,
   createAssetAssignment,
   returnAssetAssignment,
 };

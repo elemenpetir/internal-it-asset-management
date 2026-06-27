@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
+import { getRoleFromToken } from "../../utils/auth";
 
 export default function Assignments() {
   const [assignments, setAssignments] = useState([]);
@@ -20,53 +21,52 @@ export default function Assignments() {
   const [returningId, setReturningId] = useState(null);
   const [actionError, setActionError] = useState("");
 
+  const role = getRoleFromToken();
+  const isEmployee = role === "employee";
+  const token = localStorage.getItem("token");
+  const headers = { Authorization: `Bearer ${token}` };
+
   useEffect(() => {
     async function loadAssignmentData() {
       try {
-        const token = localStorage.getItem("token");
-
-        const [assignmentsResponse, assetsResponse, employeesResponse] =
-          await Promise.all([
-            fetch("http://localhost:3000/api/asset-assignments", {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }),
-            fetch("http://localhost:3000/api/assets", {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }),
-            fetch("http://localhost:3000/api/employees", {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }),
+        if (isEmployee) {
+          const response = await fetch(
+            "http://localhost:3000/api/asset-assignments/my-assignments",
+            { headers },
+          );
+          const result = await response.json();
+          if (!response.ok)
+            throw new Error(result.message || "Failed to fetch assignments");
+          setAssignments(result.data);
+        } else {
+          const [assignmentsRes, assetsRes, employeesRes] = await Promise.all([
+            fetch("http://localhost:3000/api/asset-assignments", { headers }),
+            fetch("http://localhost:3000/api/assets", { headers }),
+            fetch("http://localhost:3000/api/employees", { headers }),
           ]);
 
-        const assignmentsResult = await assignmentsResponse.json();
-        const assetsResult = await assetsResponse.json();
-        const employeesResult = await employeesResponse.json();
+          const [assignmentsResult, assetsResult, employeesResult] =
+            await Promise.all([
+              assignmentsRes.json(),
+              assetsRes.json(),
+              employeesRes.json(),
+            ]);
 
-        if (!assignmentsResponse.ok) {
-          throw new Error(
-            assignmentsResult.message || "Failed to fetch assignments",
-          );
+          if (!assignmentsRes.ok)
+            throw new Error(
+              assignmentsResult.message || "Failed to fetch assignments",
+            );
+          if (!assetsRes.ok)
+            throw new Error(assetsResult.message || "Failed to fetch assets");
+          if (!employeesRes.ok)
+            throw new Error(
+              employeesResult.message || "Failed to fetch employees",
+            );
+
+          setAssignments(assignmentsResult.data);
+          setAssets(assetsResult.data);
+          setEmployees(employeesResult.data);
         }
-
-        if (!assetsResponse.ok) {
-          throw new Error(assetsResult.message || "Failed to fetch assets");
-        }
-
-        if (!employeesResponse.ok) {
-          throw new Error(
-            employeesResult.message || "Failed to fetch employees",
-          );
-        }
-
-        setAssignments(assignmentsResult.data);
-        setAssets(assetsResult.data);
-        setEmployees(employeesResult.data);
       } catch (error) {
         setErrorMessage(error.message);
       } finally {
@@ -83,61 +83,36 @@ export default function Assignments() {
 
   function handleChange(event) {
     const { name, value } = event.target;
-
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-
-    setValidationErrors({
-      ...validationErrors,
-      [name]: "",
-    });
+    setFormData({ ...formData, [name]: value });
+    setValidationErrors({ ...validationErrors, [name]: "" });
   }
 
   function validateForm() {
     const errors = {};
-
-    if (!formData.asset_id) {
-      errors.asset_id = "Asset is required.";
-    }
-
-    if (!formData.employee_id) {
-      errors.employee_id = "Employee is required.";
-    }
-
+    if (!formData.asset_id) errors.asset_id = "Asset is required.";
+    if (!formData.employee_id) errors.employee_id = "Employee is required.";
     return errors;
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
-
     const errors = validateForm();
-
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       setSubmitError("");
       setSuccessMessage("");
       return;
     }
-
     setValidationErrors({});
-
     try {
       setIsSubmitting(true);
       setSubmitError("");
       setSuccessMessage("");
-
-      const token = localStorage.getItem("token");
-
       const response = await fetch(
         "http://localhost:3000/api/asset-assignments",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { ...headers, "Content-Type": "application/json" },
           body: JSON.stringify({
             asset_id: Number(formData.asset_id),
             employee_id: Number(formData.employee_id),
@@ -145,23 +120,12 @@ export default function Assignments() {
           }),
         },
       );
-
       const result = await response.json();
-
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(result.message || "Failed to assign asset");
-      }
-
       setSuccessMessage("Asset assigned successfully.");
-
-      setFormData({
-        asset_id: "",
-        employee_id: "",
-        notes: "",
-      });
-
+      setFormData({ asset_id: "", employee_id: "", notes: "" });
       setAssignments([result.data, ...assignments]);
-
       setAssets(
         assets.map((asset) =>
           asset.id === Number(formData.asset_id)
@@ -180,34 +144,20 @@ export default function Assignments() {
     const confirmed = window.confirm(
       `Return asset ${assignment.asset_code} from ${assignment.employee_name}?`,
     );
-
     if (!confirmed) return;
-
     try {
       setReturningId(assignment.id);
       setActionError("");
       setSuccessMessage("");
-
-      const token = localStorage.getItem("token");
-
       const response = await fetch(
         `http://localhost:3000/api/asset-assignments/${assignment.id}/return`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { method: "PATCH", headers },
       );
-
       const result = await response.json();
-
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(result.message || "Failed to return asset");
-      }
-
-      setAssignments((currentAssignments) =>
-        currentAssignments.map((item) =>
+      setAssignments((current) =>
+        current.map((item) =>
           item.id === assignment.id
             ? {
                 ...item,
@@ -217,15 +167,13 @@ export default function Assignments() {
             : item,
         ),
       );
-
-      setAssets((currentAssets) =>
-        currentAssets.map((asset) =>
+      setAssets((current) =>
+        current.map((asset) =>
           asset.id === assignment.asset_id
             ? { ...asset, status: "available" }
             : asset,
         ),
       );
-
       setSuccessMessage("Asset returned successfully.");
     } catch (error) {
       setActionError(error.message);
@@ -241,7 +189,6 @@ export default function Assignments() {
           title="Asset Assignments"
           description="Assign available IT assets to active employees."
         />
-
         <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
           Loading assignment data...
         </div>
@@ -256,7 +203,6 @@ export default function Assignments() {
           title="Asset Assignments"
           description="Assign available IT assets to active employees."
         />
-
         <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
           {errorMessage}
         </div>
@@ -264,6 +210,73 @@ export default function Assignments() {
     );
   }
 
+  // Employee view
+  if (isEmployee) {
+    return (
+      <section>
+        <PageHeader
+          title="My Assignments"
+          description="Riwayat aset yang pernah dan sedang di-assign ke kamu."
+        />
+        <div className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <table className="w-full border-collapse text-left text-sm">
+            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+              <tr>
+                <th className="px-4 py-3 font-semibold">Asset</th>
+                <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold">Assigned At</th>
+                <th className="px-4 py-3 font-semibold">Returned At</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {assignments.length > 0 ? (
+                assignments.map((assignment) => (
+                  <tr key={assignment.id} className="hover:bg-slate-50">
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-slate-800">
+                        {assignment.asset_name}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {assignment.asset_code}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          assignment.status === "active"
+                            ? "bg-blue-50 text-blue-700"
+                            : "bg-slate-100 text-slate-500"
+                        }`}
+                      >
+                        {assignment.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {assignment.assigned_at?.slice(0, 10) || "-"}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {assignment.returned_at?.slice(0, 10) || "-"}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="4"
+                    className="px-4 py-8 text-center text-slate-500"
+                  >
+                    No assignments found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    );
+  }
+
+  // Admin/Manager view — layout asli
   return (
     <section>
       <PageHeader
@@ -348,7 +361,6 @@ export default function Assignments() {
                 {successMessage}
               </div>
             )}
-
             {submitError && (
               <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
                 {submitError}
@@ -377,14 +389,12 @@ export default function Assignments() {
                 {assignments.length}
               </p>
             </div>
-
             <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
               <p className="text-sm text-slate-500">Available Assets</p>
               <p className="mt-1 text-xl font-semibold text-slate-900">
                 {availableAssets.length}
               </p>
             </div>
-
             <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
               <p className="text-sm text-slate-500">Active Employees</p>
               <p className="mt-1 text-xl font-semibold text-slate-900">
@@ -398,6 +408,7 @@ export default function Assignments() {
               {actionError}
             </div>
           )}
+
           <div className="mt-6 overflow-hidden rounded-xl border border-slate-200">
             <table className="w-full border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
@@ -409,7 +420,6 @@ export default function Assignments() {
                   <th className="px-4 py-3 font-semibold">Action</th>
                 </tr>
               </thead>
-
               <tbody className="divide-y divide-slate-100">
                 {assignments.length > 0 ? (
                   assignments.map((assignment) => (
@@ -426,7 +436,6 @@ export default function Assignments() {
                           {assignment.asset_name || "-"}
                         </div>
                       </td>
-
                       <td className="px-4 py-3 text-slate-800">
                         <div className="font-medium">
                           {assignment.employee_name ||
@@ -436,19 +445,14 @@ export default function Assignments() {
                           {assignment.employee_number || "-"}
                         </div>
                       </td>
-
                       <td className="px-4 py-3">
                         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
                           {assignment.status}
                         </span>
                       </td>
-
                       <td className="px-4 py-3 text-slate-600">
-                        {assignment.assigned_at
-                          ? assignment.assigned_at.slice(0, 10)
-                          : "-"}
+                        {assignment.assigned_at?.slice(0, 10) || "-"}
                       </td>
-
                       <td className="px-4 py-3">
                         {assignment.status === "active" ? (
                           <button

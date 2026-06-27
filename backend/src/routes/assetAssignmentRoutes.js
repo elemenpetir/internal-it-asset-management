@@ -10,6 +10,12 @@ router.get(
   roleMiddleware("asset_admin", "manager"),
   assetAssignmentController.getAssetAssignments,
 );
+router.get(
+  "/my-assignments",
+  authMiddleware,
+  roleMiddleware("employee"),
+  assetAssignmentController.getMyAssignments,
+);
 router.post(
   "/",
   authMiddleware,

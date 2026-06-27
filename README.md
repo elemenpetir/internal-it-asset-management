@@ -1,539 +1,306 @@
 # Internal IT Asset Management & Risk Scoring System
 
-## Overview
+Sistem manajemen aset IT internal perusahaan berbasis fullstack web application. Dibangun untuk melacak aset, assignment ke karyawan, maintenance request, lifecycle status, audit log, dan analitik risiko aset.
 
-Internal IT Asset Management & Risk Scoring System is a backend-focused web application for managing internal company IT assets, employee account activation, asset lifecycle status, asset assignments, returns, and audit logs.
-
-This project is built as part of a 6-month full-stack learning roadmap. The current version focuses on the backend REST API using Node.js, Express, and MySQL/MariaDB. The frontend will be developed in the next phase using React.
-
-The project is designed to represent a realistic internal IT workflow, not just a simple CRUD application. It includes authentication, role-based authorization, transactional workflows, audit logging, and asset assignment business rules.
-
----
-
-## Current Status
-
-Backend MVP is implemented.
-
-Frontend development is planned for the next phase.
-
----
-
-## Core Features
-
-* Employee account activation flow
-* JWT-based authentication
-* Role-based authorization
-* Asset category management
-* IT asset management
-* Asset assignment to employees
-* Asset return flow
-* Asset lifecycle status management
-* Audit logging for important business operations
-* Database transaction handling for critical workflows
-* Global error handling for database constraint errors
-* Basic API tests using Jest and Supertest
+Project ini dirancang sebagai sistem internal perusahaan yang realistis — bukan sekadar aplikasi CRUD biasa — dengan fitur authentication, role-based access control, transactional workflow, dan rule-based risk scoring.
 
 ---
 
 ## Tech Stack
 
-### Backend
+**Backend**
 
-* Node.js
-* Express.js
-* MySQL / MariaDB
-* mysql2
-* JSON Web Token
-* bcrypt
-* dotenv
+- Node.js + Express.js
+- MySQL / MariaDB (mysql2)
+- JSON Web Token (JWT)
+- bcrypt
+- Jest + Supertest
 
-### Testing
+**Frontend**
 
-* Jest
-* Supertest
-
-### Tools
-
-* Postman
-* phpMyAdmin / MySQL client
-* Git / GitHub
+- React + React Router
+- Tailwind CSS
+- Recharts
 
 ---
 
-## User Roles
+## Fitur Utama
 
-| Role        | Description                                                                      |
-| ----------- | -------------------------------------------------------------------------------- |
-| employee    | Regular employee account activated using registered employee data                |
-| asset_admin | Admin role responsible for managing assets, assignments, returns, and audit logs |
-| manager     | Elevated role with access to management-level asset operations                   |
+- Aktivasi akun karyawan (bukan register bebas)
+- JWT authentication + role-based authorization
+- CRUD aset IT dengan audit log otomatis
+- CRUD kategori aset, employee, dan department
+- Assignment aset ke karyawan + return flow
+- Maintenance request workflow (reported → in_progress → completed/canceled)
+- Audit log untuk setiap operasi penting
+- Rule-based asset risk scoring
+- Analytics dashboard (overview, by category, by department, maintenance trend, high risk assets)
+- Database transaction untuk workflow kritis
+- Unit test untuk endpoint utama
 
 ---
 
-## Business Rules
+## Role & Akses
 
-### Employee Activation
+| Role          | Akses                                                                       |
+| ------------- | --------------------------------------------------------------------------- |
+| `employee`    | Lihat aset milik sendiri, buat maintenance request                          |
+| `asset_admin` | CRUD aset, assignment, return, maintenance, employee, department, audit log |
+| `manager`     | Dashboard analytics, risk scoring, monitoring (read-only)                   |
 
-Employees do not register freely with arbitrary roles.
+---
 
-The activation flow works as follows:
+## Alur Bisnis Penting
 
-1. Admin creates or seeds employee data in the `employees` table.
-2. Employee activates an account using:
+### Aktivasi Akun Karyawan
 
-   * email
-   * employee number
-   * password
-3. Backend verifies that the email and employee number match an existing employee.
-4. Backend creates a user account with the forced role `employee`.
-5. Backend links `employees.user_id` to the new user account.
+1. Admin membuat data employee di tabel `employees`.
+2. Karyawan aktivasi akun via `POST /api/auth/activate` dengan email + employee number + password.
+3. Backend verifikasi kecocokan data, buat user dengan role paksa `employee`, dan link `employees.user_id`.
 
-Employees cannot choose their own role.
+Karyawan tidak bisa memilih role sendiri.
 
-### Admin Account
+### Assignment Aset
 
-The first `asset_admin` account is created manually or through a seed process for MVP purposes.
+- Hanya aset berstatus `available` yang bisa di-assign.
+- Saat di-assign: status aset berubah ke `assigned`, audit log tercatat.
+- Saat dikembalikan: status kembali ke `available`, audit log tercatat.
 
-After an admin account exists, future admin or manager account creation can be handled through protected admin endpoints in a later version.
+### Maintenance Workflow
 
-Do not commit real admin credentials to the repository. Use local seed data or environment-specific setup instructions instead.
+- Karyawan hanya bisa request maintenance untuk aset yang aktif di-assign ke dirinya.
+- Tidak boleh ada duplikasi request aktif untuk aset yang sama.
+- Status flow: `reported` → `in_progress` → `completed` / `canceled`
+- Saat `in_progress`: status aset otomatis berubah ke `under_maintenance`.
+- Saat `completed`/`canceled`: status aset kembali ke `assigned` atau `available`.
 
-### Asset Assignment
+### Risk Scoring
 
-Assets can only be assigned when their status is:
+Sistem menghitung risk score aset berdasarkan 4 faktor:
 
-```txt
-available
+| Faktor                    | Nilai |
+| ------------------------- | ----- |
+| Usia aset < 2 tahun       | +5    |
+| Usia aset 2–4 tahun       | +15   |
+| Usia aset > 4 tahun       | +30   |
+| Maintenance request 0     | +0    |
+| Maintenance request 1–2   | +15   |
+| Maintenance request > 2   | +30   |
+| Status available/assigned | +0    |
+| Status under_maintenance  | +20   |
+| Status retired            | +40   |
+| Assignment ≤ 2            | +5    |
+| Assignment 3–5            | +10   |
+| Assignment > 5            | +15   |
+
+Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
+
+---
+
+## Struktur Project
+
 ```
-
-When an asset is assigned:
-
-1. A new record is inserted into `asset_assignments`.
-2. The asset status changes to `assigned`.
-3. An audit log is created.
-
-### Asset Return
-
-When an assigned asset is returned:
-
-1. The assignment status changes from `active` to `returned`.
-2. `returned_at` is filled.
-3. The asset status changes back to `available`.
-4. An audit log is created.
-
-### Audit Logging
-
-Important operations are recorded in `audit_logs`, including:
-
-* `CREATE_ASSET`
-* `UPDATE_ASSET`
-* `ASSIGN_ASSET`
-* `RETURN_ASSET`
-
-Audit logs store:
-
-* entity type
-* entity id
-* action
-* old value
-* new value
-* user who performed the action
-* timestamp
-
----
-
-## Transaction Handling
-
-Database transactions are used for critical workflows that update multiple tables.
-
-Implemented transactional workflows:
-
-* Employee account activation
-* Asset assignment
-* Asset return
-* Asset creation with audit log
-* Asset update with audit log
-* Asset assignment with audit log
-* Asset return with audit log
-
-This prevents partial database updates when one step succeeds but another step fails.
-
----
-
-## Project Structure
-
-```txt
 .
 ├── backend/
 │   ├── database/
 │   │   └── schema.sql
 │   ├── src/
 │   │   ├── config/
-│   │   │   └── db.js
 │   │   ├── controllers/
 │   │   ├── middleware/
 │   │   ├── models/
-│   │   ├── routes/
-│   │   ├── utils/
-│   │   └── app.js
+│   │   └── routes/
 │   ├── tests/
+│   ├── .env.example
+│   ├── app.js
 │   ├── server.js
-│   ├── package.json
-│   └── package-lock.json
+│   └── package.json
 ├── frontend/
-│   └── planned for next phase
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── utils/
+│   └── package.json
 └── README.md
 ```
 
 ---
 
-## Database Overview
+## Instalasi & Setup
 
-Main tables:
+### Prasyarat
 
-| Table             | Purpose                                    |
-| ----------------- | ------------------------------------------ |
-| departments       | Stores company departments                 |
-| employees         | Stores employee business data              |
-| users             | Stores application login accounts          |
-| asset_categories  | Stores asset category data                 |
-| assets            | Stores IT asset records                    |
-| asset_assignments | Stores asset assignment and return history |
-| audit_logs        | Stores important system activity logs      |
+- Node.js v18+
+- MySQL / MariaDB
 
----
-
-## Environment Variables
-
-Create a `.env` file inside the `backend/` directory.
-
-```env
-PORT=3000
-
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_database_password
-DB_NAME=internal_it_asset
-DB_PORT=3306
-
-JWT_SECRET=your_jwt_secret
-```
-
-Do not commit `.env` to GitHub.
-
-For public repositories, provide a `.env.example` file instead of exposing real credentials.
-
-Example `.env.example`:
-
-```env
-PORT=3000
-
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=
-DB_NAME=internal_it_asset
-DB_PORT=3306
-
-JWT_SECRET=replace_with_your_secret
-```
-
----
-
-## Installation
-
-Clone the repository:
+### 1. Clone repository
 
 ```bash
 git clone <repository-url>
 cd internal-it-asset-management
 ```
 
-Go to the backend directory:
+### 2. Setup Backend
 
 ```bash
 cd backend
-```
-
-Install dependencies:
-
-```bash
 npm install
 ```
 
-Create the database and run the schema:
+Buat file `.env` di dalam folder `backend/`:
+
+```env
+PORT=3000
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=internal_it_asset
+DB_PORT=3306
+JWT_SECRET=your_jwt_secret
+```
+
+Import schema database:
 
 ```bash
-mysql -u root -p
+mysql -u root -p internal_it_asset < database/schema.sql
 ```
 
-Then execute the SQL schema from:
-
-```txt
-backend/database/schema.sql
-```
-
-Or import the schema using phpMyAdmin.
-
----
-
-## Running the Backend
-
-From the `backend/` directory:
+Jalankan backend:
 
 ```bash
 npm run dev
 ```
 
-The API will run on:
+Backend berjalan di `http://localhost:3000`
 
-```txt
-http://localhost:3000
+### 3. Setup Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
+
+Frontend berjalan di `http://localhost:5173`
 
 ---
 
-## Running Tests
-
-From the `backend/` directory:
+## Menjalankan Test
 
 ```bash
+cd backend
 npm test
 ```
 
-Current basic test coverage includes:
-
-* successful admin login
-* invalid login password
-* protected route without token
-* employee forbidden from accessing audit logs
-
-Note: the current tests use local development seed data. For production-grade testing, use a dedicated test database and test seed process.
+Coverage saat ini: 13 test case mencakup auth, asset, assignment, maintenance, dan analytics.
 
 ---
 
-## API Endpoints Summary
+## API Endpoints
 
 ### Auth
 
-| Method | Endpoint             | Access        | Description                    |
-| ------ | -------------------- | ------------- | ------------------------------ |
-| POST   | `/api/auth/login`    | Public        | Login user and return JWT      |
-| POST   | `/api/auth/activate` | Public        | Activate employee account      |
-| GET    | `/api/auth/me`       | Authenticated | Get current authenticated user |
+| Method | Endpoint             | Akses         | Deskripsi                  |
+| ------ | -------------------- | ------------- | -------------------------- |
+| POST   | `/api/auth/login`    | Public        | Login, return JWT          |
+| POST   | `/api/auth/activate` | Public        | Aktivasi akun karyawan     |
+| GET    | `/api/auth/me`       | Authenticated | Get user yang sedang login |
 
----
+### Employees
 
-### Asset Categories
+| Method | Endpoint             | Akses          | Deskripsi                 |
+| ------ | -------------------- | -------------- | ------------------------- |
+| GET    | `/api/employees`     | Authenticated  | List semua employee aktif |
+| GET    | `/api/employees/:id` | admin, manager | Detail employee           |
+| POST   | `/api/employees`     | asset_admin    | Buat employee baru        |
+| PUT    | `/api/employees/:id` | asset_admin    | Update employee           |
+| DELETE | `/api/employees/:id` | asset_admin    | Deaktivasi employee       |
 
-| Method | Endpoint                | Access               | Description              |
-| ------ | ----------------------- | -------------------- | ------------------------ |
-| GET    | `/api/asset-categories` | Authenticated        | Get all asset categories |
-| POST   | `/api/asset-categories` | asset_admin, manager | Create asset category    |
+### Departments
 
----
+| Method | Endpoint               | Akses         | Deskripsi             |
+| ------ | ---------------------- | ------------- | --------------------- |
+| GET    | `/api/departments`     | Authenticated | List semua department |
+| POST   | `/api/departments`     | asset_admin   | Buat department       |
+| PUT    | `/api/departments/:id` | asset_admin   | Update department     |
+| DELETE | `/api/departments/:id` | asset_admin   | Hapus department      |
 
 ### Assets
 
-| Method | Endpoint                 | Access               | Description         |
-| ------ | ------------------------ | -------------------- | ------------------- |
-| GET    | `/api/assets`            | Authenticated        | Get all assets      |
-| GET    | `/api/assets/:id`        | Authenticated        | Get asset detail    |
-| POST   | `/api/assets`            | asset_admin, manager | Create asset        |
-| PUT    | `/api/assets/:id`        | asset_admin, manager | Update asset data   |
-| PATCH  | `/api/assets/:id/status` | asset_admin, manager | Update asset status |
-
----
+| Method | Endpoint                     | Akses          | Deskripsi                                   |
+| ------ | ---------------------------- | -------------- | ------------------------------------------- |
+| GET    | `/api/assets`                | Authenticated  | List aset (filter: `status`, `category_id`) |
+| GET    | `/api/assets/:id`            | Authenticated  | Detail aset                                 |
+| POST   | `/api/assets`                | asset_admin    | Buat aset                                   |
+| PUT    | `/api/assets/:id`            | asset_admin    | Update aset                                 |
+| PATCH  | `/api/assets/:id/status`     | asset_admin    | Update status aset                          |
+| GET    | `/api/assets/:id/risk-score` | admin, manager | Risk score aset                             |
 
 ### Asset Assignments
 
-| Method | Endpoint                            | Access               | Description               |
-| ------ | ----------------------------------- | -------------------- | ------------------------- |
-| GET    | `/api/asset-assignments`            | Authenticated        | Get all asset assignments |
-| GET    | `/api/asset-assignments/:id`        | Authenticated        | Get assignment detail     |
-| POST   | `/api/asset-assignments`            | asset_admin, manager | Assign asset to employee  |
-| PATCH  | `/api/asset-assignments/:id/return` | asset_admin, manager | Return assigned asset     |
+| Method | Endpoint                            | Akses          | Deskripsi               |
+| ------ | ----------------------------------- | -------------- | ----------------------- |
+| GET    | `/api/asset-assignments`            | admin, manager | List semua assignment   |
+| GET    | `/api/asset-assignments/:id`        | Authenticated  | Detail assignment       |
+| POST   | `/api/asset-assignments`            | asset_admin    | Assign aset ke employee |
+| PATCH  | `/api/asset-assignments/:id/return` | asset_admin    | Return aset             |
 
----
+### Maintenance Requests
+
+| Method | Endpoint                                | Akses                 | Deskripsi                |
+| ------ | --------------------------------------- | --------------------- | ------------------------ |
+| GET    | `/api/maintenance-requests`             | admin, manager        | List semua request       |
+| GET    | `/api/maintenance-requests/:id/detail`  | Authenticated         | Detail request           |
+| GET    | `/api/maintenance-requests/my-requests` | employee              | Request milik sendiri    |
+| POST   | `/api/maintenance-requests`             | employee, asset_admin | Buat maintenance request |
+| PATCH  | `/api/maintenance-requests/:id/status`  | asset_admin           | Update status request    |
 
 ### Audit Logs
 
-| Method | Endpoint          | Access               | Description    |
-| ------ | ----------------- | -------------------- | -------------- |
-| GET    | `/api/audit-logs` | asset_admin, manager | Get audit logs |
+| Method | Endpoint          | Akses          | Deskripsi            |
+| ------ | ----------------- | -------------- | -------------------- |
+| GET    | `/api/audit-logs` | admin, manager | List semua audit log |
 
----
+### Analytics
 
-## Example API Flow
-
-### 1. Login as Asset Admin
-
-```http
-POST /api/auth/login
-```
-
-```json
-{
-  "email": "<asset_admin_email>",
-  "password": "<asset_admin_password>"
-}
-```
-
-Response includes a JWT token.
-
-Use a locally seeded asset admin account. Do not expose real credentials in the repository.
-
----
-
-### 2. Create Asset Category
-
-```http
-POST /api/asset-categories
-Authorization: Bearer <token>
-```
-
-```json
-{
-  "name": "Laptop"
-}
-```
-
----
-
-### 3. Create Asset
-
-```http
-POST /api/assets
-Authorization: Bearer <token>
-```
-
-```json
-{
-  "asset_code": "AST-0001",
-  "name": "Laptop Lenovo ThinkPad",
-  "category_id": 1,
-  "brand": "Lenovo",
-  "model": "ThinkPad T14",
-  "serial_number": "SN-LNV-001",
-  "purchase_date": "2025-01-15",
-  "location": "IT Storage Room",
-  "notes": "Initial asset record"
-}
-```
-
----
-
-### 4. Assign Asset
-
-```http
-POST /api/asset-assignments
-Authorization: Bearer <token>
-```
-
-```json
-{
-  "asset_id": 1,
-  "employee_id": 1,
-  "notes": "Assigned for daily operational work"
-}
-```
-
----
-
-### 5. Return Asset
-
-```http
-PATCH /api/asset-assignments/1/return
-Authorization: Bearer <token>
-```
-
----
-
-### 6. View Audit Logs
-
-```http
-GET /api/audit-logs
-Authorization: Bearer <token>
-```
+| Method | Endpoint                              | Akses          | Deskripsi                       |
+| ------ | ------------------------------------- | -------------- | ------------------------------- |
+| GET    | `/api/analytics/overview`             | admin, manager | Ringkasan total aset per status |
+| GET    | `/api/analytics/assets-by-category`   | admin, manager | Distribusi aset per kategori    |
+| GET    | `/api/analytics/assets-by-department` | admin, manager | Distribusi aset per department  |
+| GET    | `/api/analytics/maintenance-summary`  | admin, manager | Tren maintenance per bulan      |
+| GET    | `/api/analytics/high-risk-assets`     | admin, manager | Daftar aset high risk           |
 
 ---
 
 ## Error Handling
 
-The API includes a global error handler for common database errors.
-
-Examples:
-
-| Error Case                    | Response                    |
+| Kasus                         | Response                    |
 | ----------------------------- | --------------------------- |
 | Duplicate unique value        | `409 Conflict`              |
-| Invalid foreign key reference | `400 Bad Request`           |
-| Unexpected server error       | `500 Internal Server Error` |
+| Invalid foreign key           | `400 Bad Request`           |
+| Unauthorized                  | `401 Unauthorized`          |
+| Forbidden (role tidak sesuai) | `403 Forbidden`             |
+| Data tidak ditemukan          | `404 Not Found`             |
+| Server error                  | `500 Internal Server Error` |
 
 ---
 
-## Security Notes
+## Known Limitations
 
-* Passwords are hashed using bcrypt.
-* JWT is used for authenticated requests.
-* Role-based middleware protects admin and manager endpoints.
-* Employee activation forces the role to `employee`.
-* Client-provided roles are not trusted.
-* Audit logs record important system operations.
-* Real credentials, JWT secrets, and database passwords must not be committed to the repository.
-* Use `.env.example` for documentation and keep `.env` local.
+- Filter aset belum mendukung `department_id` dan pagination.
+- Audit log mencatat ID teknikal, bukan nama.
+- Test menggunakan database development, bukan database test terpisah.
+- Faktor "durasi under maintenance" belum diimplementasikan di risk scoring.
 
 ---
 
-## Testing Notes
+## CV Positioning
 
-The current tests use the development database and seed data.
-
-For a production-grade test setup, a separate test database and test seed process should be added.
-
-Avoid committing real test credentials. If test accounts are required, document them as local seed data only.
-
----
-
-## Planned Next Phase
-
-Frontend development using React.
-
-Planned frontend features:
-
-* Login page
-* Employee activation page
-* Asset dashboard
-* Asset category management UI
-* Asset list and detail UI
-* Assignment and return workflow UI
-* Audit log viewer
-* Role-based navigation
-
----
-
-## Future Improvements
-
-* Dedicated employee management endpoints
-* Admin user management endpoints
-* Pagination and search for asset list
-* Audit log filtering
-* Separate test database
-* Seed script
-* More complete API test coverage
-* Risk scoring module
-* Asset analytics dashboard
-
----
-
-## Project Purpose
-
-This project is intended to demonstrate backend engineering fundamentals through a realistic internal company system, including:
-
-* REST API design
-* relational database modeling
-* authentication and authorization
-* business rule implementation
-* transactional database operations
-* audit logging
-* API testing
-* clean project documentation
+```
+Internal IT Asset Management & Risk Scoring System
+Built a fullstack web application for managing internal IT assets with role-based access
+control, asset assignment tracking, maintenance workflow, audit logs, operational analytics,
+and rule-based asset risk scoring using Node.js, Express, MySQL, JWT, React, Tailwind CSS,
+and Jest.
+```

@@ -4,7 +4,12 @@ const assetAssignmentController = require("../controllers/assetAssignmentControl
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 
-router.get("/", authMiddleware, assetAssignmentController.getAssetAssignments);
+router.get(
+  "/",
+  authMiddleware,
+  roleMiddleware("asset_admin", "manager"),
+  assetAssignmentController.getAssetAssignments,
+);
 router.post(
   "/",
   authMiddleware,
@@ -17,6 +22,10 @@ router.patch(
   roleMiddleware("asset_admin", "manager"),
   assetAssignmentController.returnAssetAssignment,
 );
-router.get('/:id', authMiddleware, assetAssignmentController.getAssetAssignmentById)
+router.get(
+  "/:id",
+  authMiddleware,
+  assetAssignmentController.getAssetAssignmentById,
+);
 
 module.exports = router;

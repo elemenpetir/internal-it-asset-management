@@ -2,6 +2,7 @@ import StatusBadge from "../../components/ui/StatusBadge";
 import PageHeader from "../../components/ui/PageHeader";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getRoleFromToken } from "../../utils/auth";
 
 export default function Assets() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,6 +14,7 @@ export default function Assets() {
   const location = useLocation();
   const navigate = useNavigate();
   const [flashMessage] = useState(location.state?.successMessage || "");
+  const role = getRoleFromToken();
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -95,13 +97,14 @@ export default function Assets() {
           title="Asset Inventory"
           description="Monitor, update, and track all IT hardware assets."
         />
-
-        <Link
-          to="/assets/new"
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-        >
-          + New Asset
-        </Link>
+        {role !== "employee" && (
+          <Link
+            to="/assets/new"
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            + New Asset
+          </Link>
+        )}
       </div>
 
       {flashMessage && (

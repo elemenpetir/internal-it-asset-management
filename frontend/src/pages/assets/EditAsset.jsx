@@ -2,6 +2,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { formatDateForInput } from "../../utils/date";
 import PageHeader from "../../components/ui/PageHeader";
+import { getRoleFromToken } from "../../utils/auth";
 
 export default function EditAsset() {
   const navigate = useNavigate();
@@ -23,6 +24,13 @@ export default function EditAsset() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
+  const role = getRoleFromToken();
+
+  useEffect(() => {
+    if (role === "employee") {
+      navigate("/assets");
+    }
+  }, [role, navigate]);
 
   useEffect(() => {
     async function loadEditData() {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
+import { getRoleFromToken } from "../../utils/auth";
 
 export default function CreateAsset() {
   const navigate = useNavigate();
@@ -21,6 +22,13 @@ export default function CreateAsset() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
+  const role = getRoleFromToken();
+
+  useEffect(() => {
+    if (role === "employee") {
+      navigate("/assets");
+    }
+  }, [role, navigate]);
 
   useEffect(() => {
     async function fetchCategories() {
@@ -58,11 +66,11 @@ export default function CreateAsset() {
       ...formData,
       [name]: value,
     });
-    
+
     setValidationErrors({
-    ...validationErrors,
-    [name]: "",
-  });
+      ...validationErrors,
+      [name]: "",
+    });
   }
 
   function validationForm() {

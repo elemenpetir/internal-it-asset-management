@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
+import { getRoleFromToken } from "../../utils/auth";
 
 function formatActionBadge(action) {
   const styles = {
@@ -84,6 +86,14 @@ export default function AuditLogs() {
   const [auditLogs, setAuditLogs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const role = getRoleFromToken();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (role === "employee") {
+      navigate("/");
+    }
+  }, [role, navigate]);
 
   useEffect(() => {
     async function loadAuditLogs() {

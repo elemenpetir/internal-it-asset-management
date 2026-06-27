@@ -182,12 +182,14 @@ function Sidebar() {
               Maintenance
             </NavLink>
           </li>
-          <li>
-            <NavLink to="/audit-logs" className={navLinkClass}>
-              {icons.auditLogs}
-              Audit Logs
-            </NavLink>
-          </li>
+          {role !== "employee" && (
+            <li>
+              <NavLink to="/audit-logs" className={navLinkClass}>
+                {icons.auditLogs}
+                Audit Logs
+              </NavLink>
+            </li>
+          )}
           {role === "asset_admin" && (
             <>
               <li>

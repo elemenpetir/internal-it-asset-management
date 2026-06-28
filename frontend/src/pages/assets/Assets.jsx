@@ -97,7 +97,7 @@ export default function Assets() {
           title="Asset Inventory"
           description="Monitor, update, and track all IT hardware assets."
         />
-        {role !== "employee" && (
+        {role === "asset_admin" && (
           <Link
             to="/assets/new"
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"

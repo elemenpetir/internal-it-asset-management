@@ -25,7 +25,7 @@ export default function CreateAsset() {
   const role = getRoleFromToken();
 
   useEffect(() => {
-    if (role === "employee") {
+    if (role === "employee" || role === "manager") {
       navigate("/assets");
     }
   }, [role, navigate]);

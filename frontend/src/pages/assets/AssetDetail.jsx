@@ -199,7 +199,7 @@ export default function AssetDetail() {
           </h1>
         </div>
 
-        {asset.status !== "retired" && role !== "employee" && (
+        {asset.status !== "retired" && role === "asset_admin" && (
           <div className="flex gap-2">
             <Link
               to={`/assets/${asset.id}/edit`}

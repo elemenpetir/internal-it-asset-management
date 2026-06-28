@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
 import { getRoleFromToken } from "../../utils/auth";
+import StatusBadge from '../../components/ui/StatusBadge'
 
 export default function Assignments() {
   const [assignments, setAssignments] = useState([]);
@@ -23,13 +24,14 @@ export default function Assignments() {
 
   const role = getRoleFromToken();
   const isEmployee = role === "employee";
+  const isAdminOnly = role === "asset_admin";
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
 
   useEffect(() => {
     async function loadAssignmentData() {
       try {
-        if (isEmployee) {
+        if (role === "employee") {
           const response = await fetch(
             "http://localhost:3000/api/asset-assignments/my-assignments",
             { headers },
@@ -233,7 +235,7 @@ export default function Assignments() {
                 assignments.map((assignment) => (
                   <tr key={assignment.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3">
-                      <p className="font-medium text-slate-800">
+                      <p className="font-medium text-slate-800 mb-1">
                         {assignment.asset_name}
                       </p>
                       <p className="text-xs text-slate-400">
@@ -241,15 +243,7 @@ export default function Assignments() {
                       </p>
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-medium ${
-                          assignment.status === "active"
-                            ? "bg-blue-50 text-blue-700"
-                            : "bg-slate-100 text-slate-500"
-                        }`}
-                      >
-                        {assignment.status}
-                      </span>
+                      <StatusBadge status={assignment.status}/>
                     </td>
                     <td className="px-4 py-3 text-slate-600">
                       {assignment.assigned_at?.slice(0, 10) || "-"}
@@ -284,100 +278,104 @@ export default function Assignments() {
         description="Assign available IT assets to active employees."
       />
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-1">
-          <h3 className="text-base font-semibold text-slate-900">
-            New Assignment
-          </h3>
-          <p className="mt-1 text-sm text-slate-500">
-            Select an available asset and assign it to an active employee.
-          </p>
+      <div className={`mt-6 grid gap-6 ${isAdminOnly ? "lg:grid-cols-3" : ""}`}>
+        {isAdminOnly && (
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-1">
+            <h3 className="text-base font-semibold text-slate-900">
+              New Assignment
+            </h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Select an available asset and assign it to an active employee.
+            </p>
 
-          <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Asset
-              </label>
-              <select
-                name="asset_id"
-                value={formData.asset_id}
-                onChange={handleChange}
-                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-              >
-                <option value="">Select available asset</option>
-                {availableAssets.map((asset) => (
-                  <option key={asset.id} value={asset.id}>
-                    {asset.asset_code} — {asset.name}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.asset_id && (
-                <p className="mt-2 text-sm text-red-600">
-                  {validationErrors.asset_id}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Employee
-              </label>
-              <select
-                name="employee_id"
-                value={formData.employee_id}
-                onChange={handleChange}
-                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-              >
-                <option value="">Select employee</option>
-                {employees.map((employee) => (
-                  <option key={employee.id} value={employee.id}>
-                    {employee.name} — {employee.employee_number}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.employee_id && (
-                <p className="mt-2 text-sm text-red-600">
-                  {validationErrors.employee_id}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Notes
-              </label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                rows="3"
-                placeholder="Optional assignment notes..."
-                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-              />
-            </div>
-
-            {successMessage && (
-              <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-                {successMessage}
+            <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Asset
+                </label>
+                <select
+                  name="asset_id"
+                  value={formData.asset_id}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                >
+                  <option value="">Select available asset</option>
+                  {availableAssets.map((asset) => (
+                    <option key={asset.id} value={asset.id}>
+                      {asset.asset_code} — {asset.name}
+                    </option>
+                  ))}
+                </select>
+                {validationErrors.asset_id && (
+                  <p className="mt-2 text-sm text-red-600">
+                    {validationErrors.asset_id}
+                  </p>
+                )}
               </div>
-            )}
-            {submitError && (
-              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                {submitError}
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Employee
+                </label>
+                <select
+                  name="employee_id"
+                  value={formData.employee_id}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                >
+                  <option value="">Select employee</option>
+                  {employees.map((employee) => (
+                    <option key={employee.id} value={employee.id}>
+                      {employee.name} — {employee.employee_number}
+                    </option>
+                  ))}
+                </select>
+                {validationErrors.employee_id && (
+                  <p className="mt-2 text-sm text-red-600">
+                    {validationErrors.employee_id}
+                  </p>
+                )}
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
-            >
-              {isSubmitting ? "Assigning..." : "Assign Asset"}
-            </button>
-          </form>
-        </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Notes
+                </label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleChange}
+                  rows="3"
+                  placeholder="Optional assignment notes..."
+                  className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                />
+              </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
+              {successMessage && (
+                <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+                  {successMessage}
+                </div>
+              )}
+              {submitError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                  {submitError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
+              >
+                {isSubmitting ? "Assigning..." : "Assign Asset"}
+              </button>
+            </form>
+          </div>
+        )}
+
+        <div
+          className={`rounded-xl border border-slate-200 bg-white p-6 shadow-sm ${isAdminOnly ? "lg:col-span-2" : ""}`}
+        >
           <h3 className="text-base font-semibold text-slate-900">
             Assignment Overview
           </h3>
@@ -446,15 +444,13 @@ export default function Assignments() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
-                          {assignment.status}
-                        </span>
+                        <StatusBadge status={assignment.status}/>
                       </td>
                       <td className="px-4 py-3 text-slate-600">
                         {assignment.assigned_at?.slice(0, 10) || "-"}
                       </td>
                       <td className="px-4 py-3">
-                        {assignment.status === "active" ? (
+                        {assignment.status === "active" && isAdminOnly ? (
                           <button
                             type="button"
                             onClick={() => handleReturnAssignment(assignment)}

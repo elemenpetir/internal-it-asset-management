@@ -11,12 +11,12 @@ export default function Maintenance() {
   const location = useLocation();
   const navigate = useNavigate();
   const [flashMessage] = useState(location.state?.successMessage || "");
+  const role = getRoleFromToken();
 
   useEffect(() => {
     async function loadMaintenanceData() {
       try {
         const token = localStorage.getItem("token");
-        const role = getRoleFromToken();
         const endpoint =
           role === "employee"
             ? "http://localhost:3000/api/maintenance-requests/my-requests"
@@ -38,7 +38,7 @@ export default function Maintenance() {
       }
     }
     loadMaintenanceData();
-  }, []);
+  }, [role]);
 
   useEffect(() => {
     if (location.state?.successMessage) {
@@ -93,12 +93,14 @@ export default function Maintenance() {
 
       <div className="mt-6 flex items-center justify-between">
         <div /> {/* spacer */}
-        <Link
-          to="/maintenance/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-        >
-          + New Request
-        </Link>
+        {role === "asset_admin" && (
+          <Link
+            to="/maintenance/new"
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            + New Request
+          </Link>
+        )}
       </div>
 
       {flashMessage && (

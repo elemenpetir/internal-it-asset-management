@@ -16,6 +16,12 @@ export default function CreateMaintenance() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
+  useEffect(() => {
+    if (role === "manager") {
+      navigate("/maintenance");
+    }
+  }, [role, navigate]);
+
   // Auto-fetch assets for employee
   useEffect(() => {
     if (role !== "employee") return;

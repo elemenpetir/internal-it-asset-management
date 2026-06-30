@@ -115,6 +115,21 @@ const getAssignmentsByEmployeeUserId = async (user_id) => {
   return rows;
 };
 
+const getAssignmentsByAssetId = async (assetId) => {
+  const sql = `
+    SELECT 
+      asset_assignments.*,
+      employees.name AS employee_name,
+      employees.employee_number
+    FROM asset_assignments
+    LEFT JOIN employees ON employees.id = asset_assignments.employee_id
+    WHERE asset_assignments.asset_id = ?
+    ORDER BY asset_assignments.assigned_at DESC
+  `;
+  const [rows] = await db.query(sql, [assetId]);
+  return rows;
+};
+
 const createAssetAssignmentWithTransaction = async (data) => {
   const connection = await db.getConnection();
   try {
@@ -221,6 +236,7 @@ module.exports = {
   getActiveAssetsByEmployeeId,
   getActiveAssignmentByAssetAndEmployee,
   getAssignmentsByEmployeeUserId,
+  getAssignmentsByAssetId,
   createAssetAssignmentWithTransaction,
   returnAssetAssignmentWithTransaction,
 };

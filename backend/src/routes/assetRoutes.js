@@ -18,6 +18,12 @@ router.patch(
   roleMiddleware("asset_admin"),
   assetController.updateStatus,
 );
+router.get(
+  "/:id/assignments",
+  authMiddleware,
+  roleMiddleware("asset_admin", "manager"),
+  assetController.getAssignmentsByAssetId,
+);
 router.get("/:id", authMiddleware, assetController.getAssetById);
 router.put(
   "/:id",

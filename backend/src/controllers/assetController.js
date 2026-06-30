@@ -1,4 +1,5 @@
 const assetModel = require("../models/assetModel");
+const assetAssignmentModel = require("../models/assetAssignmentModel");
 
 const getAssets = async (req, res, next) => {
   try {
@@ -27,6 +28,20 @@ const getAssetById = async (req, res, next) => {
     return res.status(200).json({
       status: "success",
       message: "get data succesfully",
+      data: rows,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getAssignmentsByAssetId = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const rows = await assetAssignmentModel.getAssignmentsByAssetId(id);
+    res.status(200).json({
+      status: "success",
+      message: "get assignments by asset id",
       data: rows,
     });
   } catch (error) {
@@ -225,6 +240,7 @@ const updateStatus = async (req, res, next) => {
 module.exports = {
   getAssets,
   getAssetById,
+  getAssignmentsByAssetId,
   createAsset,
   updateAsset,
   updateStatus,

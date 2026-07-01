@@ -1,6 +1,11 @@
 const db = require("../config/db");
 
-const getAssets = async ({ status, category_id } = {}) => {
+const getAssets = async ({
+  status,
+  category_id,
+  page = 1,
+  limit = 10,
+} = {}) => {
   let sql = `SELECT assets.id, 
       assets.asset_code, 
       assets.name, 
@@ -37,8 +42,37 @@ const getAssets = async ({ status, category_id } = {}) => {
 
   sql += " ORDER BY assets.id DESC";
 
+  const offset = (page - 1) * limit;
+  sql += " LIMIT ? OFFSET ?";
+  values.push(Number(limit), Number(offset));
+
   const [rows] = await db.query(sql, values);
   return rows;
+};
+
+const countAssets = async ({ status, category_id } = {}) => {
+  let sql = `SELECT COUNT(*) as total FROM assets
+    JOIN asset_categories ON asset_categories.id = assets.category_id`;
+
+  const conditions = [];
+  const values = [];
+
+  if (status) {
+    conditions.push("assets.status = ?");
+    values.push(status);
+  }
+
+  if (category_id) {
+    conditions.push("assets.category_id = ?");
+    values.push(category_id);
+  }
+
+  if (conditions.length > 0) {
+    sql += " WHERE " + conditions.join(" AND ");
+  }
+
+  const [rows] = await db.query(sql, values);
+  return rows[0].total;
 };
 
 const getAssetById = async (id) => {
@@ -269,4 +303,5 @@ module.exports = {
   createAssetWithAuditLog,
   updateAssetWithAuditLog,
   updateAssetStatusWithAuditLog,
+  countAssets,
 };

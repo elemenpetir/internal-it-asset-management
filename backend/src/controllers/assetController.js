@@ -2,12 +2,22 @@ const assetModel = require("../models/assetModel");
 
 const getAssets = async (req, res, next) => {
   try {
-    const { status, category_id } = req.query;
-    const rows = await assetModel.getAssets({ status, category_id });
+    const { status, category_id, page = 1, limit = 10 } = req.query;
+    const [rows, total] = await Promise.all([
+      assetModel.getAssets({ status, category_id, page, limit }),
+      assetModel.countAssets({ status, category_id }),
+    ]);
+
     return res.status(200).json({
       status: "success",
       message: "get all data successfully",
       data: rows,
+      pagination: {
+        total: Number(total),
+        page: Number(page),
+        limit: Number(limit),
+        total_pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     next(error);

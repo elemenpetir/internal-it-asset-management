@@ -98,14 +98,14 @@ const getActiveAssetsByEmployeeId = async (employee_id) => {
 
 const getAssignmentsByEmployeeUserId = async (user_id) => {
   const sql = `SELECT 
-    asset_assignments.id,
-    asset_assignments.asset_id,
-    assets.name AS asset_name,
-    assets.asset_code,
-    asset_assignments.assigned_at,
-    asset_assignments.returned_at,
-    asset_assignments.status,
-    asset_assignments.notes
+      asset_assignments.id,
+      asset_assignments.asset_id,
+      assets.name AS asset_name,
+      assets.asset_code,
+      asset_assignments.assigned_at,
+      asset_assignments.returned_at,
+      asset_assignments.status,
+      asset_assignments.notes
     FROM asset_assignments
     JOIN assets ON assets.id = asset_assignments.asset_id
     JOIN employees ON employees.id = asset_assignments.employee_id

@@ -52,6 +52,20 @@ const getMyAssignments = async (req, res, next) => {
   }
 };
 
+const getAssignmentsByAssetId = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const rows = await assetAssignmentModel.getAssignmentsByAssetId(id);
+    res.status(200).json({
+      status: "success",
+      message: "get assignments by asset id",
+      data: rows,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const createAssetAssignment = async (req, res, next) => {
   try {
     const { asset_id, employee_id, notes } = req.body;
@@ -129,6 +143,14 @@ const returnAssetAssignment = async (req, res, next) => {
       });
     }
 
+    const asset = await assetModel.getAssetById(assignment.asset_id);
+    if (asset.status === "under_maintenance") {
+      return res.status(400).json({
+        status: "failed",
+        message: "cannot return asset that is currently under maintenance",
+      });
+    }
+
     await assetAssignmentModel.returnAssetAssignmentWithTransaction(
       id,
       assignment.asset_id,
@@ -154,6 +176,7 @@ module.exports = {
   getAssetAssignments,
   getAssetAssignmentById,
   getMyAssignments,
+  getAssignmentsByAssetId,
   createAssetAssignment,
   returnAssetAssignment,
 };

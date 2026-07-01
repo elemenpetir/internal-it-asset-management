@@ -2,19 +2,19 @@ const db = require("../config/db");
 
 const getAssets = async ({ status, category_id } = {}) => {
   let sql = `SELECT assets.id, 
-    assets.asset_code, 
-    assets.name, 
-    assets.category_id, 
-    asset_categories.name AS category_name, 
-    assets.brand,
-    assets.model,
-    assets.serial_number,
-    DATE_FORMAT(assets.purchase_date, '%Y-%m-%d') AS purchase_date,
-    assets.status,
-    assets.location,
-    assets.notes,
-    assets.created_at,
-    assets.updated_at
+      assets.asset_code, 
+      assets.name, 
+      assets.category_id, 
+      asset_categories.name AS category_name, 
+      assets.brand,
+      assets.model,
+      assets.serial_number,
+      DATE_FORMAT(assets.purchase_date, '%Y-%m-%d') AS purchase_date,
+      assets.status,
+      assets.location,
+      assets.notes,
+      assets.created_at,
+      assets.updated_at
     FROM assets
     JOIN asset_categories ON asset_categories.id = assets.category_id`;
 
@@ -43,19 +43,19 @@ const getAssets = async ({ status, category_id } = {}) => {
 
 const getAssetById = async (id) => {
   const sql = `SELECT assets.id, 
-    assets.asset_code, 
-    assets.name, 
-    assets.category_id, 
-    asset_categories.name AS category_name, 
-    assets.brand,
-    assets.model,
-    assets.serial_number,
-    DATE_FORMAT(assets.purchase_date, '%Y-%m-%d') AS purchase_date,
-    assets.status,
-    assets.location,
-    assets.notes,
-    assets.created_at,
-    assets.updated_at
+      assets.asset_code, 
+      assets.name, 
+      assets.category_id, 
+      asset_categories.name AS category_name, 
+      assets.brand,
+      assets.model,
+      assets.serial_number,
+      DATE_FORMAT(assets.purchase_date, '%Y-%m-%d') AS purchase_date,
+      assets.status,
+      assets.location,
+      assets.notes,
+      assets.created_at,
+      assets.updated_at
     FROM assets 
     JOIN asset_categories ON asset_categories.id = assets.category_id
     WHERE assets.id = ?`;

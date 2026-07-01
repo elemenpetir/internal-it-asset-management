@@ -4,6 +4,7 @@ const assetController = require("../controllers/assetController");
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 const analyticsController = require("../controllers/analyticsController");
+const assetAssignmentController = require("../controllers/assetAssignmentController");
 
 router.get("/", authMiddleware, assetController.getAssets);
 router.post(
@@ -22,7 +23,7 @@ router.get(
   "/:id/assignments",
   authMiddleware,
   roleMiddleware("asset_admin", "manager"),
-  assetController.getAssignmentsByAssetId,
+  assetAssignmentController.getAssignmentsByAssetId,
 );
 router.get("/:id", authMiddleware, assetController.getAssetById);
 router.put(

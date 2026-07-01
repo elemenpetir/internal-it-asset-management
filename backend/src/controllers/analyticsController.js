@@ -1,4 +1,5 @@
 const analyticsModel = require("../models/analyticsModel");
+const { calculateRiskScore } = require("../utils/calculateRiskScore");
 
 const getOverview = async (req, res, next) => {
   try {
@@ -38,8 +39,7 @@ const getAssetRiskScore = async (req, res, next) => {
         .json({ status: "failed", message: "Asset not found" });
     }
 
-    const { risk_score, risk_level } =
-      analyticsModel.calculateRiskScore(assetData);
+    const { risk_score, risk_level } = calculateRiskScore(assetData);
 
     return res.status(200).json({
       status: "success",
@@ -72,8 +72,7 @@ const getHighRiskAssets = async (req, res, next) => {
 
     const highRisk = allAssets
       .map((asset) => {
-        const { risk_score, risk_level } =
-          analyticsModel.calculateRiskScore(asset);
+        const { risk_score, risk_level } = calculateRiskScore(asset);
         return {
           asset_id: asset.id,
           asset_code: asset.asset_code,

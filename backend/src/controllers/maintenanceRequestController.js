@@ -39,7 +39,6 @@ const getMaintenanceRequestById = async (req, res, next) => {
 
 const getMyMaintenanceRequest = async (req, res, next) => {
   try {
-    let requested_by;
     const employee = await employeeModel.getEmployeeByUserId(req.user.id);
     if (!employee) {
       return res.status(404).json({
@@ -47,18 +46,11 @@ const getMyMaintenanceRequest = async (req, res, next) => {
         message: "employee not found",
       });
     }
-    requested_by = employee.id;
 
     const maintenanceRequest =
       await maintenanceRequestModel.getMaintenanceRequestsByEmployeeId(
-        requested_by,
+        employee.id,
       );
-    if (!maintenanceRequest) {
-      return res.status(404).json({
-        status: "failed",
-        message: "maintenance request not found",
-      });
-    }
 
     return res.status(200).json({
       status: "success",

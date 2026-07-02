@@ -30,6 +30,7 @@ export default function Dashboard() {
   const [assetsByCategory, setAssetsByCategory] = useState([]);
   const [assetsByDepartment, setAssetsByDepartment] = useState([]);
   const [maintenanceSummary, setMaintenanceSummary] = useState([]);
+  const [replacementCandidates, setReplacementCandidates] = useState([]);
   const role = getRoleFromToken();
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export default function Dashboard() {
         byCategoryRes,
         byDepartmentRes,
         maintenanceRes,
+        replacementRes,
       ] = await Promise.all([
         fetch("http://localhost:3000/api/analytics/overview", { headers }),
         fetch("http://localhost:3000/api/analytics/high-risk-assets", {
@@ -57,6 +59,9 @@ export default function Dashboard() {
         fetch("http://localhost:3000/api/analytics/maintenance-summary", {
           headers,
         }),
+        fetch("http://localhost:3000/api/analytics/replacement-candidates", {
+          headers,
+        }),
       ]);
 
       const [
@@ -65,12 +70,14 @@ export default function Dashboard() {
         byCategoryResult,
         byDepartmentResult,
         maintenanceResult,
+        replacementResult,
       ] = await Promise.all([
         overviewRes.json(),
         highRiskRes.json(),
         byCategoryRes.json(),
         byDepartmentRes.json(),
         maintenanceRes.json(),
+        replacementRes.json(),
       ]);
 
       if (!overviewRes.ok)
@@ -94,6 +101,10 @@ export default function Dashboard() {
         throw new Error(
           maintenanceResult.message || "Failed to fetch maintenance summary",
         );
+      if (!replacementRes.ok)
+        throw new Error(
+          replacementResult.message || "Failed to fetch replacement candidates",
+        );
 
       setHighRiskAssets(highRiskResult.data);
       setAssetsByCategory(
@@ -104,6 +115,7 @@ export default function Dashboard() {
       );
       setAssetsByDepartment(byDepartmentResult.data);
       setMaintenanceSummary(maintenanceResult.data);
+      setReplacementCandidates(replacementResult.data);
 
       return [
         {
@@ -287,6 +299,78 @@ export default function Dashboard() {
                             </span>
                             <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
                               high
+                            </span>
+                          </span>
+                        </td>
+                        <td className="px-5 py-3 text-slate-500">
+                          {asset.recommendation}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+
+          {/* Replacement Candidates */}
+          <div className="mt-8">
+            <h2 className="text-base font-semibold text-slate-800">
+              Replacement Candidates
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Assets over 2 years old with medium or high risk score.
+            </p>
+            <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              {replacementCandidates.length === 0 ? (
+                <p className="p-5 text-sm text-slate-400">
+                  No replacement candidates found.
+                </p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      <th className="px-5 py-3">Asset</th>
+                      <th className="px-5 py-3">Status</th>
+                      <th className="px-5 py-3">Purchase Date</th>
+                      <th className="px-5 py-3">Risk Score</th>
+                      <th className="px-5 py-3">Recommendation</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {replacementCandidates.slice(0, 5).map((asset) => (
+                      <tr key={asset.asset_id} className="hover:bg-slate-50">
+                        <td className="px-5 py-3">
+                          <p className="font-medium text-slate-800">
+                            {asset.asset_name}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            {asset.asset_code}
+                          </p>
+                        </td>
+                        <td className="px-5 py-3 text-slate-600">
+                          {asset.status}
+                        </td>
+                        <td className="px-5 py-3 text-slate-500">
+                          {asset.purchase_date
+                            ? asset.purchase_date.toString().slice(0, 10)
+                            : "-"}
+                        </td>
+                        <td className="px-5 py-3">
+                          <span className="inline-flex items-center gap-1.5">
+                            <span
+                              className={`font-bold ${asset.risk_level === "high" ? "text-red-600" : "text-amber-600"}`}
+                            >
+                              {asset.risk_score}
+                            </span>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                                asset.risk_level === "high"
+                                  ? "bg-red-100 text-red-700"
+                                  : "bg-amber-100 text-amber-700"
+                              }`}
+                            >
+                              {asset.risk_level}
                             </span>
                           </span>
                         </td>

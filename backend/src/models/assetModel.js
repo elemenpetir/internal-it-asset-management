@@ -3,6 +3,7 @@ const db = require("../config/db");
 const getAssets = async ({
   status,
   category_id,
+  department_id,
   page = 1,
   limit = 10,
 } = {}) => {
@@ -21,7 +22,10 @@ const getAssets = async ({
       assets.created_at,
       assets.updated_at
     FROM assets
-    JOIN asset_categories ON asset_categories.id = assets.category_id`;
+    JOIN asset_categories ON asset_categories.id = assets.category_id
+    LEFT JOIN asset_assignments ON asset_assignments.asset_id = assets.id 
+      AND asset_assignments.status = 'active'
+    LEFT JOIN employees ON employees.id = asset_assignments.employee_id`;
 
   const conditions = [];
   const values = [];
@@ -34,6 +38,11 @@ const getAssets = async ({
   if (category_id) {
     conditions.push("assets.category_id = ?");
     values.push(category_id);
+  }
+
+  if (department_id) {
+    conditions.push("employees.department_id = ?");
+    values.push(department_id);
   }
 
   if (conditions.length > 0) {
@@ -50,9 +59,12 @@ const getAssets = async ({
   return rows;
 };
 
-const countAssets = async ({ status, category_id } = {}) => {
+const countAssets = async ({ status, category_id, department_id } = {}) => {
   let sql = `SELECT COUNT(*) as total FROM assets
-    JOIN asset_categories ON asset_categories.id = assets.category_id`;
+    JOIN asset_categories ON asset_categories.id = assets.category_id
+    LEFT JOIN asset_assignments ON asset_assignments.asset_id = assets.id
+      AND asset_assignments.status = 'active'
+    LEFT JOIN employees ON employees.id = asset_assignments.employee_id`;
 
   const conditions = [];
   const values = [];
@@ -65,6 +77,11 @@ const countAssets = async ({ status, category_id } = {}) => {
   if (category_id) {
     conditions.push("assets.category_id = ?");
     values.push(category_id);
+  }
+
+  if (department_id) {
+    conditions.push("employees.department_id = ?");
+    values.push(department_id);
   }
 
   if (conditions.length > 0) {

@@ -34,5 +34,11 @@ router.get(
   roleMiddleware("asset_admin", "manager"),
   analyticsController.getMaintenanceSummaryController,
 );
+router.get(
+  "/replacement-candidates",
+  authMiddleware,
+  roleMiddleware("asset_admin", "manager"),
+  analyticsController.getReplacementCandidates,
+);
 
 module.exports = router;

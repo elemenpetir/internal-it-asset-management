@@ -92,6 +92,25 @@ const getMaintenanceSummary = async () => {
   return rows;
 };
 
+const getReplacementCandidates = async () => {
+  const sql = `SELECT 
+      assets.id,
+      assets.name,
+      assets.asset_code,
+      assets.status,
+      assets.purchase_date,
+      COUNT(DISTINCT maintenance_requests.id) AS maintenance_count,
+      COUNT(DISTINCT asset_assignments.id) AS assignment_count
+    FROM assets
+    LEFT JOIN maintenance_requests ON maintenance_requests.asset_id = assets.id
+    LEFT JOIN asset_assignments ON asset_assignments.asset_id = assets.id
+    WHERE assets.status != 'retired'
+    AND assets.purchase_date <= DATE_SUB(NOW(), INTERVAL 2 YEAR)
+    GROUP BY assets.id`;
+  const [rows] = await db.query(sql);
+  return rows;
+};
+
 module.exports = {
   getAssetOverview,
   getRiskScoreData,
@@ -99,4 +118,5 @@ module.exports = {
   getAssetsByDepartment,
   getAssetsByCategory,
   getMaintenanceSummary,
+  getReplacementCandidates,
 };

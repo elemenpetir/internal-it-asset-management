@@ -135,6 +135,41 @@ const getMaintenanceSummaryController = async (req, res, next) => {
   }
 };
 
+const getReplacementCandidates = async (req, res, next) => {
+  try {
+    const allAssets = await analyticsModel.getReplacementCandidates();
+
+    const candidates = allAssets
+      .map((asset) => {
+        const { risk_score, risk_level } = calculateRiskScore(asset);
+        return {
+          asset_id: asset.id,
+          asset_code: asset.asset_code,
+          asset_name: asset.name,
+          status: asset.status,
+          purchase_date: asset.purchase_date,
+          maintenance_count: Number(asset.maintenance_count),
+          assignment_count: Number(asset.assignment_count),
+          risk_score,
+          risk_level,
+          recommendation: "candidate for replacement review",
+        };
+      })
+      .filter(
+        (asset) => asset.risk_level === "medium" || asset.risk_level === "high",
+      )
+      .sort((a, b) => b.risk_score - a.risk_score);
+
+    return res.status(200).json({
+      status: "success",
+      message: "get replacement candidates successfully",
+      data: candidates,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getOverview,
   getAssetRiskScore,
@@ -142,4 +177,5 @@ module.exports = {
   getAssetsByDepartmentController,
   getAssetsByCategoryController,
   getMaintenanceSummaryController,
+  getReplacementCandidates,
 };

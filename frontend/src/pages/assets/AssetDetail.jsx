@@ -12,17 +12,19 @@ function getAgeScore(purchaseDate) {
 
 export default function AssetDetail() {
   const { id } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [asset, setAsset] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const location = useLocation();
-  const navigate = useNavigate();
   const [flashMessage] = useState(location.state?.successMessage || "");
   const [isRetiring, setIsRetiring] = useState(false);
   const [actionError, setActionError] = useState("");
   const [localSuccessMessage, setLocalSuccessMessage] = useState("");
   const [riskScore, setRiskScore] = useState(null);
   const [riskScoreError, setRiskScoreError] = useState("");
+  const [assignments, setAssignments] = useState([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(true);
   const role = getRoleFromToken();
 
   useEffect(() => {
@@ -63,6 +65,26 @@ export default function AssetDetail() {
       }
     }
     fetchRiskScore();
+  }, [id, role]);
+
+  useEffect(() => {
+    if (role === "employee") return;
+    async function fetchAssignments() {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          `http://localhost:3000/api/assets/${id}/assignments`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const result = await response.json();
+        if (response.ok) setAssignments(result.data);
+      } catch {
+        // silent fail, tabel akan kosong
+      } finally {
+        setAssignmentsLoading(false);
+      }
+    }
+    fetchAssignments();
   }, [id, role]);
 
   useEffect(() => {
@@ -379,6 +401,71 @@ export default function AssetDetail() {
         <div className="mt-4 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
           This asset is retired and kept for historical records. Editing is
           disabled.
+        </div>
+      )}
+
+      {/* Assignment History */}
+      {role !== "employee" && (
+        <div className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-100 px-5 py-4">
+            <h2 className="text-sm font-semibold text-slate-700">
+              Assignment History
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-sm">
+              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Employee</th>
+                  <th className="px-4 py-3 font-semibold">Employee Number</th>
+                  <th className="px-4 py-3 font-semibold">Assigned At</th>
+                  <th className="px-4 py-3 font-semibold">Returned At</th>
+                  <th className="px-4 py-3 font-semibold">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {assignmentsLoading ? (
+                  <tr>
+                    <td
+                      colSpan="5"
+                      className="px-4 py-6 text-center text-slate-400"
+                    >
+                      Loading...
+                    </td>
+                  </tr>
+                ) : assignments.length > 0 ? (
+                  assignments.map((a) => (
+                    <tr key={a.id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3 font-medium text-slate-800">
+                        {a.employee_name}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs text-slate-500">
+                        {a.employee_number}
+                      </td>
+                      <td className="px-4 py-3 text-slate-500">
+                        {a.assigned_at ? a.assigned_at.slice(0, 10) : "-"}
+                      </td>
+                      <td className="px-4 py-3 text-slate-500">
+                        {a.returned_at ? a.returned_at.slice(0, 10) : "-"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={a.status} />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="5"
+                      className="px-4 py-8 text-center text-slate-400"
+                    >
+                      No assignment history found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

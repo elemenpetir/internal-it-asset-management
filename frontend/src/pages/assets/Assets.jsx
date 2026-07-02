@@ -6,8 +6,10 @@ import { getRoleFromToken } from "../../utils/auth";
 
 export default function Assets() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("");
   const [assets, setAssets] = useState([]);
+  const [pagination, setPagination] = useState(null);
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const token = localStorage.getItem("token");
@@ -15,22 +17,27 @@ export default function Assets() {
   const navigate = useNavigate();
   const [flashMessage] = useState(location.state?.successMessage || "");
   const role = getRoleFromToken();
+  const limit = 10;
 
   useEffect(() => {
     const fetchAssets = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/assets", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        setIsLoading(true);
+        const params = new URLSearchParams();
+        if (searchTerm) params.append("search", searchTerm);
+        if (statusFilter) params.append("status", statusFilter);
+        params.append("page", page);
+        params.append("limit", limit);
 
+        const response = await fetch(
+          `http://localhost:3000/api/assets?${params.toString()}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
         const result = await response.json();
-        if (!response.ok) {
-          throw new Error(result.message || "failed to fetch assets");
-        }
-
+        if (!response.ok)
+          throw new Error(result.message || "Failed to fetch assets");
         setAssets(result.data);
+        setPagination(result.pagination);
       } catch (error) {
         setErrorMessage(error.message);
       } finally {
@@ -39,41 +46,13 @@ export default function Assets() {
     };
 
     fetchAssets();
-  }, [token]);
+  }, [token, searchTerm, statusFilter, page]);
 
   useEffect(() => {
     if (location.state?.successMessage) {
       navigate(location.pathname, { replace: true, state: null });
     }
   }, [location.state, location.pathname, navigate]);
-
-  const filteredAssets = assets.filter((asset) => {
-    const matchesSearch =
-      asset.asset_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset.serial_number.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === "all" || asset.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
-  });
-
-  if (isLoading) {
-    return (
-      <section>
-        <PageHeader
-          title="Asset Inventory"
-          description="Monitor, update, and track all IT hardware assets."
-        />
-
-        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5 text-slate-600 shadow-sm">
-          Loading assets...
-        </div>
-      </section>
-    );
-  }
 
   if (errorMessage) {
     return (
@@ -82,7 +61,6 @@ export default function Assets() {
           title="Asset Inventory"
           description="Monitor, update, and track all IT hardware assets."
         />
-
         <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-5 text-red-700">
           {errorMessage}
         </div>
@@ -117,17 +95,22 @@ export default function Assets() {
         <input
           type="text"
           value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-          placeholder="Search by asset code, name, or brand..."
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setPage(1);
+          }}
+          placeholder="Search by asset code, name, brand, or serial number..."
           className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 md:max-w-md"
         />
-
         <select
           value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value)}
+          onChange={(e) => {
+            setStatusFilter(e.target.value);
+            setPage(1);
+          }}
           className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
         >
-          <option value="all">All Statuses</option>
+          <option value="">All Statuses</option>
           <option value="available">Available</option>
           <option value="assigned">Assigned</option>
           <option value="under_maintenance">Under Maintenance</option>
@@ -148,10 +131,18 @@ export default function Assets() {
               <th className="px-5 py-3 font-semibold">Status</th>
             </tr>
           </thead>
-
           <tbody className="divide-y divide-slate-100">
-            {filteredAssets.length > 0 ? (
-              filteredAssets.map((asset) => (
+            {isLoading ? (
+              <tr>
+                <td
+                  colSpan="7"
+                  className="px-5 py-8 text-center text-slate-400"
+                >
+                  Loading assets...
+                </td>
+              </tr>
+            ) : assets.length > 0 ? (
+              assets.map((asset) => (
                 <tr key={asset.id} className="hover:bg-slate-50">
                   <td className="px-5 py-4 font-medium">
                     <Link
@@ -192,9 +183,36 @@ export default function Assets() {
             )}
           </tbody>
         </table>
-        <div className="border-t border-slate-100 px-5 py-3 text-sm text-slate-500">
-          Showing {filteredAssets.length} of {assets.length} assets
-        </div>
+
+        {/* Footer pagination */}
+        {pagination && (
+          <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3 text-sm text-slate-500">
+            <span>
+              Showing {assets.length} of {pagination.total} assets
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                disabled={page === 1}
+                className="rounded-lg border border-slate-200 px-3 py-1 text-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                ← Prev
+              </button>
+              <span className="text-xs">
+                Page {pagination.page} of {pagination.total_pages}
+              </span>
+              <button
+                onClick={() =>
+                  setPage((p) => Math.min(p + 1, pagination.total_pages))
+                }
+                disabled={page === pagination.total_pages}
+                className="rounded-lg border border-slate-200 px-3 py-1 text-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

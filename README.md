@@ -126,6 +126,10 @@ Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
 
 ---
 
+## ERD
+
+![ERD](docs/erd.png)
+
 ## Instalasi & Setup
 
 ### Prasyarat
@@ -227,23 +231,25 @@ Coverage saat ini: 13 test case mencakup auth, asset, assignment, maintenance, d
 
 ### Assets
 
-| Method | Endpoint                     | Akses          | Deskripsi                                   |
-| ------ | ---------------------------- | -------------- | ------------------------------------------- |
-| GET    | `/api/assets`                | Authenticated  | List aset (filter: `status`, `category_id`) |
-| GET    | `/api/assets/:id`            | Authenticated  | Detail aset                                 |
-| POST   | `/api/assets`                | asset_admin    | Buat aset                                   |
-| PUT    | `/api/assets/:id`            | asset_admin    | Update aset                                 |
-| PATCH  | `/api/assets/:id/status`     | asset_admin    | Update status aset                          |
-| GET    | `/api/assets/:id/risk-score` | admin, manager | Risk score aset                             |
+| Method | Endpoint                      | Akses          | Deskripsi                                                                          |
+| ------ | ----------------------------- | -------------- | ---------------------------------------------------------------------------------- |
+| GET    | `/api/assets`                 | Authenticated  | List aset (filter: `status`, `category_id`, `department_id`, `search`, pagination) |
+| GET    | `/api/assets/:id`             | Authenticated  | Detail aset                                                                        |
+| POST   | `/api/assets`                 | asset_admin    | Buat aset                                                                          |
+| PUT    | `/api/assets/:id`             | asset_admin    | Update aset                                                                        |
+| PATCH  | `/api/assets/:id/status`      | asset_admin    | Update status aset                                                                 |
+| GET    | `/api/assets/:id/risk-score`  | admin, manager | Risk score aset                                                                    |
+| GET    | `/api/assets/:id/assignments` | admin, manager | Assignment history aset                                                            |
 
 ### Asset Assignments
 
-| Method | Endpoint                            | Akses          | Deskripsi               |
-| ------ | ----------------------------------- | -------------- | ----------------------- |
-| GET    | `/api/asset-assignments`            | admin, manager | List semua assignment   |
-| GET    | `/api/asset-assignments/:id`        | Authenticated  | Detail assignment       |
-| POST   | `/api/asset-assignments`            | asset_admin    | Assign aset ke employee |
-| PATCH  | `/api/asset-assignments/:id/return` | asset_admin    | Return aset             |
+| Method | Endpoint                                | Akses          | Deskripsi                |
+| ------ | --------------------------------------- | -------------- | ------------------------ |
+| GET    | `/api/asset-assignments`                | admin, manager | List semua assignment    |
+| GET    | `/api/asset-assignments/:id`            | Authenticated  | Detail assignment        |
+| GET    | `/api/asset-assignments/my-assignments` | employee       | Assignment milik sendiri |
+| POST   | `/api/asset-assignments`                | asset_admin    | Assign aset ke employee  |
+| PATCH  | `/api/asset-assignments/:id/return`     | asset_admin    | Return aset              |
 
 ### Maintenance Requests
 
@@ -263,13 +269,14 @@ Coverage saat ini: 13 test case mencakup auth, asset, assignment, maintenance, d
 
 ### Analytics
 
-| Method | Endpoint                              | Akses          | Deskripsi                       |
-| ------ | ------------------------------------- | -------------- | ------------------------------- |
-| GET    | `/api/analytics/overview`             | admin, manager | Ringkasan total aset per status |
-| GET    | `/api/analytics/assets-by-category`   | admin, manager | Distribusi aset per kategori    |
-| GET    | `/api/analytics/assets-by-department` | admin, manager | Distribusi aset per department  |
-| GET    | `/api/analytics/maintenance-summary`  | admin, manager | Tren maintenance per bulan      |
-| GET    | `/api/analytics/high-risk-assets`     | admin, manager | Daftar aset high risk           |
+| Method | Endpoint                                | Akses          | Deskripsi                       |
+| ------ | --------------------------------------- | -------------- | ------------------------------- |
+| GET    | `/api/analytics/overview`               | admin, manager | Ringkasan total aset per status |
+| GET    | `/api/analytics/assets-by-category`     | admin, manager | Distribusi aset per kategori    |
+| GET    | `/api/analytics/assets-by-department`   | admin, manager | Distribusi aset per department  |
+| GET    | `/api/analytics/maintenance-summary`    | admin, manager | Tren maintenance per bulan      |
+| GET    | `/api/analytics/replacement-candidates` | admin, manager | Kandidat aset untuk replacement |
+| GET    | `/api/analytics/high-risk-assets`       | admin, manager | Daftar aset high risk           |
 
 ---
 
@@ -288,10 +295,10 @@ Coverage saat ini: 13 test case mencakup auth, asset, assignment, maintenance, d
 
 ## Known Limitations
 
-- Filter aset belum mendukung `department_id` dan pagination.
 - Audit log mencatat ID teknikal, bukan nama.
 - Test menggunakan database development, bukan database test terpisah.
 - Faktor "durasi under maintenance" belum diimplementasikan di risk scoring.
+- Halaman `/analytics` terpisah belum dibuat.
 
 ---
 

@@ -4,6 +4,7 @@ const getAssets = async ({
   status,
   category_id,
   department_id,
+  search,
   page = 1,
   limit = 10,
 } = {}) => {
@@ -45,6 +46,14 @@ const getAssets = async ({
     values.push(department_id);
   }
 
+  if (search) {
+    conditions.push(
+      "(assets.asset_code LIKE ? OR assets.name LIKE ? OR assets.brand LIKE ? OR assets.serial_number LIKE ?)",
+    );
+    const keyword = `%${search}%`;
+    values.push(keyword, keyword, keyword, keyword);
+  }
+
   if (conditions.length > 0) {
     sql += " WHERE " + conditions.join(" AND ");
   }
@@ -59,7 +68,12 @@ const getAssets = async ({
   return rows;
 };
 
-const countAssets = async ({ status, category_id, department_id } = {}) => {
+const countAssets = async ({
+  status,
+  category_id,
+  department_id,
+  search,
+} = {}) => {
   let sql = `SELECT COUNT(*) as total FROM assets
     JOIN asset_categories ON asset_categories.id = assets.category_id
     LEFT JOIN asset_assignments ON asset_assignments.asset_id = assets.id
@@ -82,6 +96,14 @@ const countAssets = async ({ status, category_id, department_id } = {}) => {
   if (department_id) {
     conditions.push("employees.department_id = ?");
     values.push(department_id);
+  }
+
+  if (search) {
+    conditions.push(
+      "(assets.asset_code LIKE ? OR assets.name LIKE ? OR assets.brand LIKE ? OR assets.serial_number LIKE ?)",
+    );
+    const keyword = `%${search}%`;
+    values.push(keyword, keyword, keyword, keyword);
   }
 
   if (conditions.length > 0) {

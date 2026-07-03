@@ -130,6 +130,36 @@ Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
 
 ![ERD](docs/erd.png)
 
+---
+
+## Screenshots
+
+### Dashboard Overview
+![Dashboard Overview](docs/screenshots/dashboard-overview.png)
+
+### Dashboard Charts
+![Dashboard Charts](docs/screenshots/dashboard-charts.png)
+
+### Asset Inventory
+![Asset Inventory](docs/screenshots/assets.png)
+
+### Asset Detail
+![Asset Detail](docs/screenshots/asset-detail.png)
+
+### Assignments
+![Assignments](docs/screenshots/assignments.png)
+
+### Maintenance Requests
+![Maintenance](docs/screenshots/maintenance.png)
+
+### Audit Logs
+![Audit Logs](docs/screenshots/audit-logs.png)
+
+### Employees
+![Employees](docs/screenshots/employees.png)
+
+---
+
 ## Instalasi & Setup
 
 ### Prasyarat

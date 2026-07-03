@@ -396,14 +396,14 @@ export default function Dashboard() {
                 Distribution of active assets per category.
               </p>
               <div className="mt-4">
-                <PieChart width={340} height={220}>
+                <PieChart width={420} height={250}>
                   <Pie
                     data={assetsByCategory}
                     dataKey="total_assets"
                     nameKey="category_name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={80}
+                    outerRadius={70}
                     label={({ category_name, total_assets }) =>
                       `${category_name} (${total_assets})`
                     }

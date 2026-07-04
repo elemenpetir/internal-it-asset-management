@@ -34,7 +34,7 @@ Project ini dirancang sebagai sistem internal perusahaan yang realistis — buka
 - Maintenance request workflow (reported → in_progress → completed/canceled)
 - Audit log untuk setiap operasi penting
 - Rule-based asset risk scoring
-- Analytics dashboard (overview, by category, by department, maintenance trend, high risk assets)
+- Analytics dashboard (overview, by category, by department, maintenance trend, high risk assets, replacement candidates)
 - Database transaction untuk workflow kritis
 - Unit test untuk endpoint utama
 
@@ -65,6 +65,7 @@ Karyawan tidak bisa memilih role sendiri.
 - Hanya aset berstatus `available` yang bisa di-assign.
 - Saat di-assign: status aset berubah ke `assigned`, audit log tercatat.
 - Saat dikembalikan: status kembali ke `available`, audit log tercatat.
+- Aset tidak bisa dikembalikan saat sedang dalam status `under_maintenance`.
 
 ### Maintenance Workflow
 
@@ -72,7 +73,7 @@ Karyawan tidak bisa memilih role sendiri.
 - Tidak boleh ada duplikasi request aktif untuk aset yang sama.
 - Status flow: `reported` → `in_progress` → `completed` / `canceled`
 - Saat `in_progress`: status aset otomatis berubah ke `under_maintenance`.
-- Saat `completed`/`canceled`: status aset kembali ke `assigned` atau `available`.
+- Saat `completed`/`canceled`: status aset kembali ke `assigned`.
 
 ### Risk Scoring
 
@@ -103,13 +104,15 @@ Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
 .
 ├── backend/
 │   ├── database/
-│   │   └── schema.sql
+│   │   ├── schema.sql
+│   │   └── seed.sql
 │   ├── src/
 │   │   ├── config/
 │   │   ├── controllers/
 │   │   ├── middleware/
 │   │   ├── models/
-│   │   └── routes/
+│   │   ├── routes/
+│   │   └── utils/
 │   ├── tests/
 │   ├── .env.example
 │   ├── app.js
@@ -121,6 +124,9 @@ Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
 │   │   ├── pages/
 │   │   └── utils/
 │   └── package.json
+├── docs/
+│   ├── erd.png
+│   └── screenshots/
 └── README.md
 ```
 
@@ -135,27 +141,35 @@ Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
 ## Screenshots
 
 ### Dashboard Overview
+
 ![Dashboard Overview](docs/screenshots/dashboard-overview.png)
 
 ### Dashboard Charts
+
 ![Dashboard Charts](docs/screenshots/dashboard-charts.png)
 
 ### Asset Inventory
+
 ![Asset Inventory](docs/screenshots/assets.png)
 
 ### Asset Detail
+
 ![Asset Detail](docs/screenshots/asset-detail.png)
 
 ### Assignments
+
 ![Assignments](docs/screenshots/assignments.png)
 
 ### Maintenance Requests
+
 ![Maintenance](docs/screenshots/maintenance.png)
 
 ### Audit Logs
+
 ![Audit Logs](docs/screenshots/audit-logs.png)
 
 ### Employees
+
 ![Employees](docs/screenshots/employees.png)
 
 ---
@@ -199,6 +213,12 @@ Import schema database:
 mysql -u root -p internal_it_asset < database/schema.sql
 ```
 
+(Opsional) Import data demo:
+
+```bash
+mysql -u root -p internal_it_asset < database/seed.sql
+```
+
 Jalankan backend:
 
 ```bash
@@ -216,6 +236,18 @@ npm run dev
 ```
 
 Frontend berjalan di `http://localhost:5173`
+
+---
+
+## Demo Accounts
+
+Setelah import seed data, gunakan akun berikut untuk login:
+
+| Role        | Email                    | Password    |
+| ----------- | ------------------------ | ----------- |
+| asset_admin | admin@company.com        | password123 |
+| manager     | rina.marlina@company.com | password123 |
+| employee    | budi.santoso@company.com | password123 |
 
 ---
 
@@ -258,6 +290,13 @@ Coverage saat ini: 13 test case mencakup auth, asset, assignment, maintenance, d
 | POST   | `/api/departments`     | asset_admin   | Buat department       |
 | PUT    | `/api/departments/:id` | asset_admin   | Update department     |
 | DELETE | `/api/departments/:id` | asset_admin   | Hapus department      |
+
+### Asset Categories
+
+| Method | Endpoint                | Akses                | Deskripsi           |
+| ------ | ----------------------- | -------------------- | ------------------- |
+| GET    | `/api/asset-categories` | Authenticated        | List semua kategori |
+| POST   | `/api/asset-categories` | asset_admin, manager | Buat kategori baru  |
 
 ### Assets
 
@@ -305,8 +344,8 @@ Coverage saat ini: 13 test case mencakup auth, asset, assignment, maintenance, d
 | GET    | `/api/analytics/assets-by-category`     | admin, manager | Distribusi aset per kategori    |
 | GET    | `/api/analytics/assets-by-department`   | admin, manager | Distribusi aset per department  |
 | GET    | `/api/analytics/maintenance-summary`    | admin, manager | Tren maintenance per bulan      |
-| GET    | `/api/analytics/replacement-candidates` | admin, manager | Kandidat aset untuk replacement |
 | GET    | `/api/analytics/high-risk-assets`       | admin, manager | Daftar aset high risk           |
+| GET    | `/api/analytics/replacement-candidates` | admin, manager | Kandidat aset untuk replacement |
 
 ---
 
@@ -325,10 +364,9 @@ Coverage saat ini: 13 test case mencakup auth, asset, assignment, maintenance, d
 
 ## Known Limitations
 
-- Audit log mencatat ID teknikal, bukan nama.
+- Audit log mencatat ID teknikal, bukan nama entitas.
 - Test menggunakan database development, bukan database test terpisah.
 - Faktor "durasi under maintenance" belum diimplementasikan di risk scoring.
-- Halaman `/analytics` terpisah belum dibuat.
 
 ---
 

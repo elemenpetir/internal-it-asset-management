@@ -296,7 +296,7 @@ Coverage saat ini: 13 test case mencakup auth, asset, assignment, maintenance, d
 | Method | Endpoint                | Akses                | Deskripsi           |
 | ------ | ----------------------- | -------------------- | ------------------- |
 | GET    | `/api/asset-categories` | Authenticated        | List semua kategori |
-| POST   | `/api/asset-categories` | asset_admin, manager | Buat kategori baru  |
+| POST   | `/api/asset-categories` | asset_admin | Buat kategori baru  |
 
 ### Assets
 

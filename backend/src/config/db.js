@@ -11,6 +11,7 @@ const db = mysql.createPool({
     connectionLimit: 10,
     connectTimeout: 5000,
     queueLimit: 0,
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 })
 
 module.exports = db

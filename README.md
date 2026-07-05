@@ -2,7 +2,7 @@
 
 Sistem manajemen aset IT internal perusahaan berbasis fullstack web application. Dibangun untuk melacak aset, assignment ke karyawan, maintenance request, lifecycle status, audit log, dan analitik risiko aset.
 
-Project ini dirancang sebagai sistem internal perusahaan yang realistis — bukan sekadar aplikasi CRUD biasa — dengan fitur authentication, role-based access control, transactional workflow, dan rule-based risk scoring.
+Project ini dirancang sebagai sistem internal perusahaan yang realistis, dilengkapi dengan fitur authentication, role-based access control, transactional workflow, dan rule-based risk scoring, sehingga lebih dari sekadar aplikasi CRUD biasa.
 
 ---
 

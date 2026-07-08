@@ -1,0 +1,30 @@
+# docker-compose.yml — DEVELOPMENT LOKAL
+#
+# Tujuan: menggantikan XAMPP dengan MySQL container.
+# Backend & frontend TETAP dijalankan native (npm run dev), bukan lewat compose ini.
+#
+# Cara pakai sehari-hari:
+#   docker compose up -d db     -> nyalakan MySQL, kerja seperti biasa
+#   docker compose down         -> matikan container, data TETAP aman (volume persist)
+#   docker compose down -v      -> reset total ke data seed awal (volume ikut terhapus)
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: it_asset_db_dev
+    restart: unless-stopped
+    environment:
+      MYSQL_USER: assetuser
+      MYSQL_PASSWORD: assetpass
+      MYSQL_DATABASE: it_asset_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_mysql_data:/var/lib/mysql
+      # Auto-import schema & seed HANYA saat volume masih kosong (first run)
+      - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./backend/database/seed.sql:/docker-entrypoint-initdb.d/2-seed.sql
+
+volumes:
+  db_mysql_data:

@@ -1,6 +1,6 @@
 # Dockerfile — frontend React (production)
 # Stage 1: build React app jadi static files
-FROM node:20-alpine AS build
+FROM node:24-alpine AS build
 
 WORKDIR /app
 

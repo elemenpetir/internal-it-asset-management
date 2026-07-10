@@ -179,7 +179,8 @@ Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
 ### Prasyarat
 
 - Node.js v18+
-- MySQL / MariaDB
+- MySQL / MariaDB (native, jika tidak menggunakan Docker)
+- Docker (opsional, alternatif untuk menjalankan MySQL tanpa instalasi manual)
 
 ### 1. Clone repository
 
@@ -205,18 +206,33 @@ DB_PASSWORD=your_password
 DB_NAME=internal_it_asset
 DB_PORT=3306
 JWT_SECRET=your_jwt_secret
+DB_SSL=false
 ```
 
-Import schema database:
+Setup database — pilih salah satu opsi berikut:
+
+**Opsi A — MySQL/MariaDB lokal (XAMPP, dll)**
 
 ```bash
 mysql -u root -p internal_it_asset < database/schema.sql
+mysql -u root -p internal_it_asset < database/seed.sql
 ```
 
-(Opsional) Import data demo:
+**Opsi B — MySQL via Docker (tidak perlu install MySQL manual)**
 
 ```bash
-mysql -u root -p internal_it_asset < database/seed.sql
+docker compose up -d db
+```
+
+Container otomatis membuat database, mengimpor schema, dan mengisi data demo saat pertama kali dijalankan. Sesuaikan `backend/.env` dengan kredensial berikut (sesuai `docker-compose.yml`):
+
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=assetuser
+DB_PASSWORD=assetpass
+DB_NAME=it_asset_db
+DB_SSL=false
 ```
 
 Jalankan backend:
@@ -293,10 +309,10 @@ Coverage saat ini: 13 test case mencakup auth, asset, assignment, maintenance, d
 
 ### Asset Categories
 
-| Method | Endpoint                | Akses                | Deskripsi           |
-| ------ | ----------------------- | -------------------- | ------------------- |
-| GET    | `/api/asset-categories` | Authenticated        | List semua kategori |
-| POST   | `/api/asset-categories` | asset_admin | Buat kategori baru  |
+| Method | Endpoint                | Akses         | Deskripsi           |
+| ------ | ----------------------- | ------------- | ------------------- |
+| GET    | `/api/asset-categories` | Authenticated | List semua kategori |
+| POST   | `/api/asset-categories` | asset_admin   | Buat kategori baru  |
 
 ### Assets
 

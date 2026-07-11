@@ -12,9 +12,18 @@ const maintenanceRequestRoutes = require("./routes/maintenanceRequestRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const departmentRoutes = require("./routes/departmentRoutes");
 
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173").split(",");
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      // origin bisa undefined kalau request datang dari tools seperti Postman/curl
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );

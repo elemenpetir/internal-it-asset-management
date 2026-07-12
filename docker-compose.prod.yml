@@ -23,6 +23,7 @@ services:
       DB_NAME: ${DB_NAME}
       DB_SSL: "true"
       JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN}
 
   frontend:
     build:

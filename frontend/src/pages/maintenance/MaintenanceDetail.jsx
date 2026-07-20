@@ -26,7 +26,7 @@ export default function MaintenanceDetail() {
       try {
         const token = localStorage.getItem("token");
         const response = await fetch(
-          `http://localhost:3000/api/maintenance-requests/${id}/detail`,
+          `${import.meta.env.VITE_API_URL}/api/maintenance-requests/${id}/detail`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
         const result = await response.json();
@@ -51,7 +51,7 @@ export default function MaintenanceDetail() {
       const body = { status: formStatus };
       if (formStatus === "completed") body.resolution_note = resolutionNote;
       const response = await fetch(
-        `http://localhost:3000/api/maintenance-requests/${id}/status`,
+        `${import.meta.env.VITE_API_URL}/api/maintenance-requests/${id}/status`,
         {
           method: "PATCH",
           headers: {

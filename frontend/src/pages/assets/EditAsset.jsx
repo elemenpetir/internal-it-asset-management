@@ -38,12 +38,12 @@ export default function EditAsset() {
         const token = localStorage.getItem("token");
 
         const [assetResponse, categoriesResponse] = await Promise.all([
-          fetch(`http://localhost:3000/api/assets/${id}`, {
+          fetch(`${import.meta.env.VITE_API_URL}/api/assets/${id}`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }),
-          fetch("http://localhost:3000/api/asset-categories", {
+          fetch(`${import.meta.env.VITE_API_URL}/api/asset-categories`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -156,7 +156,7 @@ export default function EditAsset() {
       setSubmitError("");
 
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:3000/api/assets/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/assets/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

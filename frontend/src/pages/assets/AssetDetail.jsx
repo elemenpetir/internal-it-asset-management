@@ -31,7 +31,7 @@ export default function AssetDetail() {
     async function fetchAssetDetail() {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`http://localhost:3000/api/assets/${id}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/assets/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const result = await response.json();
@@ -53,7 +53,7 @@ export default function AssetDetail() {
       try {
         const token = localStorage.getItem("token");
         const response = await fetch(
-          `http://localhost:3000/api/assets/${id}/risk-score`,
+          `${import.meta.env.VITE_API_URL}/api/assets/${id}/risk-score`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -73,7 +73,7 @@ export default function AssetDetail() {
       try {
         const token = localStorage.getItem("token");
         const response = await fetch(
-          `http://localhost:3000/api/assets/${id}/assignments`,
+          `${import.meta.env.VITE_API_URL}/api/assets/${id}/assignments`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
         const result = await response.json();
@@ -104,7 +104,7 @@ export default function AssetDetail() {
       setLocalSuccessMessage("");
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:3000/api/assets/${id}/status`,
+        `${import.meta.env.VITE_API_URL}/api/assets/${id}/status`,
         {
           method: "PATCH",
           headers: {

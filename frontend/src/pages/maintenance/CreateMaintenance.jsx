@@ -39,7 +39,7 @@ export default function CreateMaintenance() {
       const body = empNumber ? { employee_number: empNumber } : undefined;
 
       const response = await fetch(
-        "http://localhost:3000/api/maintenance-requests/my-assets",
+        `${import.meta.env.VITE_API_URL}/api/maintenance-requests/my-assets`,
         {
           method: "POST",
           headers: {
@@ -88,7 +88,7 @@ export default function CreateMaintenance() {
       }
 
       const response = await fetch(
-        "http://localhost:3000/api/maintenance-requests",
+        `${import.meta.env.VITE_API_URL}/api/maintenance-requests`,
         {
           method: "POST",
           headers: {

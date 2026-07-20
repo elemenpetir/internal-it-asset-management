@@ -30,7 +30,7 @@ export default function Assets() {
         params.append("limit", limit);
 
         const response = await fetch(
-          `http://localhost:3000/api/assets?${params.toString()}`,
+          `${import.meta.env.VITE_API_URL}/api/assets?${params.toString()}`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
         const result = await response.json();

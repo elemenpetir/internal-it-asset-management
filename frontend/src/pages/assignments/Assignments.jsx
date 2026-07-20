@@ -33,7 +33,7 @@ export default function Assignments() {
       try {
         if (role === "employee") {
           const response = await fetch(
-            "http://localhost:3000/api/asset-assignments/my-assignments",
+            `${import.meta.env.VITE_API_URL}/api/asset-assignments/my-assignments`,
             { headers },
           );
           const result = await response.json();
@@ -42,9 +42,9 @@ export default function Assignments() {
           setAssignments(result.data);
         } else {
           const [assignmentsRes, assetsRes, employeesRes] = await Promise.all([
-            fetch("http://localhost:3000/api/asset-assignments", { headers }),
-            fetch("http://localhost:3000/api/assets", { headers }),
-            fetch("http://localhost:3000/api/employees", { headers }),
+            fetch(`${import.meta.env.VITE_API_URL}/api/asset-assignments`, { headers }),
+            fetch(`${import.meta.env.VITE_API_URL}/api/assets`, { headers }),
+            fetch(`${import.meta.env.VITE_API_URL}/api/employees`, { headers }),
           ]);
 
           const [assignmentsResult, assetsResult, employeesResult] =
@@ -111,7 +111,7 @@ export default function Assignments() {
       setSubmitError("");
       setSuccessMessage("");
       const response = await fetch(
-        "http://localhost:3000/api/asset-assignments",
+        `${import.meta.env.VITE_API_URL}/api/asset-assignments`,
         {
           method: "POST",
           headers: { ...headers, "Content-Type": "application/json" },
@@ -152,7 +152,7 @@ export default function Assignments() {
       setActionError("");
       setSuccessMessage("");
       const response = await fetch(
-        `http://localhost:3000/api/asset-assignments/${assignment.id}/return`,
+        `${import.meta.env.VITE_API_URL}/api/asset-assignments/${assignment.id}/return`,
         { method: "PATCH", headers },
       );
       const result = await response.json();

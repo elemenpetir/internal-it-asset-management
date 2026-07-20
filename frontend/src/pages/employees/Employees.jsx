@@ -39,8 +39,8 @@ export default function Employees() {
     try {
       setIsLoading(true);
       const [empRes, deptRes] = await Promise.all([
-        fetch("http://localhost:3000/api/employees", { headers }),
-        fetch("http://localhost:3000/api/departments", { headers }),
+        fetch(`${import.meta.env.VITE_API_URL}/api/employees`, { headers }),
+        fetch(`${import.meta.env.VITE_API_URL}/api/departments`, { headers }),
       ]);
       const [empResult, deptResult] = await Promise.all([
         empRes.json(),
@@ -101,8 +101,8 @@ export default function Employees() {
 
       const url =
         modalMode === "create"
-          ? "http://localhost:3000/api/employees"
-          : `http://localhost:3000/api/employees/${selectedEmployee.id}`;
+          ? `${import.meta.env.VITE_API_URL}/api/employees`
+          : `${import.meta.env.VITE_API_URL}/api/employees/${selectedEmployee.id}`;
 
       const method = modalMode === "create" ? "POST" : "PUT";
 
@@ -135,7 +135,7 @@ export default function Employees() {
     if (!confirmed) return;
     try {
       const response = await fetch(
-        `http://localhost:3000/api/employees/${employee.id}`,
+        `${import.meta.env.VITE_API_URL}/api/employees/${employee.id}`,
         {
           method: "DELETE",
           headers,

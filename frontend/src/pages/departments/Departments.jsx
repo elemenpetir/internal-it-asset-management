@@ -26,7 +26,7 @@ export default function Departments() {
   async function fetchDepartments() {
     try {
       setIsLoading(true);
-      const response = await fetch("http://localhost:3000/api/departments", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/departments`, {
         headers,
       });
       const result = await response.json();
@@ -68,8 +68,8 @@ export default function Departments() {
 
       const url =
         modalMode === "create"
-          ? "http://localhost:3000/api/departments"
-          : `http://localhost:3000/api/departments/${selectedDepartment.id}`;
+          ? `${import.meta.env.VITE_API_URL}/api/departments`
+          : `${import.meta.env.VITE_API_URL}/api/departments/${selectedDepartment.id}`;
 
       const method = modalMode === "create" ? "POST" : "PUT";
 
@@ -104,7 +104,7 @@ export default function Departments() {
     if (!confirmed) return;
     try {
       const response = await fetch(
-        `http://localhost:3000/api/departments/${department.id}`,
+        `${import.meta.env.VITE_API_URL}/api/departments/${department.id}`,
         {
           method: "DELETE",
           headers,

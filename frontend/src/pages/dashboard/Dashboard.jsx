@@ -46,20 +46,20 @@ export default function Dashboard() {
         maintenanceRes,
         replacementRes,
       ] = await Promise.all([
-        fetch("http://localhost:3000/api/analytics/overview", { headers }),
-        fetch("http://localhost:3000/api/analytics/high-risk-assets", {
+        fetch(`${import.meta.env.VITE_API_URL}/api/analytics/overview`, { headers }),
+        fetch(`${import.meta.env.VITE_API_URL}/api/analytics/high-risk-assets`, {
           headers,
         }),
-        fetch("http://localhost:3000/api/analytics/assets-by-category", {
+        fetch(`${import.meta.env.VITE_API_URL}/api/analytics/assets-by-category`, {
           headers,
         }),
-        fetch("http://localhost:3000/api/analytics/assets-by-department", {
+        fetch(`${import.meta.env.VITE_API_URL}/api/analytics/assets-by-department`, {
           headers,
         }),
-        fetch("http://localhost:3000/api/analytics/maintenance-summary", {
+        fetch(`${import.meta.env.VITE_API_URL}/api/analytics/maintenance-summary`, {
           headers,
         }),
-        fetch("http://localhost:3000/api/analytics/replacement-candidates", {
+        fetch(`${import.meta.env.VITE_API_URL}/api/analytics/replacement-candidates`, {
           headers,
         }),
       ]);
@@ -145,11 +145,11 @@ export default function Dashboard() {
       const token = localStorage.getItem("token");
 
       const [assetsResponse, requestsResponse] = await Promise.all([
-        fetch("http://localhost:3000/api/maintenance-requests/my-assets", {
+        fetch(`${import.meta.env.VITE_API_URL}/api/maintenance-requests/my-assets`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://localhost:3000/api/maintenance-requests/my-requests", {
+        fetch(`${import.meta.env.VITE_API_URL}/api/maintenance-requests/my-requests`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);

@@ -18,7 +18,7 @@ export default function AssignmentDetail() {
         const token = localStorage.getItem("token");
 
         const response = await fetch(
-          `http://localhost:3000/api/asset-assignments/${id}`,
+          `${import.meta.env.VITE_API_URL}/api/asset-assignments/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -60,7 +60,7 @@ export default function AssignmentDetail() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:3000/api/asset-assignments/${id}/return`,
+        `${import.meta.env.VITE_API_URL}/api/asset-assignments/${id}/return`,
         {
           method: "PATCH",
           headers: {

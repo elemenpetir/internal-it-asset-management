@@ -19,8 +19,8 @@ export default function Maintenance() {
         const token = localStorage.getItem("token");
         const endpoint =
           role === "employee"
-            ? "http://localhost:3000/api/maintenance-requests/my-requests"
-            : "http://localhost:3000/api/maintenance-requests";
+            ? `${import.meta.env.VITE_API_URL}/api/maintenance-requests/my-requests`
+            : `${import.meta.env.VITE_API_URL}/api/maintenance-requests`;
         const response = await fetch(`${endpoint}`, {
           headers: { Authorization: `Bearer ${token}` },
         });

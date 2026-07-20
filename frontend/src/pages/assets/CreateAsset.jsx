@@ -36,7 +36,7 @@ export default function CreateAsset() {
         const token = localStorage.getItem("token");
 
         const response = await fetch(
-          "http://localhost:3000/api/asset-categories",
+          `${import.meta.env.VITE_API_URL}/api/asset-categories`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -126,7 +126,7 @@ export default function CreateAsset() {
 
       const token = localStorage.getItem("token");
 
-      const response = await fetch("http://localhost:3000/api/assets", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/assets`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -378,6 +378,35 @@ Coverage saat ini: 13 test case mencakup auth, asset, assignment, maintenance, d
 
 ---
 
+## Deployment Notes & Troubleshooting
+
+Beberapa isu teknis yang ditemukan selama proses containerization dan deployment, dicatat sebagai referensi jika mengalami masalah serupa.
+
+### Vite Environment Variable Tidak Ter-bake ke Build
+
+**Gejala:** Frontend ter-deploy sukses, tapi request ke backend selalu error `undefined/api/...` — env var yang sudah diset benar di dashboard platform (Render/dsb) seakan tidak terbaca.
+
+**Penyebab:** Vite meng-inline environment variable (`import.meta.env.VITE_*`) ke dalam bundle JS **saat build time**, bukan saat runtime. Env var yang cuma diset di dashboard platform tidak otomatis tersedia di dalam Docker build context — Docker build berjalan terisolasi dari environment container saat runtime.
+
+**Solusi:** Deklarasikan env var secara eksplisit di `Dockerfile` menggunakan `ARG` dan `ENV`, lalu teruskan nilainya lewat build argument saat proses build image:
+
+```dockerfile
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+```
+
+Pastikan juga platform deployment diset untuk meneruskan env var dashboard sebagai build argument, bukan cuma runtime environment variable.
+
+### CORS Origin Harus Persis Sama dengan Browser
+
+**Gejala:** Request dari frontend ke backend kena CORS error meski `CORS_ORIGIN` sudah diisi.
+
+**Penyebab:** Browser menghilangkan port default (`:80` untuk HTTP, `:443` untuk HTTPS) dari header `Origin`. Kalau `CORS_ORIGIN` diset dengan port eksplisit (`http://localhost:80`) sementara browser mengirim `http://localhost`, keduanya dianggap origin berbeda.
+
+**Solusi:** Set `CORS_ORIGIN` tanpa port kalau memakai port default, dan pastikan value ini direferensikan secara eksplisit di file compose/environment config platform deployment — bukan cuma di `.env` lokal.
+
+---
+
 ## Known Limitations
 
 - Audit log mencatat ID teknikal, bukan nama entitas.

@@ -5,8 +5,8 @@ const db = require("../src/config/db");
 describe("AUTH API", () => {
   test("should login successfully with valid credentials", async () => {
     const res = await request(app).post("/api/auth/login").send({
-      email: "admin@gmail.com",
-      password: "admin12345",
+      email: "admin@company.com",
+      password: "password123",
     });
 
     expect(res.statusCode).toBe(200);
@@ -17,7 +17,7 @@ describe("AUTH API", () => {
 
   test("should return 401 when password is invalid", async () => {
     const res = await request(app).post("/api/auth/login").send({
-      email: "admin@gmail.com",
+      email: "admin@company.com",
       password: "wrongpassword",
     });
 
@@ -35,8 +35,8 @@ describe("AUTH API", () => {
 
   test("should return 403 when employee accesses audit logs", async () => {
     const loginRes = await request(app).post("/api/auth/login").send({
-      email: "employee1@gmail.com",
-      password: "11111111",
+      email: "budi.santoso@company.com",
+      password: "password123",
     });
 
     const employeeToken = loginRes.body.data.token;
@@ -45,8 +45,8 @@ describe("AUTH API", () => {
       .get("/api/audit-logs")
       .set("authorization", `Bearer ${employeeToken}`);
 
-    expect(res.statusCode).toBe(403)
-    expect(res.body.status).toBe('failed')
+    expect(res.statusCode).toBe(403);
+    expect(res.body.status).toBe("failed");
   });
 
   afterAll(async () => {

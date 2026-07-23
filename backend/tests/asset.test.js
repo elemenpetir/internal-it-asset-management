@@ -6,8 +6,8 @@ let adminToken;
 
 beforeAll(async () => {
   const loginRes = await request(app).post("/api/auth/login").send({
-    email: "admin@gmail.com",
-    password: "admin12345",
+    email: "admin@company.com",
+    password: "password123",
   });
   adminToken = loginRes.body.data.token;
 });

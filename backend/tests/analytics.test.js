@@ -9,10 +9,10 @@ beforeAll(async () => {
   const [adminRes, employeeRes] = await Promise.all([
     request(app)
       .post("/api/auth/login")
-      .send({ email: "admin@gmail.com", password: "admin12345" }),
+      .send({ email: "admin@company.com", password: "password123" }),
     request(app)
       .post("/api/auth/login")
-      .send({ email: "employee1@gmail.com", password: "11111111" }),
+      .send({ email: "budi.santoso@company.com", password: "password123" }),
   ]);
   adminToken = adminRes.body.data.token;
   employeeToken = employeeRes.body.data.token;

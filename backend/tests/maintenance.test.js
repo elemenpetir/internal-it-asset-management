@@ -7,8 +7,8 @@ let maintenanceId;
 
 beforeAll(async () => {
   const loginRes = await request(app).post("/api/auth/login").send({
-    email: "employee1@gmail.com",
-    password: "11111111",
+    email: "budi.santoso@company.com",
+    password: "password123",
   });
   employeeToken = loginRes.body.data.token;
 });

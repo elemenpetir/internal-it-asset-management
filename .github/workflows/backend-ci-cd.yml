@@ -54,7 +54,7 @@ jobs:
           DB_PORT: 3306
           DB_SSL: false
           JWT_SECRET: ${{ secrets.JWT_SECRET_TEST }}
-        run: npm test
+        run: npm test -- --runInBand
 
   deploy:
     needs: test

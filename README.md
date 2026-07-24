@@ -22,6 +22,12 @@ Project ini dirancang sebagai sistem internal perusahaan yang realistis, dilengk
 - Tailwind CSS
 - Recharts
 
+**DevOps**
+
+- Docker (multi-stage build + Nginx untuk frontend)
+- GitHub Actions (CI/CD)
+- Render (hosting backend & frontend)
+
 ---
 
 ## Fitur Utama
@@ -102,6 +108,10 @@ Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
 
 ```
 .
+├── .github/
+│   └── workflows/
+│       ├── backend-ci-cd.yml
+│       └── frontend-ci-cd.yml
 ├── backend/
 │   ├── database/
 │   │   ├── schema.sql
@@ -209,16 +219,16 @@ JWT_SECRET=your_jwt_secret
 DB_SSL=false
 ```
 
-Setup database — pilih salah satu opsi berikut:
+Setup database , pilih salah satu opsi berikut:
 
-**Opsi A — MySQL/MariaDB lokal (XAMPP, dll)**
+**Opsi A , MySQL/MariaDB lokal (XAMPP, dll)**
 
 ```bash
 mysql -u root -p internal_it_asset < database/schema.sql
 mysql -u root -p internal_it_asset < database/seed.sql
 ```
 
-**Opsi B — MySQL via Docker (tidak perlu install MySQL manual)**
+**Opsi B , MySQL via Docker (tidak perlu install MySQL manual)**
 
 ```bash
 docker compose up -d db
@@ -275,6 +285,38 @@ npm test
 ```
 
 Coverage saat ini: 13 test case mencakup auth, asset, assignment, maintenance, dan analytics.
+
+> Test suite dijalankan secara sequential (`--runInBand`) di CI karena semua suite berbagi satu database yang sama , menjalankannya secara paralel menyebabkan race condition antar suite yang saling memodifikasi data (lihat detail di bagian CI/CD Pipeline).
+
+---
+
+## CI/CD Pipeline
+
+Backend dan frontend masing-masing punya workflow GitHub Actions terpisah (`backend-ci-cd.yml` dan `frontend-ci-cd.yml`), dengan pola yang sama: **job test/build harus sukses dulu sebelum deploy dijalankan**.
+
+```
+push ke folder terkait (backend/ atau frontend/)
+        │
+        ▼
+   job: test/build
+   - backend → jalankan test suite di MySQL service container (ephemeral, terisolasi dari database Aiven)
+   - frontend → jalankan `vite build` untuk memastikan tidak ada error compile
+        │
+        ▼ (hanya lanjut kalau sukses, via `needs`)
+   job: deploy
+   - curl ke Render Deploy Hook
+        │
+        ▼
+   Render pull kode terbaru → build ulang via Dockerfile → deploy
+```
+
+Poin penting:
+
+- **Auto-Deploy "On Commit" di Render dimatikan** untuk kedua service. Deploy hanya terjadi lewat Deploy Hook yang dipanggil GitHub Actions, supaya kode yang belum lolos test/build tidak pernah sampai ke production.
+- **Test backend berjalan di MySQL service container**, bukan di database Aiven yang dipakai development , database ini hidup hanya selama job berjalan, di-seed ulang dari `schema.sql` + `seed.sql`, lalu otomatis dibuang setelah selesai.
+- **Build check frontend berjalan di luar Docker** (`vite build` langsung di runner), sehingga hanya menangkap error kode (syntax, import, dsb). Masalah spesifik konfigurasi Docker/env var (mis. `VITE_API_URL` yang perlu `ARG`/`ENV` di Dockerfile) baru tervalidasi saat Render benar-benar melakukan build via Docker, dan tetap perlu dicek manual setelah deploy.
+- Kedua workflow bisa dijalankan manual lewat tab **Actions** di GitHub (`workflow_dispatch`), tanpa perlu menunggu perubahan kode.
+- Deploy Hook URL disimpan sebagai GitHub Secrets (`RENDER_DEPLOY_HOOK_BACKEND`, `RENDER_DEPLOY_HOOK_FRONTEND`), tidak pernah ditulis langsung di file workflow.
 
 ---
 
@@ -384,9 +426,9 @@ Beberapa isu teknis yang ditemukan selama proses containerization dan deployment
 
 ### Vite Environment Variable Tidak Ter-bake ke Build
 
-**Gejala:** Frontend ter-deploy sukses, tapi request ke backend selalu error `undefined/api/...` — env var yang sudah diset benar di dashboard platform (Render/dsb) seakan tidak terbaca.
+**Gejala:** Frontend ter-deploy sukses, tapi request ke backend selalu error `undefined/api/...` , env var yang sudah diset benar di dashboard platform (Render/dsb) seakan tidak terbaca.
 
-**Penyebab:** Vite meng-inline environment variable (`import.meta.env.VITE_*`) ke dalam bundle JS **saat build time**, bukan saat runtime. Env var yang cuma diset di dashboard platform tidak otomatis tersedia di dalam Docker build context — Docker build berjalan terisolasi dari environment container saat runtime.
+**Penyebab:** Vite meng-inline environment variable (`import.meta.env.VITE_*`) ke dalam bundle JS **saat build time**, bukan saat runtime. Env var yang cuma diset di dashboard platform tidak otomatis tersedia di dalam Docker build context , Docker build berjalan terisolasi dari environment container saat runtime.
 
 **Solusi:** Deklarasikan env var secara eksplisit di `Dockerfile` menggunakan `ARG` dan `ENV`, lalu teruskan nilainya lewat build argument saat proses build image:
 
@@ -403,15 +445,16 @@ Pastikan juga platform deployment diset untuk meneruskan env var dashboard sebag
 
 **Penyebab:** Browser menghilangkan port default (`:80` untuk HTTP, `:443` untuk HTTPS) dari header `Origin`. Kalau `CORS_ORIGIN` diset dengan port eksplisit (`http://localhost:80`) sementara browser mengirim `http://localhost`, keduanya dianggap origin berbeda.
 
-**Solusi:** Set `CORS_ORIGIN` tanpa port kalau memakai port default, dan pastikan value ini direferensikan secara eksplisit di file compose/environment config platform deployment — bukan cuma di `.env` lokal.
+**Solusi:** Set `CORS_ORIGIN` tanpa port kalau memakai port default, dan pastikan value ini direferensikan secara eksplisit di file compose/environment config platform deployment , bukan cuma di `.env` lokal.
 
 ---
 
 ## Known Limitations
 
 - Audit log mencatat ID teknikal, bukan nama entitas.
-- Test menggunakan database development, bukan database test terpisah.
 - Faktor "durasi under maintenance" belum diimplementasikan di risk scoring.
+- Test suite berjalan sequential (bukan paralel) karena masih berbagi satu database per run , belum dipisah per-test-file dengan database/transaction terisolasi.
+- Belum ada unit test untuk frontend; build check di CI hanya memastikan kode bisa di-compile, bukan validasi behavior.
 
 ---
 

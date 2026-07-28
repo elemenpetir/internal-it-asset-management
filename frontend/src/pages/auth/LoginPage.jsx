@@ -11,23 +11,19 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    if (!email || !password) {
-      setErrorMessage("Email and password are required.");
-      return;
-    }
-
+  async function loginWithCredentials(emailValue, passwordValue) {
     try {
       setIsSubmitting(true);
       setErrorMessage("");
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: emailValue, password: passwordValue }),
+        },
+      );
 
       const result = await response.json();
 
@@ -44,6 +40,30 @@ export default function Login() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    if (!email || !password) {
+      setErrorMessage("Email and password are required.");
+      return;
+    }
+
+    loginWithCredentials(email, password);
+  }
+
+  function handleDemoLogin(role) {
+    const demoAccounts = {
+      employee: { email: "budi.santoso@company.com", password: "password123" },
+      admin: { email: "admin@company.com", password: "password123" },
+      manager: { email: "rina.marlina@company.com", password: "password123" },
+    };
+
+    const { email: demoEmail, password: demoPassword } = demoAccounts[role];
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    loginWithCredentials(demoEmail, demoPassword);
   }
 
   useEffect(() => {
@@ -137,6 +157,39 @@ export default function Login() {
               {isSubmitting ? "Signing in..." : "Sign In"}
             </button>
           </form>
+
+          <div className="mt-4 flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-s text-slate-400">or try a demo account</span>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
+
+          <div className="mt-4 flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => handleDemoLogin("employee")}
+              disabled={isSubmitting}
+              className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Login as Employee
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDemoLogin("admin")}
+              disabled={isSubmitting}
+              className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Login as Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDemoLogin("manager")}
+              disabled={isSubmitting}
+              className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Login as Manager
+            </button>
+          </div>
         </div>
 
         <p className="mt-6 text-center text-sm text-slate-500">

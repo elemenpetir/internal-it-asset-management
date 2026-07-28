@@ -60,9 +60,12 @@ const getAssets = async ({
 
   sql += " ORDER BY assets.id DESC";
 
-  const offset = (page - 1) * limit;
-  sql += " LIMIT ? OFFSET ?";
-  values.push(Number(limit), Number(offset));
+  // Skip pagination kalau limit === 'all'
+  if (limit !== "all") {
+    const offset = (page - 1) * limit;
+    sql += " LIMIT ? OFFSET ?";
+    values.push(Number(limit), Number(offset));
+  }
 
   const [rows] = await db.query(sql, values);
   return rows;

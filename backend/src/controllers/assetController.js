@@ -29,9 +29,9 @@ const getAssets = async (req, res, next) => {
       data: rows,
       pagination: {
         total: Number(total),
-        page: Number(page),
-        limit: Number(limit),
-        total_pages: Math.ceil(total / limit),
+        page: limit === "all" ? 1 : Number(page),
+        limit: limit === "all" ? Number(total) : Number(limit),
+        total_pages: limit === "all" ? 1 : Math.ceil(total / limit),
       },
     });
   } catch (error) {

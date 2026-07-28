@@ -43,7 +43,7 @@ export default function Assignments() {
         } else {
           const [assignmentsRes, assetsRes, employeesRes] = await Promise.all([
             fetch(`${import.meta.env.VITE_API_URL}/api/asset-assignments`, { headers }),
-            fetch(`${import.meta.env.VITE_API_URL}/api/assets`, { headers }),
+            fetch(`${import.meta.env.VITE_API_URL}/api/assets?limit=all`, { headers }),
             fetch(`${import.meta.env.VITE_API_URL}/api/employees`, { headers }),
           ]);
 

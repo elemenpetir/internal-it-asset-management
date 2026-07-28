@@ -313,7 +313,7 @@ push ke folder terkait (backend/ atau frontend/)
 Poin penting:
 
 - **Auto-Deploy "On Commit" di Render dimatikan** untuk kedua service. Deploy hanya terjadi lewat Deploy Hook yang dipanggil GitHub Actions, supaya kode yang belum lolos test/build tidak pernah sampai ke production.
-- **Test backend berjalan di MySQL service container**, bukan di database Aiven yang dipakai development , database ini hidup hanya selama job berjalan, di-seed ulang dari `schema.sql` + `seed.sql`, lalu otomatis dibuang setelah selesai.
+- **Test backend berjalan di MySQL service container**, bukan di database yang dipakai development (TiDB Cloud) , database ini hidup hanya selama job berjalan, di-seed ulang dari `schema.sql` + `seed.sql`, lalu otomatis dibuang setelah selesai.
 - **Build check frontend berjalan di luar Docker** (`vite build` langsung di runner), sehingga hanya menangkap error kode (syntax, import, dsb). Masalah spesifik konfigurasi Docker/env var (mis. `VITE_API_URL` yang perlu `ARG`/`ENV` di Dockerfile) baru tervalidasi saat Render benar-benar melakukan build via Docker, dan tetap perlu dicek manual setelah deploy.
 - Kedua workflow bisa dijalankan manual lewat tab **Actions** di GitHub (`workflow_dispatch`), tanpa perlu menunggu perubahan kode.
 - Deploy Hook URL disimpan sebagai GitHub Secrets (`RENDER_DEPLOY_HOOK_BACKEND`, `RENDER_DEPLOY_HOOK_FRONTEND`), tidak pernah ditulis langsung di file workflow.

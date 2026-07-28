@@ -267,7 +267,7 @@ Frontend berjalan di `http://localhost:5173`
 
 ## Demo Accounts
 
-Setelah import seed data, gunakan akun berikut untuk login:
+Setelah import seed data, gunakan akun berikut untuk login , atau klik salah satu tombol "Login as Demo" di halaman login untuk langsung mencoba tiap role tanpa perlu mengetik kredensial manual.
 
 | Role        | Email                    | Password    |
 | ----------- | ------------------------ | ----------- |
@@ -360,7 +360,7 @@ Poin penting:
 
 | Method | Endpoint                      | Akses          | Deskripsi                                                                          |
 | ------ | ----------------------------- | -------------- | ---------------------------------------------------------------------------------- |
-| GET    | `/api/assets`                 | Authenticated  | List aset (filter: `status`, `category_id`, `department_id`, `search`, pagination) |
+| GET    | `/api/assets`                 | Authenticated  | List aset (filter: `status`, `category_id`, `department_id`, `search`, pagination , gunakan `limit=all` untuk mengambil semua data tanpa batas) |
 | GET    | `/api/assets/:id`             | Authenticated  | Detail aset                                                                        |
 | POST   | `/api/assets`                 | asset_admin    | Buat aset                                                                          |
 | PUT    | `/api/assets/:id`             | asset_admin    | Update aset                                                                        |

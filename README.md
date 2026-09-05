@@ -1,8 +1,8 @@
 # Internal IT Asset Management & Risk Scoring System
 
-Sistem manajemen aset IT internal perusahaan berbasis fullstack web application. Dibangun untuk melacak aset, assignment ke karyawan, maintenance request, lifecycle status, audit log, dan analitik risiko aset.
+A fullstack web application for managing internal IT assets. Covers asset tracking, employee assignment, maintenance requests, lifecycle status, audit logging, and rule-based risk scoring with authentication and role-based access control.
 
-Project ini dirancang sebagai sistem internal perusahaan yang realistis, dilengkapi dengan fitur authentication, role-based access control, transactional workflow, dan rule-based risk scoring, sehingga lebih dari sekadar aplikasi CRUD biasa.
+**Live Demo:** [https://internal-it-asset-management.onrender.com](https://internal-it-asset-management.onrender.com) (cold start may take ~30 seconds on free tier)
 
 ---
 
@@ -24,87 +24,87 @@ Project ini dirancang sebagai sistem internal perusahaan yang realistis, dilengk
 
 **DevOps**
 
-- Docker (multi-stage build + Nginx untuk frontend)
+- Docker (multi-stage build + Nginx for frontend)
 - GitHub Actions (CI/CD)
-- Render (hosting backend & frontend)
+- Render (backend & frontend hosting)
 
 ---
 
-## Fitur Utama
+## Features
 
-- Aktivasi akun karyawan (bukan register bebas)
+- Employee account activation flow (no open registration)
 - JWT authentication + role-based authorization
-- CRUD aset IT dengan audit log otomatis
-- CRUD kategori aset, employee, dan department
-- Assignment aset ke karyawan + return flow
-- Maintenance request workflow (reported → in_progress → completed/canceled)
-- Audit log untuk setiap operasi penting
+- IT asset CRUD with automatic audit logging
+- Asset category, employee, and department management
+- Asset assignment to employees + return flow
+- Maintenance request workflow (`reported` → `in_progress` → `completed` / `canceled`)
+- Audit log for every significant operation
 - Rule-based asset risk scoring
-- Analytics dashboard (overview, by category, by department, maintenance trend, high risk assets, replacement candidates)
-- Database transaction untuk workflow kritis
-- Unit test untuk endpoint utama
+- Analytics dashboard (overview, by category, by department, maintenance trend, high-risk assets, replacement candidates)
+- Database transactions for critical workflows
+- Unit tests for core endpoints
 
 ---
 
-## Role & Akses
+## Roles & Access
 
-| Role          | Akses                                                                       |
-| ------------- | --------------------------------------------------------------------------- |
-| `employee`    | Lihat aset milik sendiri, buat maintenance request                          |
-| `asset_admin` | CRUD aset, assignment, return, maintenance, employee, department, audit log |
-| `manager`     | Dashboard analytics, risk scoring, monitoring (read-only)                   |
+| Role          | Access                                                                                     |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| `employee`    | View own assigned assets, submit maintenance requests                                      |
+| `asset_admin` | Full CRUD on assets, assignments, returns, maintenance, employees, departments, audit logs |
+| `manager`     | Analytics dashboard, risk scoring, monitoring (read-only)                                  |
 
 ---
 
-## Alur Bisnis Penting
+## Key Business Flows
 
-### Aktivasi Akun Karyawan
+### Employee Account Activation
 
-1. Admin membuat data employee di tabel `employees`.
-2. Karyawan aktivasi akun via `POST /api/auth/activate` dengan email + employee number + password.
-3. Backend verifikasi kecocokan data, buat user dengan role paksa `employee`, dan link `employees.user_id`.
+1. Admin creates an employee record in the `employees` table.
+2. The employee activates their account via `POST /api/auth/activate` using their email, employee number, and a chosen password.
+3. The backend verifies the data, creates a user with the role locked to `employee`, and links `employees.user_id`.
 
-Karyawan tidak bisa memilih role sendiri.
+Employees cannot self-register or choose their own role.
 
-### Assignment Aset
+### Asset Assignment
 
-- Hanya aset berstatus `available` yang bisa di-assign.
-- Saat di-assign: status aset berubah ke `assigned`, audit log tercatat.
-- Saat dikembalikan: status kembali ke `available`, audit log tercatat.
-- Aset tidak bisa dikembalikan saat sedang dalam status `under_maintenance`.
+- Only assets with `available` status can be assigned.
+- On assignment: asset status changes to `assigned`, audit log is recorded.
+- On return: asset status reverts to `available`, audit log is recorded.
+- Assets cannot be returned while in `under_maintenance` status.
 
 ### Maintenance Workflow
 
-- Karyawan hanya bisa request maintenance untuk aset yang aktif di-assign ke dirinya.
-- Tidak boleh ada duplikasi request aktif untuk aset yang sama.
+- Employees can only submit maintenance requests for assets currently assigned to them.
+- No duplicate active requests are allowed for the same asset.
 - Status flow: `reported` → `in_progress` → `completed` / `canceled`
-- Saat `in_progress`: status aset otomatis berubah ke `under_maintenance`.
-- Saat `completed`/`canceled`: status aset kembali ke `assigned`.
+- On `in_progress`: asset status automatically changes to `under_maintenance`.
+- On `completed` / `canceled`: asset status reverts to `assigned`.
 
 ### Risk Scoring
 
-Sistem menghitung risk score aset berdasarkan 4 faktor:
+The system calculates a risk score for each asset based on four factors:
 
-| Faktor                    | Nilai |
-| ------------------------- | ----- |
-| Usia aset < 2 tahun       | +5    |
-| Usia aset 2–4 tahun       | +15   |
-| Usia aset > 4 tahun       | +30   |
-| Maintenance request 0     | +0    |
-| Maintenance request 1–2   | +15   |
-| Maintenance request > 2   | +30   |
-| Status available/assigned | +0    |
-| Status under_maintenance  | +20   |
-| Status retired            | +40   |
-| Assignment ≤ 2            | +5    |
-| Assignment 3–5            | +10   |
-| Assignment > 5            | +15   |
+| Factor                       | Points |
+| ---------------------------- | ------ |
+| Asset age < 2 years          | +5     |
+| Asset age 2–4 years          | +15    |
+| Asset age > 4 years          | +30    |
+| Maintenance requests: 0      | +0     |
+| Maintenance requests: 1–2    | +15    |
+| Maintenance requests: > 2    | +30    |
+| Status: available / assigned | +0     |
+| Status: under_maintenance    | +20    |
+| Status: retired              | +40    |
+| Assignments ≤ 2              | +5     |
+| Assignments 3–5              | +10    |
+| Assignments > 5              | +15    |
 
 Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
 
 ---
 
-## Struktur Project
+## Project Structure
 
 ```
 .
@@ -184,15 +184,15 @@ Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
 
 ---
 
-## Instalasi & Setup
+## Installation & Setup
 
-### Prasyarat
+### Prerequisites
 
 - Node.js v18+
-- MySQL / MariaDB (native, jika tidak menggunakan Docker)
-- Docker (opsional, alternatif untuk menjalankan MySQL tanpa instalasi manual)
+- MySQL / MariaDB (native, if not using Docker)
+- Docker (optional, as an alternative to installing MySQL manually)
 
-### 1. Clone repository
+### 1. Clone the repository
 
 ```bash
 git clone <repository-url>
@@ -206,7 +206,7 @@ cd backend
 npm install
 ```
 
-Buat file `.env` di dalam folder `backend/`:
+Create a `.env` file inside the `backend/` folder:
 
 ```env
 PORT=3000
@@ -219,22 +219,22 @@ JWT_SECRET=your_jwt_secret
 DB_SSL=false
 ```
 
-Setup database , pilih salah satu opsi berikut:
+Setup the database. Choose one of the following options:
 
-**Opsi A , MySQL/MariaDB lokal (XAMPP, dll)**
+**Option A: Local MySQL / MariaDB (XAMPP, etc.)**
 
 ```bash
 mysql -u root -p internal_it_asset < database/schema.sql
 mysql -u root -p internal_it_asset < database/seed.sql
 ```
 
-**Opsi B , MySQL via Docker (tidak perlu install MySQL manual)**
+**Option B: MySQL via Docker (no manual MySQL installation needed)**
 
 ```bash
 docker compose up -d db
 ```
 
-Container otomatis membuat database, mengimpor schema, dan mengisi data demo saat pertama kali dijalankan. Sesuaikan `backend/.env` dengan kredensial berikut (sesuai `docker-compose.yml`):
+The container will automatically create the database, import the schema, and seed demo data on first run. Update `backend/.env` with the following credentials (as defined in `docker-compose.yml`):
 
 ```env
 DB_HOST=localhost
@@ -245,13 +245,13 @@ DB_NAME=it_asset_db
 DB_SSL=false
 ```
 
-Jalankan backend:
+Start the backend:
 
 ```bash
 npm run dev
 ```
 
-Backend berjalan di `http://localhost:3000`
+Backend runs at `http://localhost:3000`
 
 ### 3. Setup Frontend
 
@@ -261,13 +261,13 @@ npm install
 npm run dev
 ```
 
-Frontend berjalan di `http://localhost:5173`
+Frontend runs at `http://localhost:5173`
 
 ---
 
 ## Demo Accounts
 
-Setelah import seed data, gunakan akun berikut untuk login , atau klik salah satu tombol "Login as Demo" di halaman login untuk langsung mencoba tiap role tanpa perlu mengetik kredensial manual.
+After importing the seed data, use the following accounts to log in. You can also click one of the "Login as Demo" buttons on the login page to try each role without entering credentials manually.
 
 | Role        | Email                    | Password    |
 | ----------- | ------------------------ | ----------- |
@@ -277,46 +277,46 @@ Setelah import seed data, gunakan akun berikut untuk login , atau klik salah sat
 
 ---
 
-## Menjalankan Test
+## Running Tests
 
 ```bash
 cd backend
 npm test
 ```
 
-Coverage saat ini: 13 test case mencakup auth, asset, assignment, maintenance, dan analytics.
+Current coverage: 13 test cases covering auth, assets, assignments, maintenance, and analytics.
 
-> Test suite dijalankan secara sequential (`--runInBand`) di CI karena semua suite berbagi satu database yang sama , menjalankannya secara paralel menyebabkan race condition antar suite yang saling memodifikasi data (lihat detail di bagian CI/CD Pipeline).
+> Tests run sequentially (`--runInBand`) in CI because all suites share a single database. Running them in parallel causes race conditions between suites that mutate shared data (see CI/CD Pipeline section for details).
 
 ---
 
 ## CI/CD Pipeline
 
-Backend dan frontend masing-masing punya workflow GitHub Actions terpisah (`backend-ci-cd.yml` dan `frontend-ci-cd.yml`), dengan pola yang sama: **job test/build harus sukses dulu sebelum deploy dijalankan**.
+Backend and frontend each have separate GitHub Actions workflows (`backend-ci-cd.yml` and `frontend-ci-cd.yml`), following the same pattern: **the test/build job must succeed before the deploy job runs**.
 
 ```
-push ke folder terkait (backend/ atau frontend/)
+push to relevant folder (backend/ or frontend/)
         │
         ▼
    job: test/build
-   - backend → jalankan test suite di MySQL service container (ephemeral, terisolasi dari database Aiven)
-   - frontend → jalankan `vite build` untuk memastikan tidak ada error compile
+   - backend → runs test suite against a MySQL service container (ephemeral, isolated from the development database)
+   - frontend → runs `vite build` to catch any compile errors
         │
-        ▼ (hanya lanjut kalau sukses, via `needs`)
+        ▼ (only continues on success, via `needs`)
    job: deploy
-   - curl ke Render Deploy Hook
+   - curl to Render Deploy Hook
         │
         ▼
-   Render pull kode terbaru → build ulang via Dockerfile → deploy
+   Render pulls latest code → rebuilds via Dockerfile → deploys
 ```
 
-Poin penting:
+Key points:
 
-- **Auto-Deploy "On Commit" di Render dimatikan** untuk kedua service. Deploy hanya terjadi lewat Deploy Hook yang dipanggil GitHub Actions, supaya kode yang belum lolos test/build tidak pernah sampai ke production.
-- **Test backend berjalan di MySQL service container**, bukan di database yang dipakai development (TiDB Cloud) , database ini hidup hanya selama job berjalan, di-seed ulang dari `schema.sql` + `seed.sql`, lalu otomatis dibuang setelah selesai.
-- **Build check frontend berjalan di luar Docker** (`vite build` langsung di runner), sehingga hanya menangkap error kode (syntax, import, dsb). Masalah spesifik konfigurasi Docker/env var (mis. `VITE_API_URL` yang perlu `ARG`/`ENV` di Dockerfile) baru tervalidasi saat Render benar-benar melakukan build via Docker, dan tetap perlu dicek manual setelah deploy.
-- Kedua workflow bisa dijalankan manual lewat tab **Actions** di GitHub (`workflow_dispatch`), tanpa perlu menunggu perubahan kode.
-- Deploy Hook URL disimpan sebagai GitHub Secrets (`RENDER_DEPLOY_HOOK_BACKEND`, `RENDER_DEPLOY_HOOK_FRONTEND`), tidak pernah ditulis langsung di file workflow.
+- **Render's "Auto-Deploy on Commit" is disabled** for both services. Deployments only happen via the Deploy Hook triggered by GitHub Actions, ensuring code that fails tests never reaches production.
+- **Backend tests run against a MySQL service container**, not the development database (TiDB Cloud). The container lives only for the duration of the job, is seeded from `schema.sql` + `seed.sql`, and is discarded afterwards.
+- **Frontend build check runs outside Docker** (`vite build` directly on the runner), so it only catches code errors (syntax, imports, etc.). Docker-specific issues such as `VITE_API_URL` requiring `ARG`/`ENV` in the Dockerfile are only validated when Render performs the actual Docker build and still need to be verified manually after deployment.
+- Both workflows can be triggered manually from the **Actions** tab on GitHub (`workflow_dispatch`), without needing a code push.
+- Deploy Hook URLs are stored as GitHub Secrets (`RENDER_DEPLOY_HOOK_BACKEND`, `RENDER_DEPLOY_HOOK_FRONTEND`) and never written directly in workflow files.
 
 ---
 
@@ -324,146 +324,134 @@ Poin penting:
 
 ### Auth
 
-| Method | Endpoint             | Akses         | Deskripsi                  |
-| ------ | -------------------- | ------------- | -------------------------- |
-| POST   | `/api/auth/login`    | Public        | Login, return JWT          |
-| POST   | `/api/auth/activate` | Public        | Aktivasi akun karyawan     |
-| GET    | `/api/auth/me`       | Authenticated | Get user yang sedang login |
+| Method | Endpoint             | Access        | Description                  |
+| ------ | -------------------- | ------------- | ---------------------------- |
+| POST   | `/api/auth/login`    | Public        | Login, returns JWT           |
+| POST   | `/api/auth/activate` | Public        | Activate employee account    |
+| GET    | `/api/auth/me`       | Authenticated | Get currently logged-in user |
 
 ### Employees
 
-| Method | Endpoint             | Akses          | Deskripsi                 |
+| Method | Endpoint             | Access         | Description               |
 | ------ | -------------------- | -------------- | ------------------------- |
-| GET    | `/api/employees`     | Authenticated  | List semua employee aktif |
-| GET    | `/api/employees/:id` | admin, manager | Detail employee           |
-| POST   | `/api/employees`     | asset_admin    | Buat employee baru        |
+| GET    | `/api/employees`     | Authenticated  | List all active employees |
+| GET    | `/api/employees/:id` | admin, manager | Employee detail           |
+| POST   | `/api/employees`     | asset_admin    | Create new employee       |
 | PUT    | `/api/employees/:id` | asset_admin    | Update employee           |
-| DELETE | `/api/employees/:id` | asset_admin    | Deaktivasi employee       |
+| DELETE | `/api/employees/:id` | asset_admin    | Deactivate employee       |
 
 ### Departments
 
-| Method | Endpoint               | Akses         | Deskripsi             |
-| ------ | ---------------------- | ------------- | --------------------- |
-| GET    | `/api/departments`     | Authenticated | List semua department |
-| POST   | `/api/departments`     | asset_admin   | Buat department       |
-| PUT    | `/api/departments/:id` | asset_admin   | Update department     |
-| DELETE | `/api/departments/:id` | asset_admin   | Hapus department      |
+| Method | Endpoint               | Access        | Description          |
+| ------ | ---------------------- | ------------- | -------------------- |
+| GET    | `/api/departments`     | Authenticated | List all departments |
+| POST   | `/api/departments`     | asset_admin   | Create department    |
+| PUT    | `/api/departments/:id` | asset_admin   | Update department    |
+| DELETE | `/api/departments/:id` | asset_admin   | Delete department    |
 
 ### Asset Categories
 
-| Method | Endpoint                | Akses         | Deskripsi           |
+| Method | Endpoint                | Access        | Description         |
 | ------ | ----------------------- | ------------- | ------------------- |
-| GET    | `/api/asset-categories` | Authenticated | List semua kategori |
-| POST   | `/api/asset-categories` | asset_admin   | Buat kategori baru  |
+| GET    | `/api/asset-categories` | Authenticated | List all categories |
+| POST   | `/api/asset-categories` | asset_admin   | Create new category |
 
 ### Assets
 
-| Method | Endpoint                      | Akses          | Deskripsi                                                                          |
-| ------ | ----------------------------- | -------------- | ---------------------------------------------------------------------------------- |
-| GET    | `/api/assets`                 | Authenticated  | List aset (filter: `status`, `category_id`, `department_id`, `search`, pagination , gunakan `limit=all` untuk mengambil semua data tanpa batas) |
-| GET    | `/api/assets/:id`             | Authenticated  | Detail aset                                                                        |
-| POST   | `/api/assets`                 | asset_admin    | Buat aset                                                                          |
-| PUT    | `/api/assets/:id`             | asset_admin    | Update aset                                                                        |
-| PATCH  | `/api/assets/:id/status`      | asset_admin    | Update status aset                                                                 |
-| GET    | `/api/assets/:id/risk-score`  | admin, manager | Risk score aset                                                                    |
-| GET    | `/api/assets/:id/assignments` | admin, manager | Assignment history aset                                                            |
+| Method | Endpoint                      | Access         | Description                                                                                                                            |
+| ------ | ----------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/assets`                 | Authenticated  | List assets (filters: `status`, `category_id`, `department_id`, `search`, pagination; use `limit=all` to fetch all without pagination) |
+| GET    | `/api/assets/:id`             | Authenticated  | Asset detail                                                                                                                           |
+| POST   | `/api/assets`                 | asset_admin    | Create asset                                                                                                                           |
+| PUT    | `/api/assets/:id`             | asset_admin    | Update asset                                                                                                                           |
+| PATCH  | `/api/assets/:id/status`      | asset_admin    | Update asset status                                                                                                                    |
+| GET    | `/api/assets/:id/risk-score`  | admin, manager | Get asset risk score                                                                                                                   |
+| GET    | `/api/assets/:id/assignments` | admin, manager | Asset assignment history                                                                                                               |
 
 ### Asset Assignments
 
-| Method | Endpoint                                | Akses          | Deskripsi                |
-| ------ | --------------------------------------- | -------------- | ------------------------ |
-| GET    | `/api/asset-assignments`                | admin, manager | List semua assignment    |
-| GET    | `/api/asset-assignments/:id`            | Authenticated  | Detail assignment        |
-| GET    | `/api/asset-assignments/my-assignments` | employee       | Assignment milik sendiri |
-| POST   | `/api/asset-assignments`                | asset_admin    | Assign aset ke employee  |
-| PATCH  | `/api/asset-assignments/:id/return`     | asset_admin    | Return aset              |
+| Method | Endpoint                                | Access         | Description                |
+| ------ | --------------------------------------- | -------------- | -------------------------- |
+| GET    | `/api/asset-assignments`                | admin, manager | List all assignments       |
+| GET    | `/api/asset-assignments/:id`            | Authenticated  | Assignment detail          |
+| GET    | `/api/asset-assignments/my-assignments` | employee       | Current user's assignments |
+| POST   | `/api/asset-assignments`                | asset_admin    | Assign asset to employee   |
+| PATCH  | `/api/asset-assignments/:id/return`     | asset_admin    | Return asset               |
 
 ### Maintenance Requests
 
-| Method | Endpoint                                | Akses                 | Deskripsi                |
-| ------ | --------------------------------------- | --------------------- | ------------------------ |
-| GET    | `/api/maintenance-requests`             | admin, manager        | List semua request       |
-| GET    | `/api/maintenance-requests/:id/detail`  | Authenticated         | Detail request           |
-| GET    | `/api/maintenance-requests/my-requests` | employee              | Request milik sendiri    |
-| POST   | `/api/maintenance-requests`             | employee, asset_admin | Buat maintenance request |
-| PATCH  | `/api/maintenance-requests/:id/status`  | asset_admin           | Update status request    |
+| Method | Endpoint                                | Access                | Description                |
+| ------ | --------------------------------------- | --------------------- | -------------------------- |
+| GET    | `/api/maintenance-requests`             | admin, manager        | List all requests          |
+| GET    | `/api/maintenance-requests/:id/detail`  | Authenticated         | Request detail             |
+| GET    | `/api/maintenance-requests/my-requests` | employee              | Current user's requests    |
+| POST   | `/api/maintenance-requests`             | employee, asset_admin | Submit maintenance request |
+| PATCH  | `/api/maintenance-requests/:id/status`  | asset_admin           | Update request status      |
 
 ### Audit Logs
 
-| Method | Endpoint          | Akses          | Deskripsi            |
-| ------ | ----------------- | -------------- | -------------------- |
-| GET    | `/api/audit-logs` | admin, manager | List semua audit log |
+| Method | Endpoint          | Access         | Description         |
+| ------ | ----------------- | -------------- | ------------------- |
+| GET    | `/api/audit-logs` | admin, manager | List all audit logs |
 
 ### Analytics
 
-| Method | Endpoint                                | Akses          | Deskripsi                       |
-| ------ | --------------------------------------- | -------------- | ------------------------------- |
-| GET    | `/api/analytics/overview`               | admin, manager | Ringkasan total aset per status |
-| GET    | `/api/analytics/assets-by-category`     | admin, manager | Distribusi aset per kategori    |
-| GET    | `/api/analytics/assets-by-department`   | admin, manager | Distribusi aset per department  |
-| GET    | `/api/analytics/maintenance-summary`    | admin, manager | Tren maintenance per bulan      |
-| GET    | `/api/analytics/high-risk-assets`       | admin, manager | Daftar aset high risk           |
-| GET    | `/api/analytics/replacement-candidates` | admin, manager | Kandidat aset untuk replacement |
+| Method | Endpoint                                | Access         | Description                      |
+| ------ | --------------------------------------- | -------------- | -------------------------------- |
+| GET    | `/api/analytics/overview`               | admin, manager | Total assets summary by status   |
+| GET    | `/api/analytics/assets-by-category`     | admin, manager | Asset distribution by category   |
+| GET    | `/api/analytics/assets-by-department`   | admin, manager | Asset distribution by department |
+| GET    | `/api/analytics/maintenance-summary`    | admin, manager | Monthly maintenance trend        |
+| GET    | `/api/analytics/high-risk-assets`       | admin, manager | High-risk asset list             |
+| GET    | `/api/analytics/replacement-candidates` | admin, manager | Replacement candidate assets     |
 
 ---
 
 ## Error Handling
 
-| Kasus                         | Response                    |
+| Case                          | Response                    |
 | ----------------------------- | --------------------------- |
 | Duplicate unique value        | `409 Conflict`              |
 | Invalid foreign key           | `400 Bad Request`           |
 | Unauthorized                  | `401 Unauthorized`          |
-| Forbidden (role tidak sesuai) | `403 Forbidden`             |
-| Data tidak ditemukan          | `404 Not Found`             |
+| Forbidden (insufficient role) | `403 Forbidden`             |
+| Data not found                | `404 Not Found`             |
 | Server error                  | `500 Internal Server Error` |
 
 ---
 
 ## Deployment Notes & Troubleshooting
 
-Beberapa isu teknis yang ditemukan selama proses containerization dan deployment, dicatat sebagai referensi jika mengalami masalah serupa.
+Technical issues encountered during containerization and deployment, documented as a reference for similar problems.
 
-### Vite Environment Variable Tidak Ter-bake ke Build
+### Vite Environment Variable Not Baked into Build
 
-**Gejala:** Frontend ter-deploy sukses, tapi request ke backend selalu error `undefined/api/...` , env var yang sudah diset benar di dashboard platform (Render/dsb) seakan tidak terbaca.
+**Symptom:** Frontend deploys successfully, but all backend requests fail with `undefined/api/...`. Environment variables set correctly in the platform dashboard appear to be ignored.
 
-**Penyebab:** Vite meng-inline environment variable (`import.meta.env.VITE_*`) ke dalam bundle JS **saat build time**, bukan saat runtime. Env var yang cuma diset di dashboard platform tidak otomatis tersedia di dalam Docker build context , Docker build berjalan terisolasi dari environment container saat runtime.
+**Cause:** Vite inlines environment variables (`import.meta.env.VITE_*`) into the JS bundle **at build time**, not at runtime. Variables set only in the platform dashboard are not automatically available inside the Docker build context. Docker builds run isolated from the container's runtime environment.
 
-**Solusi:** Deklarasikan env var secara eksplisit di `Dockerfile` menggunakan `ARG` dan `ENV`, lalu teruskan nilainya lewat build argument saat proses build image:
+**Fix:** Declare the variable explicitly in `Dockerfile` using `ARG` and `ENV`, then pass the value as a build argument during the image build:
 
 ```dockerfile
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 ```
 
-Pastikan juga platform deployment diset untuk meneruskan env var dashboard sebagai build argument, bukan cuma runtime environment variable.
+Also ensure the deployment platform is configured to forward the dashboard env var as a build argument, not just as a runtime environment variable.
 
-### CORS Origin Harus Persis Sama dengan Browser
+### CORS Origin Must Match the Browser Exactly
 
-**Gejala:** Request dari frontend ke backend kena CORS error meski `CORS_ORIGIN` sudah diisi.
+**Symptom:** Requests from the frontend to the backend trigger a CORS error even when `CORS_ORIGIN` is set.
 
-**Penyebab:** Browser menghilangkan port default (`:80` untuk HTTP, `:443` untuk HTTPS) dari header `Origin`. Kalau `CORS_ORIGIN` diset dengan port eksplisit (`http://localhost:80`) sementara browser mengirim `http://localhost`, keduanya dianggap origin berbeda.
+**Cause:** Browsers strip default ports (`:80` for HTTP, `:443` for HTTPS) from the `Origin` header. If `CORS_ORIGIN` is set with an explicit port (`http://localhost:80`) while the browser sends `http://localhost`, they are treated as different origins.
 
-**Solusi:** Set `CORS_ORIGIN` tanpa port kalau memakai port default, dan pastikan value ini direferensikan secara eksplisit di file compose/environment config platform deployment , bukan cuma di `.env` lokal.
+**Fix:** Set `CORS_ORIGIN` without the port when using default ports, and make sure this value is referenced explicitly in your compose file or platform environment config, not just in the local `.env`.
 
 ---
 
 ## Known Limitations
 
-- Audit log mencatat ID teknikal, bukan nama entitas.
-- Faktor "durasi under maintenance" belum diimplementasikan di risk scoring.
-- Test suite berjalan sequential (bukan paralel) karena masih berbagi satu database per run , belum dipisah per-test-file dengan database/transaction terisolasi.
-- Belum ada unit test untuk frontend; build check di CI hanya memastikan kode bisa di-compile, bukan validasi behavior.
-
----
-
-## CV Positioning
-
-```
-Internal IT Asset Management & Risk Scoring System
-Built a fullstack web application for managing internal IT assets with role-based access
-control, asset assignment tracking, maintenance workflow, audit logs, operational analytics,
-and rule-based asset risk scoring using Node.js, Express, MySQL, JWT, React, Tailwind CSS,
-and Jest.
-```
+- Audit logs record technical IDs, not entity names.
+- The "duration under maintenance" factor is not yet implemented in risk scoring.
+- Test suite runs sequentially rather than in parallel because all suites share a single database per run. Per-file isolation with dedicated transactions is not yet in place.
+- No frontend unit tests; the CI build check only verifies that the code compiles, not behavioral correctness.

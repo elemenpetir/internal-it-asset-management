@@ -77,7 +77,7 @@ export default function Assignments() {
     }
 
     loadAssignmentData();
-  }, []);
+  }, []); 
 
   const availableAssets = assets.filter(
     (asset) => asset.status === "available",

@@ -455,3 +455,7 @@ Also ensure the deployment platform is configured to forward the dashboard env v
 - The "duration under maintenance" factor is not yet implemented in risk scoring.
 - Test suite runs sequentially rather than in parallel because all suites share a single database per run. Per-file isolation with dedicated transactions is not yet in place.
 - No frontend unit tests; the CI build check only verifies that the code compiles, not behavioral correctness.
+
+## License
+
+MIT

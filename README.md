@@ -28,6 +28,10 @@ A fullstack web application for managing internal IT assets. Covers asset tracki
 - GitHub Actions (CI/CD)
 - Render (backend & frontend hosting)
 
+**Database**
+
+- TiDB Cloud Serverless (MySQL-compatible)
+
 ---
 
 ## Features

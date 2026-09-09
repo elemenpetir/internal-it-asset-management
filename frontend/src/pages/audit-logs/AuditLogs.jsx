@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
+import ArrowIcon from "../../components/ui/ArrowIcon";
 import { getRoleFromToken } from "../../utils/auth";
 
 function formatActionBadge(action) {
@@ -89,7 +90,11 @@ function ChangeDetail({ oldValue, newValue, lookups }) {
           <span className="text-red-500 line-through truncate max-w-15 block">
             {resolveValue(key, oldData[key], lookups).slice(0, 20)}...
           </span>
-          <span className="text-slate-400">→</span>
+          <ArrowIcon
+            direction="right"
+            variant="arrow"
+            className="h-3 w-3 shrink-0 text-slate-400"
+          />
           <span className="text-green-600 truncate max-w-15 block">
             {resolveValue(key, newData[key], lookups).slice(0, 20)}...
           </span>

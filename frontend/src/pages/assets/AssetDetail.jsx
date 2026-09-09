@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { formatDateForDisplay } from "../../utils/date";
 import { getRoleFromToken } from "../../utils/auth";
 import StatusBadge from "../../components/ui/StatusBadge";
+import ArrowIcon from "../../components/ui/ArrowIcon";
 
 function getAgeScore(purchaseDate) {
   const d = new Date(purchaseDate);
@@ -475,7 +476,8 @@ export default function AssetDetail() {
           to="/assets"
           className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700"
         >
-          ← Back to Asset Inventory
+          <ArrowIcon direction="left" className="h-3.5 w-3.5" />
+          Back to Asset Inventory
         </Link>
       </div>
     </section>

@@ -1,5 +1,6 @@
 import StatusBadge from "../../components/ui/StatusBadge";
 import PageHeader from "../../components/ui/PageHeader";
+import ArrowIcon from "../../components/ui/ArrowIcon";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getRoleFromToken } from "../../utils/auth";
@@ -194,9 +195,10 @@ export default function Assets() {
               <button
                 onClick={() => setPage((p) => Math.max(p - 1, 1))}
                 disabled={page === 1}
-                className="rounded-lg border border-slate-200 px-3 py-1 text-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1 text-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                ← Prev
+                <ArrowIcon direction="left" className="h-3 w-3" />
+                Prev
               </button>
               <span className="text-xs">
                 Page {pagination.page} of {pagination.total_pages}
@@ -206,9 +208,10 @@ export default function Assets() {
                   setPage((p) => Math.min(p + 1, pagination.total_pages))
                 }
                 disabled={page === pagination.total_pages}
-                className="rounded-lg border border-slate-200 px-3 py-1 text-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1 text-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Next →
+                Next
+                <ArrowIcon direction="right" className="h-3 w-3" />
               </button>
             </div>
           </div>

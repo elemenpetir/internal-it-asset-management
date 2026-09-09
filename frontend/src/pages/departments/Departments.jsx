@@ -130,8 +130,8 @@ export default function Departments() {
   if (errorMessage) {
     return (
       <section>
-        <h1 className="text-xl font-bold text-slate-900">Departments</h1>
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <h1 className="text-xl font-bold text-slate-100">Departments</h1>
+        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
           {errorMessage}
         </div>
       </section>
@@ -142,8 +142,8 @@ export default function Departments() {
     <section>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Departments</h1>
-          <p className="mt-0.5 text-[13px] text-slate-500 tabular-nums">
+          <h1 className="text-xl font-bold text-slate-100">Departments</h1>
+          <p className="mt-0.5 text-[13px] text-slate-400 tabular-nums">
             {departments.length} departments
           </p>
         </div>
@@ -155,7 +155,7 @@ export default function Departments() {
         )}
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <div className="mt-4 overflow-hidden rounded-lg border border-border bg-card">
         {isLoading ? (
           <div className="space-y-2 p-4">
             <Skeleton className="h-9 w-full" />
@@ -179,10 +179,10 @@ export default function Departments() {
             <TableBody>
               {departments.map((dept) => (
                 <TableRow key={dept.id}>
-                  <TableCell className="font-medium text-slate-800">
+                  <TableCell className="font-medium text-slate-200">
                     {dept.name}
                   </TableCell>
-                  <TableCell className="text-slate-500 tabular-nums">
+                  <TableCell className="text-slate-400 tabular-nums">
                     {new Date(dept.created_at).toLocaleDateString("id-ID", {
                       day: "numeric",
                       month: "long",
@@ -202,7 +202,7 @@ export default function Departments() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-red-600 hover:text-red-700"
+                          className="text-red-400 hover:text-red-300"
                           onClick={() => handleDelete(dept)}
                         >
                           Delete

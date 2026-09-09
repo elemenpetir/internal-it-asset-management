@@ -15,15 +15,15 @@ import {
 
 function formatActionBadge(action) {
   const styles = {
-    CREATE_ASSET: "bg-green-100 text-green-700",
-    UPDATE_ASSET: "bg-blue-100 text-blue-700",
-    UPDATE_ASSET_STATUS: "bg-amber-100 text-amber-700",
-    ASSIGN_ASSET: "bg-blue-100 text-blue-700",
-    RETURN_ASSET: "bg-slate-200 text-slate-600",
-    MAINTENANCE_CREATED: "bg-cyan-100 text-cyan-700",
-    UPDATE_STATUS: "bg-amber-100 text-amber-700",
+    CREATE_ASSET: "bg-green-500/15 text-green-400",
+    UPDATE_ASSET: "bg-blue-500/15 text-blue-400",
+    UPDATE_ASSET_STATUS: "bg-amber-500/15 text-amber-400",
+    ASSIGN_ASSET: "bg-blue-500/15 text-blue-400",
+    RETURN_ASSET: "bg-slate-500/15 text-slate-400",
+    MAINTENANCE_CREATED: "bg-cyan-500/15 text-cyan-400",
+    UPDATE_STATUS: "bg-amber-500/15 text-amber-400",
   };
-  return styles[action] || "bg-slate-200 text-slate-600";
+  return styles[action] || "bg-slate-500/15 text-slate-400";
 }
 
 function parseJson(value) {
@@ -70,7 +70,7 @@ function ChangeDetail({ oldValue, newValue, lookups }) {
 
   if (!oldData) {
     return (
-      <div className="text-[13px] text-slate-600">
+      <div className="text-[13px] text-slate-400">
         {Object.entries(newData)
           .slice(0, 3)
           .map(([key, val]) => (
@@ -99,7 +99,7 @@ function ChangeDetail({ oldValue, newValue, lookups }) {
             {resolveValue(key, oldData[key], lookups).slice(0, 20)}
           </span>
           <ChevronRight className="h-3 w-3 shrink-0 text-slate-300" />
-          <span className="truncate text-green-600">
+          <span className="truncate text-green-400">
             {resolveValue(key, newData[key], lookups).slice(0, 20)}
           </span>
         </div>
@@ -195,8 +195,8 @@ export default function AuditLogs() {
   if (errorMessage) {
     return (
       <section>
-        <h1 className="text-xl font-bold text-slate-900">Audit log</h1>
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <h1 className="text-xl font-bold text-slate-100">Audit log</h1>
+        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
           {errorMessage}
         </div>
       </section>
@@ -215,12 +215,12 @@ export default function AuditLogs() {
 
   return (
     <section>
-      <h1 className="text-xl font-bold text-slate-900">Audit log</h1>
-      <p className="mt-0.5 text-[13px] text-slate-500">
+      <h1 className="text-xl font-bold text-slate-100">Audit log</h1>
+      <p className="mt-0.5 text-[13px] text-slate-400">
         System-wide changes and asset lifecycle transitions.
       </p>
 
-      <div className="mt-4 flex divide-x divide-slate-200 rounded-lg border border-slate-200 bg-white">
+      <div className="mt-4 flex divide-x divide-border rounded-lg border border-border bg-card">
         {[
           ["Total", counts.total],
           ["Assets", counts.asset],
@@ -231,14 +231,14 @@ export default function AuditLogs() {
             <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
               {label}
             </p>
-            <p className="text-lg font-bold text-slate-900 tabular-nums">
+            <p className="text-lg font-bold text-slate-100 tabular-nums">
               {count}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card">
         {isLoading ? (
           <div className="space-y-2 p-4">
             <Skeleton className="h-9 w-full" />
@@ -259,18 +259,18 @@ export default function AuditLogs() {
             <TableBody>
               {auditLogs.map((log) => (
                 <TableRow key={log.id}>
-                  <TableCell className="text-slate-500 tabular-nums whitespace-nowrap">
+                  <TableCell className="text-slate-400 tabular-nums whitespace-nowrap">
                     {log.created_at?.slice(0, 16).replace("T", " ")}
                   </TableCell>
                   <TableCell>
-                    <div className="font-medium text-slate-700">
+                    <div className="font-medium text-slate-300">
                       {formatEntityType(log.entity_type)}
                     </div>
                     <div className="font-mono text-xs text-slate-400 tabular-nums">
                       #{log.entity_id}
                     </div>
                     {log.entity_label && (
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-slate-400">
                         {log.entity_label}
                       </div>
                     )}
@@ -287,7 +287,7 @@ export default function AuditLogs() {
                       lookups={lookups}
                     />
                   </TableCell>
-                  <TableCell className="text-slate-700">
+                  <TableCell className="text-slate-300">
                     {log.changed_by_name}
                   </TableCell>
                 </TableRow>

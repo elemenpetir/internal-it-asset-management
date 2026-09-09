@@ -107,8 +107,8 @@ export default function MaintenanceDetail() {
   if (errorMessage) {
     return (
       <section>
-        <h1 className="text-xl font-bold text-slate-900">Request #{id}</h1>
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <h1 className="text-xl font-bold text-slate-100">Request #{id}</h1>
+        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
           {errorMessage}
         </div>
       </section>
@@ -130,15 +130,15 @@ export default function MaintenanceDetail() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-1.5 text-[13px] text-slate-400">
-            <Link to="/maintenance" className="hover:text-slate-600">
+            <Link to="/maintenance" className="hover:text-slate-400">
               Maintenance
             </Link>
             <span>/</span>
-            <span className="font-mono text-slate-600 tabular-nums">
+            <span className="font-mono text-slate-400 tabular-nums">
               #{id}
             </span>
           </div>
-          <h1 className="mt-1 text-xl font-bold text-slate-900">
+          <h1 className="mt-1 text-xl font-bold text-slate-100">
             Request #{id}
           </h1>
         </div>
@@ -146,7 +146,7 @@ export default function MaintenanceDetail() {
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <div className="rounded-lg border border-border bg-card p-4">
           <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             Overview
           </p>
@@ -154,7 +154,7 @@ export default function MaintenanceDetail() {
             {meta.map(([label, value]) => (
               <div key={label}>
                 <p className="text-xs text-slate-400">{label}</p>
-                <p className="mt-0.5 text-[13px] text-slate-700 tabular-nums">
+                <p className="mt-0.5 text-[13px] text-slate-300 tabular-nums">
                   {value}
                 </p>
               </div>
@@ -163,12 +163,12 @@ export default function MaintenanceDetail() {
         </div>
 
         <div className="space-y-4 lg:col-span-2">
-          <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4">
+          <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground">
               <Monitor className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-900">
+              <p className="text-sm font-semibold text-slate-100">
                 {maintenanceRequest.asset_name}
               </p>
               <p className="font-mono text-xs text-primary">
@@ -177,16 +177,16 @@ export default function MaintenanceDetail() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-4">
-            <h2 className="text-sm font-semibold text-slate-900">Issue</h2>
-            <p className="mt-1.5 border-l-2 border-red-400 pl-3 text-[13px] leading-relaxed text-slate-700">
+          <div className="rounded-lg border border-border bg-card p-4">
+            <h2 className="text-sm font-semibold text-slate-100">Issue</h2>
+            <p className="mt-1.5 border-l-2 border-red-400 pl-3 text-[13px] leading-relaxed text-slate-300">
               {maintenanceRequest.issue_description}
             </p>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-4">
-            <h2 className="text-sm font-semibold text-slate-900">Resolution</h2>
-            <p className="mt-1.5 border-l-2 border-primary pl-3 text-[13px] leading-relaxed text-slate-700">
+          <div className="rounded-lg border border-border bg-card p-4">
+            <h2 className="text-sm font-semibold text-slate-100">Resolution</h2>
+            <p className="mt-1.5 border-l-2 border-primary pl-3 text-[13px] leading-relaxed text-slate-300">
               {maintenanceRequest.resolution_note || (
                 <span className="text-slate-400">No resolution yet.</span>
               )}
@@ -195,8 +195,8 @@ export default function MaintenanceDetail() {
 
           {statusOptions[maintenanceRequest.status] &&
             role === "asset_admin" && (
-              <div className="rounded-lg border border-slate-200 bg-white p-4">
-                <h2 className="text-sm font-semibold text-slate-900">
+              <div className="rounded-lg border border-border bg-card p-4">
+                <h2 className="text-sm font-semibold text-slate-100">
                   Update status
                 </h2>
                 <div className="mt-2.5 flex gap-2">
@@ -238,7 +238,7 @@ export default function MaintenanceDetail() {
       <div className="mt-4">
         <Link
           to="/maintenance"
-          className="inline-flex items-center gap-1 text-[13px] text-slate-500 hover:text-slate-700"
+          className="inline-flex items-center gap-1 text-[13px] text-slate-400 hover:text-slate-300"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to maintenance

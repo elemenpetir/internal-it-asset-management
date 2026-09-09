@@ -178,8 +178,8 @@ export default function Employees() {
   if (errorMessage) {
     return (
       <section>
-        <h1 className="text-xl font-bold text-slate-900">Employees</h1>
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <h1 className="text-xl font-bold text-slate-100">Employees</h1>
+        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
           {errorMessage}
         </div>
       </section>
@@ -190,8 +190,8 @@ export default function Employees() {
     <section>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Employees</h1>
-          <p className="mt-0.5 text-[13px] text-slate-500 tabular-nums">
+          <h1 className="text-xl font-bold text-slate-100">Employees</h1>
+          <p className="mt-0.5 text-[13px] text-slate-400 tabular-nums">
             {employees.length} active employees
           </p>
         </div>
@@ -203,7 +203,7 @@ export default function Employees() {
         )}
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <div className="mt-4 overflow-hidden rounded-lg border border-border bg-card">
         {isLoading ? (
           <div className="space-y-2 p-4">
             <Skeleton className="h-9 w-full" />
@@ -232,16 +232,16 @@ export default function Employees() {
               {employees.map((emp) => (
                 <TableRow key={emp.id}>
                   <TableCell>
-                    <div className="font-medium text-slate-800">{emp.name}</div>
+                    <div className="font-medium text-slate-200">{emp.name}</div>
                     <div className="font-mono text-xs text-slate-400">
                       {emp.employee_number}
                     </div>
                   </TableCell>
-                  <TableCell className="text-slate-600">{emp.email}</TableCell>
-                  <TableCell className="text-slate-600">
+                  <TableCell className="text-slate-400">{emp.email}</TableCell>
+                  <TableCell className="text-slate-400">
                     {getDepartmentName(emp.department_id)}
                   </TableCell>
-                  <TableCell className="text-slate-600">
+                  <TableCell className="text-slate-400">
                     {emp.position}
                   </TableCell>
                   <TableCell>
@@ -260,7 +260,7 @@ export default function Employees() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-red-600 hover:text-red-700"
+                          className="text-red-400 hover:text-red-300"
                           onClick={() => handleDeactivate(emp)}
                         >
                           Deactivate

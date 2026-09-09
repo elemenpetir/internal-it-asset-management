@@ -122,13 +122,13 @@ export default function CreateMaintenance() {
 
   return (
     <section>
-      <h1 className="text-xl font-bold text-slate-900">New request</h1>
-      <p className="mt-0.5 text-[13px] text-slate-500">
+      <h1 className="text-xl font-bold text-slate-100">New request</h1>
+      <p className="mt-0.5 text-[13px] text-slate-400">
         Report a technical issue with assigned equipment.
       </p>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <div className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-2">
+        <div className="rounded-lg border border-border bg-card p-4 lg:col-span-2">
           <form onSubmit={handleSubmit} className="space-y-4">
             {role === "asset_admin" && (
               <div className="space-y-1.5">
@@ -149,7 +149,7 @@ export default function CreateMaintenance() {
                   </Button>
                 </div>
                 {assetError && (
-                  <p className="text-xs text-red-600">{assetError}</p>
+                  <p className="text-xs text-red-400">{assetError}</p>
                 )}
               </div>
             )}
@@ -184,7 +184,7 @@ export default function CreateMaintenance() {
                 </SelectContent>
               </Select>
               {role === "employee" && assetError && (
-                <p className="text-xs text-red-600">{assetError}</p>
+                <p className="text-xs text-red-400">{assetError}</p>
               )}
             </div>
 
@@ -213,8 +213,8 @@ export default function CreateMaintenance() {
           </form>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <h2 className="text-sm font-semibold text-slate-900">How it works</h2>
+        <div className="rounded-lg border border-border bg-card p-4">
+          <h2 className="text-sm font-semibold text-slate-100">How it works</h2>
           <ol className="mt-3 space-y-3">
             {[
               ["Triage", "The team reviews your request."],
@@ -226,10 +226,10 @@ export default function CreateMaintenance() {
                   {i + 1}
                 </span>
                 <div>
-                  <p className="text-[13px] font-medium text-slate-800">
+                  <p className="text-[13px] font-medium text-slate-200">
                     {title}
                   </p>
-                  <p className="text-xs text-slate-500">{text}</p>
+                  <p className="text-xs text-slate-400">{text}</p>
                 </div>
               </li>
             ))}

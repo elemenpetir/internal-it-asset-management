@@ -22,6 +22,7 @@ router.post(
   roleMiddleware("employee", "asset_admin"),
   maintenanceRequestController.getMyActiveAssets,
 );
+// B5: open to all authenticated roles; ownership checked in controller for employee
 router.get(
   "/:id/detail",
   authMiddleware,

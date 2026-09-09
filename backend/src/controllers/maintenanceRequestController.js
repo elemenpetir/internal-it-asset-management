@@ -27,6 +27,17 @@ const getMaintenanceRequestById = async (req, res, next) => {
       });
     }
 
+    // B5: employees may only view their own requests
+    if (req.user.role === "employee") {
+      const employee = await employeeModel.getEmployeeByUserId(req.user.id);
+      if (!employee || employee.id !== maintenanceRequest.requested_by) {
+        return res.status(403).json({
+          status: "failed",
+          message: "you are not allowed to view this maintenance request",
+        });
+      }
+    }
+
     return res.status(200).json({
       status: "success",
       message: "get detail maintenance request successfully",

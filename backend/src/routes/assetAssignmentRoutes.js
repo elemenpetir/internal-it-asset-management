@@ -16,18 +16,20 @@ router.get(
   roleMiddleware("employee"),
   assetAssignmentController.getMyAssignments,
 );
+// B9: manager is read-only per PRD — POST/return restricted to asset_admin
 router.post(
   "/",
   authMiddleware,
-  roleMiddleware("asset_admin", "manager"),
+  roleMiddleware("asset_admin"),
   assetAssignmentController.createAssetAssignment,
 );
 router.patch(
   "/:id/return",
   authMiddleware,
-  roleMiddleware("asset_admin", "manager"),
+  roleMiddleware("asset_admin"),
   assetAssignmentController.returnAssetAssignment,
 );
+// B5: open to all authenticated roles; ownership checked in controller for employee
 router.get(
   "/:id",
   authMiddleware,

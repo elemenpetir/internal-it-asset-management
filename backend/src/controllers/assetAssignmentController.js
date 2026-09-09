@@ -27,6 +27,17 @@ const getAssetAssignmentById = async (req, res, next) => {
       });
     }
 
+    // B5: employees may only view their own assignments
+    if (req.user.role === "employee") {
+      const employee = await employeeModel.getEmployeeByUserId(req.user.id);
+      if (!employee || employee.id !== assignment.employee_id) {
+        return res.status(403).json({
+          status: "failed",
+          message: "you are not allowed to view this assignment",
+        });
+      }
+    }
+
     return res.status(200).json({
       status: "success",
       message: "get detail asset assignment successfully",

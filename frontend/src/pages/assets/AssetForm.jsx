@@ -15,7 +15,7 @@ function Field({ label, error, children }) {
     <div className="space-y-1.5">
       <Label>{label}</Label>
       {children}
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 }
@@ -35,7 +35,7 @@ export default function AssetForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-lg border border-slate-200 bg-white p-5"
+      className="rounded-lg border border-border bg-card p-5"
     >
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Asset code" error={validationErrors.asset_code}>
@@ -78,7 +78,7 @@ export default function AssetForm({
             </SelectContent>
           </Select>
           {categoryError && (
-            <p className="text-xs text-red-600">{categoryError}</p>
+            <p className="text-xs text-red-400">{categoryError}</p>
           )}
         </Field>
 

@@ -68,8 +68,8 @@ export default function Assets() {
   if (errorMessage) {
     return (
       <section>
-        <h1 className="text-xl font-bold text-slate-900">Asset inventory</h1>
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <h1 className="text-xl font-bold text-slate-100">Asset inventory</h1>
+        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
           {errorMessage}
         </div>
       </section>
@@ -80,8 +80,8 @@ export default function Assets() {
     <section>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Asset inventory</h1>
-          <p className="mt-0.5 text-[13px] text-slate-500">
+          <h1 className="text-xl font-bold text-slate-100">Asset inventory</h1>
+          <p className="mt-0.5 text-[13px] text-slate-400">
             Monitor and track company IT assets.
           </p>
         </div>
@@ -103,7 +103,7 @@ export default function Assets() {
               setPage(1);
             }}
             placeholder="Search code, name, brand, serial..."
-            className="bg-white pl-9"
+            className="bg-card pl-9"
           />
         </div>
         <Select
@@ -113,7 +113,7 @@ export default function Assets() {
             setPage(1);
           }}
         >
-          <SelectTrigger className="bg-white md:w-48">
+          <SelectTrigger className="bg-card md:w-48">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>
@@ -126,7 +126,7 @@ export default function Assets() {
         </Select>
       </div>
 
-      <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card">
         {isLoading ? (
           <div className="space-y-2 p-4">
             <Skeleton className="h-9 w-full" />
@@ -157,20 +157,20 @@ export default function Assets() {
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <div className="font-medium text-slate-800">
+                    <div className="font-medium text-slate-200">
                       {asset.name}
                     </div>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-slate-400">
                       {asset.brand} {asset.model}
                     </div>
                   </TableCell>
-                  <TableCell className="text-slate-600">
+                  <TableCell className="text-slate-400">
                     {asset.category_name}
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-slate-500">
+                  <TableCell className="font-mono text-xs text-slate-400">
                     {asset.serial_number}
                   </TableCell>
-                  <TableCell className="text-slate-600">
+                  <TableCell className="text-slate-400">
                     {asset.location}
                   </TableCell>
                   <TableCell>
@@ -187,7 +187,7 @@ export default function Assets() {
         )}
 
         {pagination && (
-          <div className="flex items-center justify-between border-t border-slate-200 px-4 py-2.5 text-[13px] text-slate-500">
+          <div className="flex items-center justify-between border-t border-border px-4 py-2.5 text-[13px] text-slate-400">
             <span className="tabular-nums">
               {assets.length} of {pagination.total}
             </span>

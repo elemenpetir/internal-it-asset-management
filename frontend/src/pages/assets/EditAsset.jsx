@@ -134,8 +134,8 @@ export default function EditAsset() {
   if (errorMessage) {
     return (
       <section>
-        <h1 className="text-xl font-bold text-slate-900">Edit asset</h1>
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <h1 className="text-xl font-bold text-slate-100">Edit asset</h1>
+        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
           {errorMessage}
         </div>
       </section>
@@ -144,8 +144,8 @@ export default function EditAsset() {
 
   return (
     <section>
-      <h1 className="text-xl font-bold text-slate-900">Edit asset</h1>
-      <p className="mt-0.5 text-[13px] text-slate-500">
+      <h1 className="text-xl font-bold text-slate-100">Edit asset</h1>
+      <p className="mt-0.5 text-[13px] text-slate-400">
         Update asset information.
       </p>
       <div className="mt-4">

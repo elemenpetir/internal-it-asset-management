@@ -28,20 +28,20 @@ import {
   YAxis,
 } from "recharts";
 
-const CATEGORY_COLORS = ["#2563eb", "#16a34a", "#d97706", "#0891b2", "#dc2626", "#64748b"];
+const CATEGORY_COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#22d3ee", "#f87171", "#94a3b8"];
 
 const riskBadgeClass = {
-  high: "bg-red-100 text-red-700",
-  medium: "bg-amber-100 text-amber-700",
-  low: "bg-green-100 text-green-700",
+  high: "bg-red-500/15 text-red-400",
+  medium: "bg-amber-500/15 text-amber-400",
+  low: "bg-green-500/15 text-green-400",
 };
 
 function SectionHeader({ title, description }) {
   return (
     <div>
-      <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+      <h2 className="text-base font-semibold text-slate-100">{title}</h2>
       {description && (
-        <p className="mt-0.5 text-[13px] text-slate-500">{description}</p>
+        <p className="mt-0.5 text-[13px] text-slate-400">{description}</p>
       )}
     </div>
   );
@@ -49,16 +49,16 @@ function SectionHeader({ title, description }) {
 
 function SummaryStrip({ items }) {
   return (
-    <div className="flex flex-wrap items-stretch divide-x divide-slate-200 rounded-lg border border-slate-200 bg-white">
+    <div className="flex flex-wrap items-stretch divide-x divide-border rounded-lg border border-border bg-card">
       {items.map((item) => (
         <div key={item.title} className="min-w-36 flex-1 px-5 py-3.5">
           <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             {item.title}
           </p>
-          <p className="mt-1 text-2xl font-bold text-slate-900 tabular-nums">
+          <p className="mt-1 text-2xl font-bold text-slate-100 tabular-nums">
             {item.value}
           </p>
-          <p className="mt-0.5 text-xs text-slate-500">{item.description}</p>
+          <p className="mt-0.5 text-xs text-slate-400">{item.description}</p>
         </div>
       ))}
     </div>
@@ -82,7 +82,7 @@ function AssetCell({ asset }) {
 function RiskCell({ score, level }) {
   return (
     <span className="inline-flex items-center gap-2">
-      <span className="font-bold text-slate-900 tabular-nums">{score}</span>
+      <span className="font-bold text-slate-100 tabular-nums">{score}</span>
       <Badge className={riskBadgeClass[level] || riskBadgeClass.low}>
         {level}
       </Badge>
@@ -281,8 +281,8 @@ export default function Dashboard() {
   if (errorMessage) {
     return (
       <section>
-        <h1 className="text-xl font-bold text-slate-900">Dashboard</h1>
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <h1 className="text-xl font-bold text-slate-100">Dashboard</h1>
+        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
           {errorMessage}
         </div>
       </section>
@@ -291,8 +291,8 @@ export default function Dashboard() {
 
   return (
     <section>
-      <h1 className="text-xl font-bold text-slate-900">Dashboard</h1>
-      <p className="mt-0.5 text-[13px] text-slate-500">
+      <h1 className="text-xl font-bold text-slate-100">Dashboard</h1>
+      <p className="mt-0.5 text-[13px] text-slate-400">
         {role === "employee"
           ? "Your assigned assets and maintenance requests."
           : "Asset status, maintenance activity, and risk indicators."}
@@ -309,7 +309,7 @@ export default function Dashboard() {
               title="High risk assets"
               description="Flagged for maintenance or replacement review."
             />
-            <div className="mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white">
+            <div className="mt-2 overflow-hidden rounded-lg border border-border bg-card">
               {highRiskAssets.length === 0 ? (
                 <p className="p-4 text-[13px] text-slate-400">
                   No high risk assets found.
@@ -330,7 +330,7 @@ export default function Dashboard() {
                         <TableCell>
                           <AssetCell asset={asset} />
                         </TableCell>
-                        <TableCell className="text-slate-600">
+                        <TableCell className="text-slate-400">
                           {asset.status}
                         </TableCell>
                         <TableCell>
@@ -339,7 +339,7 @@ export default function Dashboard() {
                             level={asset.risk_level}
                           />
                         </TableCell>
-                        <TableCell className="text-slate-500">
+                        <TableCell className="text-slate-400">
                           {asset.recommendation}
                         </TableCell>
                       </TableRow>
@@ -355,7 +355,7 @@ export default function Dashboard() {
               title="Replacement candidates"
               description="Over 2 years old with medium or high risk score."
             />
-            <div className="mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white">
+            <div className="mt-2 overflow-hidden rounded-lg border border-border bg-card">
               {replacementCandidates.length === 0 ? (
                 <p className="p-4 text-[13px] text-slate-400">
                   No replacement candidates found.
@@ -376,7 +376,7 @@ export default function Dashboard() {
                         <TableCell>
                           <AssetCell asset={asset} />
                         </TableCell>
-                        <TableCell className="text-slate-500 tabular-nums">
+                        <TableCell className="text-slate-400 tabular-nums">
                           {asset.purchase_date
                             ? asset.purchase_date.toString().slice(0, 10)
                             : "-"}
@@ -387,7 +387,7 @@ export default function Dashboard() {
                             level={asset.risk_level}
                           />
                         </TableCell>
-                        <TableCell className="text-slate-500">
+                        <TableCell className="text-slate-400">
                           {asset.recommendation}
                         </TableCell>
                       </TableRow>
@@ -399,7 +399,7 @@ export default function Dashboard() {
           </div>
 
           <div className="mt-6 grid gap-4 lg:grid-cols-5">
-            <div className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-2">
+            <div className="rounded-lg border border-border bg-card p-4 lg:col-span-2">
               <SectionHeader
                 title="Assets by category"
                 description="Active assets per category."
@@ -425,19 +425,19 @@ export default function Dashboard() {
                         />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: 8, fontSize: 12 }} />
                     <Legend
                       layout="vertical"
                       align="right"
                       verticalAlign="middle"
-                      wrapperStyle={{ fontSize: 12 }}
+                      wrapperStyle={{ fontSize: 12, color: "#94a3b8" }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-3">
+            <div className="rounded-lg border border-border bg-card p-4 lg:col-span-3">
               <SectionHeader
                 title="Assets by department"
                 description="Active assignments per department."
@@ -445,13 +445,13 @@ export default function Dashboard() {
               <div className="mt-2 h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={assetsByDepartment}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                    <XAxis dataKey="department_name" tick={{ fontSize: 12 }} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                    <Tooltip />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                    <XAxis dataKey="department_name" tick={{ fontSize: 12, fill: "#94a3b8" }} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#94a3b8" }} />
+                    <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: 8, fontSize: 12 }} />
                     <Bar
                       dataKey="total_assets"
-                      fill="#2563eb"
+                      fill="#3b82f6"
                       radius={[4, 4, 0, 0]}
                     />
                   </BarChart>
@@ -460,7 +460,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
+          <div className="mt-4 rounded-lg border border-border bg-card p-4">
             <SectionHeader
               title="Maintenance trend"
               description="Monthly requests over the last 6 months."
@@ -468,29 +468,29 @@ export default function Dashboard() {
             <div className="mt-2 h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={[...maintenanceSummary].reverse()}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#94a3b8" }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#94a3b8" }} />
+                  <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: 8, fontSize: 12 }} />
+                  <Legend wrapperStyle={{ fontSize: 12, color: "#94a3b8" }} />
                   <Line
                     type="monotone"
                     dataKey="completed"
-                    stroke="#16a34a"
+                    stroke="#22c55e"
                     strokeWidth={2}
                     dot={false}
                   />
                   <Line
                     type="monotone"
                     dataKey="ongoing"
-                    stroke="#d97706"
+                    stroke="#f59e0b"
                     strokeWidth={2}
                     dot={false}
                   />
                   <Line
                     type="monotone"
                     dataKey="canceled"
-                    stroke="#94a3b8"
+                    stroke="#64748b"
                     strokeWidth={2}
                     dot={false}
                   />

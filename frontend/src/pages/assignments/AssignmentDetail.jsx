@@ -79,8 +79,8 @@ export default function AssignmentDetail() {
   if (errorMessage) {
     return (
       <section>
-        <h1 className="text-xl font-bold text-slate-900">Assignment</h1>
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <h1 className="text-xl font-bold text-slate-100">Assignment</h1>
+        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
           {errorMessage}
         </div>
       </section>
@@ -119,10 +119,10 @@ export default function AssignmentDetail() {
     <section>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-mono text-xl font-bold text-slate-900">
+          <h1 className="font-mono text-xl font-bold text-slate-100">
             {assignment.asset_code}
           </h1>
-          <p className="mt-0.5 text-[13px] text-slate-500">
+          <p className="mt-0.5 text-[13px] text-slate-400">
             {assignment.asset_name}
           </p>
         </div>
@@ -140,12 +140,12 @@ export default function AssignmentDetail() {
         </div>
       </div>
 
-      <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
+      <div className="mt-4 rounded-lg border border-border bg-card p-4">
         <dl className="grid gap-3 md:grid-cols-2">
           {details.map(([label, value]) => (
             <div key={label}>
               <dt className="text-xs text-slate-400">{label}</dt>
-              <dd className="mt-0.5 text-[13px] text-slate-700">{value}</dd>
+              <dd className="mt-0.5 text-[13px] text-slate-300">{value}</dd>
             </div>
           ))}
         </dl>
@@ -154,7 +154,7 @@ export default function AssignmentDetail() {
       <div className="mt-4">
         <Link
           to="/assignments"
-          className="inline-flex items-center gap-1 text-[13px] text-slate-500 hover:text-slate-700"
+          className="inline-flex items-center gap-1 text-[13px] text-slate-400 hover:text-slate-300"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to assignments

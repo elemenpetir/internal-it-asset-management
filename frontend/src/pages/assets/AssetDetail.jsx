@@ -24,9 +24,9 @@ function getAgeScore(purchaseDate) {
 }
 
 const riskBadgeClass = {
-  high: "bg-red-100 text-red-700",
-  medium: "bg-amber-100 text-amber-700",
-  low: "bg-green-100 text-green-700",
+  high: "bg-red-500/15 text-red-400",
+  medium: "bg-amber-500/15 text-amber-400",
+  low: "bg-green-500/15 text-green-400",
 };
 
 function DetailItem({ label, children, mono = false }) {
@@ -34,7 +34,7 @@ function DetailItem({ label, children, mono = false }) {
     <div>
       <p className="text-xs text-slate-400">{label}</p>
       <div
-        className={`mt-1 text-[13px] text-slate-700 ${mono ? "font-mono" : ""}`}
+        className={`mt-1 text-[13px] text-slate-300 ${mono ? "font-mono" : ""}`}
       >
         {children}
       </div>
@@ -155,7 +155,7 @@ export default function AssetDetail() {
   if (errorMessage) {
     return (
       <section>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
           {errorMessage}
         </div>
       </section>
@@ -207,13 +207,13 @@ export default function AssetDetail() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-1.5 text-[13px] text-slate-400">
-            <Link to="/assets" className="hover:text-slate-600">
+            <Link to="/assets" className="hover:text-slate-400">
               Inventory
             </Link>
             <span>/</span>
-            <span className="font-mono text-slate-600">{asset.asset_code}</span>
+            <span className="font-mono text-slate-400">{asset.asset_code}</span>
           </div>
-          <h1 className="mt-1 text-xl font-bold text-slate-900">
+          <h1 className="mt-1 text-xl font-bold text-slate-100">
             {asset.name}
           </h1>
         </div>
@@ -238,7 +238,7 @@ export default function AssetDetail() {
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <div className="rounded-lg border border-border bg-card p-4">
           <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             Overview
           </p>
@@ -259,7 +259,7 @@ export default function AssetDetail() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <div className="rounded-lg border border-border bg-card p-4">
           <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             Specifications
           </p>
@@ -276,19 +276,19 @@ export default function AssetDetail() {
         </div>
 
         {riskScore && (
-          <div className="rounded-lg border border-slate-200 bg-white p-4">
+          <div className="rounded-lg border border-border bg-card p-4">
             <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
               Risk analysis
             </p>
             <div className="mt-3 flex items-center gap-2.5">
-              <span className="text-4xl font-bold text-slate-900 tabular-nums">
+              <span className="text-4xl font-bold text-slate-100 tabular-nums">
                 {riskScore.risk_score}
               </span>
               <Badge className={riskBadgeClass[riskScore.risk_level]}>
                 {riskScore.risk_level}
               </Badge>
             </div>
-            <div className="mt-3 flex h-2 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="mt-3 flex h-2 w-full overflow-hidden rounded-full bg-muted">
               {scoreBreakdown.map((item) => (
                 <div
                   key={item.label}
@@ -308,16 +308,16 @@ export default function AssetDetail() {
               {scoreBreakdown.map((item) => (
                 <div
                   key={item.label}
-                  className="flex justify-between text-xs text-slate-500"
+                  className="flex justify-between text-xs text-slate-400"
                 >
                   <span>{item.label}</span>
-                  <span className="font-semibold text-slate-700 tabular-nums">
+                  <span className="font-semibold text-slate-300 tabular-nums">
                     +{item.value}
                   </span>
                 </div>
               ))}
             </div>
-            <p className="mt-3 rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-500">
+            <p className="mt-3 rounded-md bg-muted px-3 py-2 text-xs text-slate-400">
               {riskScore.recommendation}
             </p>
           </div>
@@ -325,17 +325,17 @@ export default function AssetDetail() {
       </div>
 
       {asset.status === "retired" && (
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700">
+        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-[13px] text-red-400">
           Retired. Kept for historical records; editing is disabled.
         </div>
       )}
 
       {role !== "employee" && (
         <div className="mt-4">
-          <h2 className="text-base font-semibold text-slate-900">
+          <h2 className="text-base font-semibold text-slate-100">
             Assignment history
           </h2>
-          <div className="mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white">
+          <div className="mt-2 overflow-hidden rounded-lg border border-border bg-card">
             {assignmentsLoading ? (
               <div className="space-y-2 p-4">
                 <Skeleton className="h-9 w-full" />
@@ -355,17 +355,17 @@ export default function AssetDetail() {
                   {assignments.map((a) => (
                     <TableRow key={a.id}>
                       <TableCell>
-                        <div className="font-medium text-slate-800">
+                        <div className="font-medium text-slate-200">
                           {a.employee_name}
                         </div>
                         <div className="font-mono text-xs text-slate-400">
                           {a.employee_number}
                         </div>
                       </TableCell>
-                      <TableCell className="text-slate-500 tabular-nums">
+                      <TableCell className="text-slate-400 tabular-nums">
                         {a.assigned_at ? a.assigned_at.slice(0, 10) : "-"}
                       </TableCell>
-                      <TableCell className="text-slate-500 tabular-nums">
+                      <TableCell className="text-slate-400 tabular-nums">
                         {a.returned_at ? a.returned_at.slice(0, 10) : "-"}
                       </TableCell>
                       <TableCell>
@@ -387,7 +387,7 @@ export default function AssetDetail() {
       <div className="mt-4">
         <Link
           to="/assets"
-          className="inline-flex items-center gap-1 text-[13px] text-slate-500 hover:text-slate-700"
+          className="inline-flex items-center gap-1 text-[13px] text-slate-400 hover:text-slate-300"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to inventory

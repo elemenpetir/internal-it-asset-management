@@ -195,10 +195,10 @@ export default function Assignments() {
   if (errorMessage) {
     return (
       <section>
-        <h1 className="text-xl font-bold text-slate-900">
+        <h1 className="text-xl font-bold text-slate-100">
           {isEmployee ? "My assignments" : "Assignments"}
         </h1>
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
           {errorMessage}
         </div>
       </section>
@@ -208,11 +208,11 @@ export default function Assignments() {
   if (isEmployee) {
     return (
       <section>
-        <h1 className="text-xl font-bold text-slate-900">My assignments</h1>
-        <p className="mt-0.5 text-[13px] text-slate-500">
+        <h1 className="text-xl font-bold text-slate-100">My assignments</h1>
+        <p className="mt-0.5 text-[13px] text-slate-400">
           Assets currently and previously assigned to you.
         </p>
-        <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white">
+        <div className="mt-4 overflow-hidden rounded-lg border border-border bg-card">
           {assignments.length > 0 ? (
             <Table>
               <TableHeader>
@@ -227,7 +227,7 @@ export default function Assignments() {
                 {assignments.map((assignment) => (
                   <TableRow key={assignment.id}>
                     <TableCell>
-                      <div className="font-medium text-slate-800">
+                      <div className="font-medium text-slate-200">
                         {assignment.asset_name}
                       </div>
                       <div className="font-mono text-xs text-slate-400">
@@ -237,10 +237,10 @@ export default function Assignments() {
                     <TableCell>
                       <StatusBadge status={assignment.status} />
                     </TableCell>
-                    <TableCell className="text-slate-500 tabular-nums">
+                    <TableCell className="text-slate-400 tabular-nums">
                       {assignment.assigned_at?.slice(0, 10) || "-"}
                     </TableCell>
-                    <TableCell className="text-slate-500 tabular-nums">
+                    <TableCell className="text-slate-400 tabular-nums">
                       {assignment.returned_at?.slice(0, 10) || "-"}
                     </TableCell>
                   </TableRow>
@@ -259,15 +259,15 @@ export default function Assignments() {
 
   return (
     <section>
-      <h1 className="text-xl font-bold text-slate-900">Assignments</h1>
-      <p className="mt-0.5 text-[13px] text-slate-500">
+      <h1 className="text-xl font-bold text-slate-100">Assignments</h1>
+      <p className="mt-0.5 text-[13px] text-slate-400">
         Assign available assets to active employees.
       </p>
 
       <div className={`mt-4 grid gap-4 ${isAdminOnly ? "lg:grid-cols-3" : ""}`}>
         {isAdminOnly && (
-          <div className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-1">
-            <h2 className="text-sm font-semibold text-slate-900">
+          <div className="rounded-lg border border-border bg-card p-4 lg:col-span-1">
+            <h2 className="text-sm font-semibold text-slate-100">
               New assignment
             </h2>
             <form onSubmit={handleSubmit} className="mt-3 space-y-3">
@@ -331,14 +331,14 @@ export default function Assignments() {
         )}
 
         <div
-          className={`overflow-hidden rounded-lg border border-slate-200 bg-white ${isAdminOnly ? "lg:col-span-2" : ""}`}
+          className={`overflow-hidden rounded-lg border border-border bg-card ${isAdminOnly ? "lg:col-span-2" : ""}`}
         >
-          <div className="flex divide-x divide-slate-200 border-b border-slate-200">
+          <div className="flex divide-x divide-border border-b border-border">
             <div className="flex-1 px-4 py-2.5">
               <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
                 Assignments
               </p>
-              <p className="text-lg font-bold text-slate-900 tabular-nums">
+              <p className="text-lg font-bold text-slate-100 tabular-nums">
                 {assignments.length}
               </p>
             </div>
@@ -346,7 +346,7 @@ export default function Assignments() {
               <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
                 Available
               </p>
-              <p className="text-lg font-bold text-slate-900 tabular-nums">
+              <p className="text-lg font-bold text-slate-100 tabular-nums">
                 {availableAssets.length}
               </p>
             </div>
@@ -354,7 +354,7 @@ export default function Assignments() {
               <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
                 Employees
               </p>
-              <p className="text-lg font-bold text-slate-900 tabular-nums">
+              <p className="text-lg font-bold text-slate-100 tabular-nums">
                 {employees.length}
               </p>
             </div>
@@ -382,12 +382,12 @@ export default function Assignments() {
                         {assignment.asset_code ||
                           `Asset #${assignment.asset_id}`}
                       </Link>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-slate-400">
                         {assignment.asset_name || "-"}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="font-medium text-slate-800">
+                      <div className="font-medium text-slate-200">
                         {assignment.employee_name ||
                           `Employee #${assignment.employee_id}`}
                       </div>
@@ -398,7 +398,7 @@ export default function Assignments() {
                     <TableCell>
                       <StatusBadge status={assignment.status} />
                     </TableCell>
-                    <TableCell className="text-slate-500 tabular-nums">
+                    <TableCell className="text-slate-400 tabular-nums">
                       {assignment.assigned_at?.slice(0, 10) || "-"}
                     </TableCell>
                     <TableCell className="text-right">

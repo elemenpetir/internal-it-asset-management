@@ -111,8 +111,8 @@ export default function CreateAsset() {
 
   return (
     <section>
-      <h1 className="text-xl font-bold text-slate-900">New asset</h1>
-      <p className="mt-0.5 text-[13px] text-slate-500">
+      <h1 className="text-xl font-bold text-slate-100">New asset</h1>
+      <p className="mt-0.5 text-[13px] text-slate-400">
         Add an IT asset to the inventory.
       </p>
       <div className="mt-4">

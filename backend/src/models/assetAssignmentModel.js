@@ -135,6 +135,19 @@ const createAssetAssignmentWithTransaction = async (data) => {
   try {
     await connection.beginTransaction();
 
+    // B3: lock the asset row and re-check inside the transaction,
+    // so two parallel POSTs cannot both see "available"
+    const [assetRows] = await connection.query(
+      "SELECT status FROM assets WHERE id = ? FOR UPDATE",
+      [data.asset_id],
+    );
+    if (assetRows.length === 0 || assetRows[0].status !== "available") {
+      await connection.rollback();
+      const conflict = new Error("asset is not available for assignment");
+      conflict.statusCode = 400;
+      throw conflict;
+    }
+
     const insertSql = `INSERT INTO asset_assignments
     (asset_id, employee_id, assigned_by, notes) VALUES (?, ?, ?, ?)`;
     const insertValues = [
@@ -212,6 +225,21 @@ const returnAssetAssignmentWithTransaction = async (
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
+
+    // B7: re-check asset status inside the transaction under lock,
+    // so a return cannot blind-overwrite an in-progress maintenance
+    const [assetRows] = await connection.query(
+      "SELECT status FROM assets WHERE id = ? FOR UPDATE",
+      [assetId],
+    );
+    if (assetRows.length === 0 || assetRows[0].status === "under_maintenance") {
+      await connection.rollback();
+      const conflict = new Error(
+        "cannot return asset that is currently under maintenance",
+      );
+      conflict.statusCode = 400;
+      throw conflict;
+    }
 
     const updateAssignmentSql = `UPDATE asset_assignments 
       SET status = 'returned', returned_at = current_timestamp

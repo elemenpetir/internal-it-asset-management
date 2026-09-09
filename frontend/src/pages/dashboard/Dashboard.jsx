@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getRoleFromToken } from "../../utils/auth";
 import { Badge } from "@/components/ui/badge";
+import StatusBadge from "../../components/ui/StatusBadge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -330,8 +331,8 @@ export default function Dashboard() {
                         <TableCell>
                           <AssetCell asset={asset} />
                         </TableCell>
-                        <TableCell className="text-slate-400">
-                          {asset.status}
+                        <TableCell>
+                          <StatusBadge status={asset.status} />
                         </TableCell>
                         <TableCell>
                           <RiskCell
@@ -339,7 +340,7 @@ export default function Dashboard() {
                             level={asset.risk_level}
                           />
                         </TableCell>
-                        <TableCell className="text-slate-400">
+                        <TableCell className="text-slate-400 capitalize">
                           {asset.recommendation}
                         </TableCell>
                       </TableRow>
@@ -387,7 +388,7 @@ export default function Dashboard() {
                             level={asset.risk_level}
                           />
                         </TableCell>
-                        <TableCell className="text-slate-400">
+                        <TableCell className="text-slate-400 capitalize">
                           {asset.recommendation}
                         </TableCell>
                       </TableRow>

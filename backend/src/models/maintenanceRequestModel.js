@@ -120,7 +120,8 @@ const createMaintenanceRequestWithTransaction = async (data) => {
         issue_description: data.issue_description,
         status: "reported",
       }),
-      data.requested_by,
+      // B4: changed_by is users.id (audit_logs FK), requested_by is employees.id
+      data.changed_by ?? data.requested_by,
     ]);
 
     await connection.commit();
@@ -155,11 +156,34 @@ const updateMaintenanceRequestStatusWithTransaction = async (data) => {
     updateValues.push(data.id);
 
     const [currentData] = await connection.query(
-      "SELECT status, asset_id FROM maintenance_requests WHERE id = ?",
+      "SELECT status, asset_id, requested_by FROM maintenance_requests WHERE id = ?",
       [data.id],
     );
+    // B6: id not found must be 404, not TypeError 500
+    if (currentData.length === 0) {
+      const notFound = new Error("maintenance request not found");
+      notFound.statusCode = 404;
+      throw notFound;
+    }
     const old_status = currentData[0].status;
     const asset_id = currentData[0].asset_id;
+    const requested_by = currentData[0].requested_by;
+
+    // B2: legal transitions only (reported → in_progress → completed/canceled)
+    const allowedTransitions = {
+      reported: ["in_progress", "canceled"],
+      in_progress: ["completed", "canceled"],
+      completed: [],
+      canceled: [],
+    };
+    if (!allowedTransitions[old_status]?.includes(data.status)) {
+      await connection.rollback();
+      const badTransition = new Error(
+        `cannot change status from ${old_status} to ${data.status}`,
+      );
+      badTransition.statusCode = 400;
+      throw badTransition;
+    }
 
     const updateSql = `UPDATE maintenance_requests SET ${updateFields} WHERE id = ?`;
     const [updateMaintenanceRequestResult] = await connection.query(
@@ -167,10 +191,17 @@ const updateMaintenanceRequestStatusWithTransaction = async (data) => {
       updateValues,
     );
 
+    // asset status follows the request, but only if the asset is in a state this
+    // flow controls (B13: never force "assigned" on an unassigned/retired asset)
     let assetStatus;
     if (data.status === "in_progress") assetStatus = "under_maintenance";
-    if (data.status === "completed" || data.status === "canceled")
-      assetStatus = "assigned";
+    if (data.status === "completed" || data.status === "canceled") {
+      const [assetRows] = await connection.query(
+        "SELECT status FROM assets WHERE id = ?",
+        [asset_id],
+      );
+      assetStatus = assetRows[0]?.status === "under_maintenance" ? "assigned" : null;
+    }
 
     if (assetStatus) {
       await connection.query("UPDATE assets SET status = ? WHERE id = ?", [

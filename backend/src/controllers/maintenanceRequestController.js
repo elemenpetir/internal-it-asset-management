@@ -177,11 +177,13 @@ const createMaintenanceRequest = async (req, res, next) => {
     }
 
     const result =
-      await maintenanceRequestModel.createMaintenanceRequestWithTransaction({
-        asset_id,
-        requested_by,
-        issue_description,
-      });
+    // B4: audit_logs.changed_by must reference users.id, not employees.id
+    await maintenanceRequestModel.createMaintenanceRequestWithTransaction({
+      asset_id,
+      requested_by,
+      issue_description,
+      changed_by: req.user.id,
+    });
     return res.status(201).json({
       status: "success",
       message: "maintenance request successfully",

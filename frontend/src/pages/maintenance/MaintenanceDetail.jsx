@@ -171,7 +171,7 @@ export default function MaintenanceDetail() {
               <p className="text-sm font-semibold text-slate-100">
                 {maintenanceRequest.asset_name}
               </p>
-              <p className="font-mono text-xs text-primary">
+              <p className="font-mono text-xs text-link">
                 {maintenanceRequest.asset_code}
               </p>
             </div>

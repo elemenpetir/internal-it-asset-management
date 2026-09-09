@@ -151,7 +151,7 @@ export default function Assets() {
                   <TableCell>
                     <Link
                       to={`/assets/${asset.id}`}
-                      className="font-mono font-medium text-primary hover:underline"
+                      className="font-mono font-medium text-link hover:underline"
                     >
                       {asset.asset_code}
                     </Link>

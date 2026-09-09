@@ -128,7 +128,7 @@ export default function Maintenance() {
                   <TableCell>
                     <Link
                       to={`/maintenance/${request.id}`}
-                      className="font-mono font-medium text-primary tabular-nums hover:underline"
+                      className="font-mono font-medium text-link tabular-nums hover:underline"
                     >
                       #{request.id}
                     </Link>

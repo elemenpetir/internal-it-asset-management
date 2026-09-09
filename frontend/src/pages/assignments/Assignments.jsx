@@ -377,7 +377,7 @@ export default function Assignments() {
                     <TableCell>
                       <Link
                         to={`/assignments/${assignment.id}`}
-                        className="font-mono font-medium text-primary hover:underline"
+                        className="font-mono font-medium text-link hover:underline"
                       >
                         {assignment.asset_code ||
                           `Asset #${assignment.asset_id}`}

@@ -70,7 +70,7 @@ function AssetCell({ asset }) {
     <div>
       <Link
         to={`/assets/${asset.asset_id}`}
-        className="font-medium text-primary hover:underline"
+        className="font-medium text-link hover:underline"
       >
         {asset.asset_name}
       </Link>
@@ -425,7 +425,7 @@ export default function Dashboard() {
                         />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: 8, fontSize: 12 }} />
+                    <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: 8, fontSize: 12 }} labelStyle={{ color: "#f1f5f9" }} itemStyle={{ color: "#cbd5e1" }} />
                     <Legend
                       layout="vertical"
                       align="right"
@@ -448,7 +448,7 @@ export default function Dashboard() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                     <XAxis dataKey="department_name" tick={{ fontSize: 12, fill: "#94a3b8" }} />
                     <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#94a3b8" }} />
-                    <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: 8, fontSize: 12 }} />
+                    <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: 8, fontSize: 12 }} labelStyle={{ color: "#f1f5f9" }} itemStyle={{ color: "#cbd5e1" }} />
                     <Bar
                       dataKey="total_assets"
                       fill="#3b82f6"
@@ -471,7 +471,7 @@ export default function Dashboard() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                   <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#94a3b8" }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#94a3b8" }} />
-                  <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: 8, fontSize: 12 }} />
+                  <Tooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: 8, fontSize: 12 }} labelStyle={{ color: "#f1f5f9" }} itemStyle={{ color: "#cbd5e1" }} />
                   <Legend wrapperStyle={{ fontSize: 12, color: "#94a3b8" }} />
                   <Line
                     type="monotone"

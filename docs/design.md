@@ -14,8 +14,9 @@ dashboard AI: tanpa gradient, glassmorphism, blur, oversized icon, ilustrasi.
 
 | Token              | Nilai       | Penggunaan                        |
 | ------------------ | ----------- | --------------------------------- |
-| Primary 600        | `#2563EB`   | Button, active nav, link, CTA     |
+| Primary 600        | `#2563EB`   | Button fill, active nav, CTA      |
 | Primary 500        | `#3B82F6`   | Hover (dicerahkan untuk dark bg)  |
+| Link               | `#60A5FA`   | Warna teks link (bukan primary: `#2563EB` sebagai teks hanya 3.5 kontras, gagal WCAG AA) |
 | Background         | `#020617`   | Background konten (slate-950)     |
 | Sidebar            | `#0F172A`   | Panel sidebar (slate-900)         |
 | Card               | `#0F172A`   | Tabel, modal, dialog (slate-900)  |

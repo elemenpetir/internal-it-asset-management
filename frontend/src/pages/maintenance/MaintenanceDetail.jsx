@@ -54,6 +54,11 @@ export default function MaintenanceDetail() {
 
   async function handleUpdateStatus() {
     if (!formStatus) return;
+    // B10: completed requires a resolution note before hitting the API
+    if (formStatus === "completed" && !resolutionNote.trim()) {
+      toast.error("Resolution note is required to complete a request.");
+      return;
+    }
     try {
       setIsUpdating(true);
       const token = localStorage.getItem("token");

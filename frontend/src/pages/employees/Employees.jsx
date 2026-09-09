@@ -114,8 +114,15 @@ export default function Employees() {
   }
 
   async function handleSubmit() {
-    if (!form.name.trim() || !form.email.trim()) {
-      toast.error("Name and email are required.");
+    // B10: match backend contract — create needs all 5 fields, update needs status
+    if (
+      !form.name.trim() ||
+      !form.email.trim() ||
+      !form.position.trim() ||
+      !form.department_id ||
+      (modalMode === "create" && !form.employee_number.trim())
+    ) {
+      toast.error("Name, email, position, and department are required.");
       return;
     }
     try {

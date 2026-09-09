@@ -81,6 +81,12 @@ export default function CreateMaintenance() {
       return;
     }
 
+    // B10: admin must supply employee_number before the search can happen
+    if (role === "asset_admin" && !employeeNumber.trim()) {
+      toast.error("Employee number is required to search their assets.");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");

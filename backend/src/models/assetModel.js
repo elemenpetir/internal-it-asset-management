@@ -48,9 +48,10 @@ const getAssets = async ({
 
   if (search) {
     conditions.push(
-      "(assets.asset_code LIKE ? OR assets.name LIKE ? OR assets.brand LIKE ? OR assets.serial_number LIKE ?)",
+      "(LOWER(assets.asset_code) LIKE ? OR LOWER(assets.name) LIKE ? OR LOWER(assets.brand) LIKE ? OR LOWER(assets.serial_number) LIKE ?)",
     );
-    const keyword = `%${search}%`;
+    // ponytail: LOWER() both sides, case-insensitive on any collation (TiDB defaults binary)
+    const keyword = `%${search.toLowerCase()}%`;
     values.push(keyword, keyword, keyword, keyword);
   }
 
@@ -103,9 +104,10 @@ const countAssets = async ({
 
   if (search) {
     conditions.push(
-      "(assets.asset_code LIKE ? OR assets.name LIKE ? OR assets.brand LIKE ? OR assets.serial_number LIKE ?)",
+      "(LOWER(assets.asset_code) LIKE ? OR LOWER(assets.name) LIKE ? OR LOWER(assets.brand) LIKE ? OR LOWER(assets.serial_number) LIKE ?)",
     );
-    const keyword = `%${search}%`;
+    // ponytail: LOWER() both sides, case-insensitive on any collation (TiDB defaults binary)
+    const keyword = `%${search.toLowerCase()}%`;
     values.push(keyword, keyword, keyword, keyword);
   }
 

@@ -54,6 +54,22 @@ describe("ASSET API", () => {
     expect(res.body.status).toBe("success");
     expect(Array.isArray(res.body.data)).toBe(true);
   });
+
+  test("should search assets case-insensitively", async () => {
+    const lower = await request(app)
+      .get("/api/assets?search=test%20laptop")
+      .set("Authorization", `Bearer ${adminToken}`);
+    const upper = await request(app)
+      .get("/api/assets?search=TEST%20LAPTOP")
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(lower.statusCode).toBe(200);
+    expect(upper.statusCode).toBe(200);
+    const lowerCodes = lower.body.data.map((a) => a.asset_code).sort();
+    const upperCodes = upper.body.data.map((a) => a.asset_code).sort();
+    expect(lowerCodes).toEqual(upperCodes);
+    expect(lowerCodes).toContain("AST-TEST-001");
+  });
 });
 
 afterAll(async () => {

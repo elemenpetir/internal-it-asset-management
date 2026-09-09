@@ -35,20 +35,31 @@ export default function Assets() {
   const navigate = useNavigate();
   const role = getRoleFromToken();
   const limit = 10;
+  // ponytail: 400ms debounce, typing "mouse" fires 1 request instead of 5
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
 
   useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const controller = new AbortController();
     const fetchAssets = async () => {
       try {
         setIsLoading(true);
         const params = new URLSearchParams();
-        if (searchTerm) params.append("search", searchTerm);
+        if (debouncedSearch) params.append("search", debouncedSearch);
         if (statusFilter !== "all") params.append("status", statusFilter);
         params.append("page", page);
         params.append("limit", limit);
 
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/api/assets?${params.toString()}`,
-          { headers: { Authorization: `Bearer ${token}` } },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            signal: controller.signal,
+          },
         );
         const result = await response.json();
         if (!response.ok)
@@ -56,14 +67,15 @@ export default function Assets() {
         setAssets(result.data);
         setPagination(result.pagination);
       } catch (error) {
-        setErrorMessage(error.message);
+        if (error.name !== "AbortError") setErrorMessage(error.message);
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     };
 
     fetchAssets();
-  }, [token, searchTerm, statusFilter, page]);
+    return () => controller.abort();
+  }, [token, debouncedSearch, statusFilter, page]);
 
   if (errorMessage) {
     return (

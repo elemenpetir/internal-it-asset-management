@@ -1,20 +1,29 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PageHeader from "../../components/ui/PageHeader";
-import ArrowIcon from "../../components/ui/ArrowIcon";
+import { ChevronRight } from "lucide-react";
 import { getRoleFromToken } from "../../utils/auth";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 function formatActionBadge(action) {
   const styles = {
     CREATE_ASSET: "bg-green-100 text-green-700",
     UPDATE_ASSET: "bg-blue-100 text-blue-700",
     UPDATE_ASSET_STATUS: "bg-amber-100 text-amber-700",
-    ASSIGN_ASSET: "bg-indigo-100 text-indigo-700",
-    RETURN_ASSET: "bg-slate-100 text-slate-700",
-    MAINTENANCE_CREATED: "bg-purple-100 text-purple-700",
-    UPDATE_STATUS: "bg-orange-100 text-orange-700",
+    ASSIGN_ASSET: "bg-blue-100 text-blue-700",
+    RETURN_ASSET: "bg-slate-200 text-slate-600",
+    MAINTENANCE_CREATED: "bg-cyan-100 text-cyan-700",
+    UPDATE_STATUS: "bg-amber-100 text-amber-700",
   };
-  return styles[action] || "bg-slate-100 text-slate-700";
+  return styles[action] || "bg-slate-200 text-slate-600";
 }
 
 function parseJson(value) {
@@ -31,7 +40,8 @@ function parseJson(value) {
 function resolveValue(key, value, lookups) {
   if (value === null || value === undefined) return "-";
   const id = String(value);
-  if (key === "asset_id" && lookups.assets.has(id)) return lookups.assets.get(id);
+  if (key === "asset_id" && lookups.assets.has(id))
+    return lookups.assets.get(id);
   if (
     (key === "employee_id" || key === "requested_by") &&
     lookups.employees.has(id)
@@ -56,19 +66,17 @@ function ChangeDetail({ oldValue, newValue, lookups }) {
   const oldData = parseJson(oldValue);
   const newData = parseJson(newValue);
 
-  if (!newData) return <span className="text-slate-400 text-sm">-</span>;
+  if (!newData) return <span className="text-[13px] text-slate-300">-</span>;
 
   if (!oldData) {
     return (
-      <div className="text-sm text-slate-600">
+      <div className="text-[13px] text-slate-600">
         {Object.entries(newData)
           .slice(0, 3)
           .map(([key, val]) => (
-            <div key={key}>
-              <span className="font-medium text-slate-500">{key}:</span>{" "}
-              <span className="truncate block max-w-40">
-                {resolveValue(key, val, lookups)}
-              </span>
+            <div key={key} className="truncate">
+              <span className="text-slate-400">{key}: </span>
+              {resolveValue(key, val, lookups)}
             </div>
           ))}
       </div>
@@ -80,23 +88,19 @@ function ChangeDetail({ oldValue, newValue, lookups }) {
   );
 
   if (changedKeys.length === 0)
-    return <span className="text-slate-400 text-sm">No changes</span>;
+    return <span className="text-[13px] text-slate-300">No changes</span>;
 
   return (
-    <div className="text-sm space-y-1">
+    <div className="space-y-0.5 text-[13px]">
       {changedKeys.slice(0, 3).map((key) => (
         <div key={key} className="flex items-center gap-1">
-          <span className="font-medium text-slate-500">{key}:</span>
-          <span className="text-red-500 line-through truncate max-w-15 block">
-            {resolveValue(key, oldData[key], lookups).slice(0, 20)}...
+          <span className="shrink-0 text-slate-400">{key}:</span>
+          <span className="truncate text-red-500 line-through">
+            {resolveValue(key, oldData[key], lookups).slice(0, 20)}
           </span>
-          <ArrowIcon
-            direction="right"
-            variant="arrow"
-            className="h-3 w-3 shrink-0 text-slate-400"
-          />
-          <span className="text-green-600 truncate max-w-15 block">
-            {resolveValue(key, newData[key], lookups).slice(0, 20)}...
+          <ChevronRight className="h-3 w-3 shrink-0 text-slate-300" />
+          <span className="truncate text-green-600">
+            {resolveValue(key, newData[key], lookups).slice(0, 20)}
           </span>
         </div>
       ))}
@@ -188,148 +192,113 @@ export default function AuditLogs() {
     loadAuditLogs();
   }, []);
 
-  if (isLoading) {
-    return (
-      <section>
-        <PageHeader
-          title="Audit Logs"
-          description="Monitor system-wide changes and asset lifecycle transitions."
-        />
-        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
-          Loading audit logs...
-        </div>
-      </section>
-    );
-  }
-
   if (errorMessage) {
     return (
       <section>
-        <PageHeader
-          title="Audit Logs"
-          description="Monitor system-wide changes and asset lifecycle transitions."
-        />
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+        <h1 className="text-xl font-bold text-slate-900">Audit log</h1>
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {errorMessage}
         </div>
       </section>
     );
   }
 
+  const counts = {
+    total: auditLogs.length,
+    asset: auditLogs.filter((l) => l.entity_type === "asset").length,
+    assignment: auditLogs.filter((l) => l.entity_type === "asset_assignment")
+      .length,
+    maintenance: auditLogs.filter(
+      (l) => l.entity_type === "maintenance_requests",
+    ).length,
+  };
+
   return (
     <section>
-      <PageHeader
-        title="Audit Logs"
-        description="Monitor system-wide changes and asset lifecycle transitions."
-      />
+      <h1 className="text-xl font-bold text-slate-900">Audit log</h1>
+      <p className="mt-0.5 text-[13px] text-slate-500">
+        System-wide changes and asset lifecycle transitions.
+      </p>
 
-      {/* Summary Cards */}
-      <div className="mt-6 grid gap-4 md:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium uppercase text-slate-400">
-            Total Logs
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">
-            {auditLogs.length}
-          </p>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium uppercase text-slate-400">
-            Asset Changes
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">
-            {auditLogs.filter((l) => l.entity_type === "asset").length}
-          </p>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium uppercase text-slate-400">
-            Assignments
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">
-            {
-              auditLogs.filter((l) => l.entity_type === "asset_assignment")
-                .length
-            }
-          </p>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium uppercase text-slate-400">
-            Maintenance
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">
-            {
-              auditLogs.filter((l) => l.entity_type === "maintenance_requests")
-                .length
-            }
-          </p>
-        </div>
+      <div className="mt-4 flex divide-x divide-slate-200 rounded-lg border border-slate-200 bg-white">
+        {[
+          ["Total", counts.total],
+          ["Assets", counts.asset],
+          ["Assignments", counts.assignment],
+          ["Maintenance", counts.maintenance],
+        ].map(([label, count]) => (
+          <div key={label} className="flex-1 px-4 py-2.5">
+            <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+              {label}
+            </p>
+            <p className="text-lg font-bold text-slate-900 tabular-nums">
+              {count}
+            </p>
+          </div>
+        ))}
       </div>
 
-      {/* Table */}
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-sm">
-            <thead className="bg-slate-50 text-sm uppercase text-slate-500">
-              <tr>
-                <th className="px-4 py-3 font-semibold">Timestamp</th>
-                <th className="px-4 py-3 font-semibold">Entity</th>
-                <th className="px-4 py-3 font-semibold">Action</th>
-                <th className="px-4 py-3 font-semibold">Change Detail</th>
-                <th className="px-4 py-3 font-semibold">Changed By</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {auditLogs.length > 0 ? (
-                auditLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 text-sm text-slate-500 whitespace-nowrap">
-                      {log.created_at?.slice(0, 16).replace("T", " ")}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="text-sm font-medium text-slate-700">
-                        {formatEntityType(log.entity_type)}
+      <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white">
+        {isLoading ? (
+          <div className="space-y-2 p-4">
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-full" />
+          </div>
+        ) : auditLogs.length > 0 ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Timestamp</TableHead>
+                <TableHead>Entity</TableHead>
+                <TableHead>Action</TableHead>
+                <TableHead>Change</TableHead>
+                <TableHead>Changed by</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {auditLogs.map((log) => (
+                <TableRow key={log.id}>
+                  <TableCell className="text-slate-500 tabular-nums whitespace-nowrap">
+                    {log.created_at?.slice(0, 16).replace("T", " ")}
+                  </TableCell>
+                  <TableCell>
+                    <div className="font-medium text-slate-700">
+                      {formatEntityType(log.entity_type)}
+                    </div>
+                    <div className="font-mono text-xs text-slate-400 tabular-nums">
+                      #{log.entity_id}
+                    </div>
+                    {log.entity_label && (
+                      <div className="text-xs text-slate-500">
+                        {log.entity_label}
                       </div>
-                      <div className="text-sm text-slate-400">
-                        #{log.entity_id}
-                      </div>
-                      {log.entity_label && (
-                        <div className="text-xs text-slate-500">
-                          {log.entity_label}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2 py-1 text-sm font-semibold ${formatActionBadge(log.action)}`}
-                      >
-                        {log.action}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 max-w-65">
-                      <ChangeDetail
-                        oldValue={log.old_value}
-                        newValue={log.new_value}
-                        lookups={lookups}
-                      />
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-700">
-                      {log.changed_by_name}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="5"
-                    className="px-4 py-8 text-center text-slate-500"
-                  >
-                    No audit logs found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={formatActionBadge(log.action)}>
+                      {log.action}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="max-w-65">
+                    <ChangeDetail
+                      oldValue={log.old_value}
+                      newValue={log.new_value}
+                      lookups={lookups}
+                    />
+                  </TableCell>
+                  <TableCell className="text-slate-700">
+                    {log.changed_by_name}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <p className="p-8 text-center text-[13px] text-slate-400">
+            No audit logs found.
+          </p>
+        )}
       </div>
     </section>
   );

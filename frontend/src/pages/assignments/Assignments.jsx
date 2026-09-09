@@ -1,8 +1,27 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import PageHeader from "../../components/ui/PageHeader";
+import { toast } from "sonner";
 import { getRoleFromToken } from "../../utils/auth";
-import StatusBadge from '../../components/ui/StatusBadge'
+import StatusBadge from "../../components/ui/StatusBadge";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Assignments() {
   const [assignments, setAssignments] = useState([]);
@@ -15,12 +34,8 @@ export default function Assignments() {
     employee_id: "",
     notes: "",
   });
-  const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [returningId, setReturningId] = useState(null);
-  const [actionError, setActionError] = useState("");
 
   const role = getRoleFromToken();
   const isEmployee = role === "employee";
@@ -77,39 +92,24 @@ export default function Assignments() {
     }
 
     loadAssignmentData();
-  }, []); 
+  }, []);
 
   const availableAssets = assets.filter(
     (asset) => asset.status === "available",
   );
 
-  function handleChange(event) {
-    const { name, value } = event.target;
-    setFormData({ ...formData, [name]: value });
-    setValidationErrors({ ...validationErrors, [name]: "" });
-  }
-
-  function validateForm() {
-    const errors = {};
-    if (!formData.asset_id) errors.asset_id = "Asset is required.";
-    if (!formData.employee_id) errors.employee_id = "Employee is required.";
-    return errors;
+  function handleFieldChange(name, value) {
+    setFormData((current) => ({ ...current, [name]: value }));
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      setSubmitError("");
-      setSuccessMessage("");
+    if (!formData.asset_id || !formData.employee_id) {
+      toast.error("Asset and employee are required.");
       return;
     }
-    setValidationErrors({});
     try {
       setIsSubmitting(true);
-      setSubmitError("");
-      setSuccessMessage("");
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/asset-assignments`,
         {
@@ -126,7 +126,7 @@ export default function Assignments() {
       if (!response.ok)
         throw new Error(result.message || "Failed to assign asset");
       const assignedAssetId = Number(formData.asset_id);
-      setSuccessMessage("Asset assigned successfully.");
+      toast.success("Asset assigned successfully.");
       setFormData({ asset_id: "", employee_id: "", notes: "" });
       setAssignments((current) => [result.data, ...current]);
       setAssets((current) =>
@@ -137,7 +137,7 @@ export default function Assignments() {
         ),
       );
     } catch (error) {
-      setSubmitError(error.message);
+      toast.error(error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -150,8 +150,6 @@ export default function Assignments() {
     if (!confirmed) return;
     try {
       setReturningId(assignment.id);
-      setActionError("");
-      setSuccessMessage("");
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/asset-assignments/${assignment.id}/return`,
         { method: "PATCH", headers },
@@ -177,9 +175,9 @@ export default function Assignments() {
             : asset,
         ),
       );
-      setSuccessMessage("Asset returned successfully.");
+      toast.success("Asset returned successfully.");
     } catch (error) {
-      setActionError(error.message);
+      toast.error(error.message);
     } finally {
       setReturningId(null);
     }
@@ -187,14 +185,9 @@ export default function Assignments() {
 
   if (isLoading) {
     return (
-      <section>
-        <PageHeader
-          title="Asset Assignments"
-          description="Assign available IT assets to active employees."
-        />
-        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
-          Loading assignment data...
-        </div>
+      <section className="space-y-4">
+        <Skeleton className="h-8 w-56" />
+        <Skeleton className="h-64 w-full" />
       </section>
     );
   }
@@ -202,285 +195,237 @@ export default function Assignments() {
   if (errorMessage) {
     return (
       <section>
-        <PageHeader
-          title="Asset Assignments"
-          description="Assign available IT assets to active employees."
-        />
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+        <h1 className="text-xl font-bold text-slate-900">
+          {isEmployee ? "My assignments" : "Assignments"}
+        </h1>
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {errorMessage}
         </div>
       </section>
     );
   }
 
-  // Employee view
   if (isEmployee) {
     return (
       <section>
-        <PageHeader
-          title="My Assignments"
-          description="Riwayat aset yang pernah dan sedang di-assign ke kamu."
-        />
-        <div className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <table className="w-full border-collapse text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-              <tr>
-                <th className="px-4 py-3 font-semibold">Asset</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
-                <th className="px-4 py-3 font-semibold">Assigned At</th>
-                <th className="px-4 py-3 font-semibold">Returned At</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {assignments.length > 0 ? (
-                assignments.map((assignment) => (
-                  <tr key={assignment.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-slate-800 mb-1">
+        <h1 className="text-xl font-bold text-slate-900">My assignments</h1>
+        <p className="mt-0.5 text-[13px] text-slate-500">
+          Assets currently and previously assigned to you.
+        </p>
+        <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white">
+          {assignments.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Asset</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Assigned</TableHead>
+                  <TableHead>Returned</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {assignments.map((assignment) => (
+                  <TableRow key={assignment.id}>
+                    <TableCell>
+                      <div className="font-medium text-slate-800">
                         {assignment.asset_name}
-                      </p>
-                      <p className="text-xs text-slate-400">
+                      </div>
+                      <div className="font-mono text-xs text-slate-400">
                         {assignment.asset_code}
-                      </p>
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={assignment.status}/>
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={assignment.status} />
+                    </TableCell>
+                    <TableCell className="text-slate-500 tabular-nums">
                       {assignment.assigned_at?.slice(0, 10) || "-"}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">
+                    </TableCell>
+                    <TableCell className="text-slate-500 tabular-nums">
                       {assignment.returned_at?.slice(0, 10) || "-"}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="4"
-                    className="px-4 py-8 text-center text-slate-500"
-                  >
-                    No assignments found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="p-8 text-center text-[13px] text-slate-400">
+              No assignments found.
+            </p>
+          )}
         </div>
       </section>
     );
   }
 
-  // Admin/Manager view — layout asli
   return (
     <section>
-      <PageHeader
-        title="Asset Assignments"
-        description="Assign available IT assets to active employees."
-      />
+      <h1 className="text-xl font-bold text-slate-900">Assignments</h1>
+      <p className="mt-0.5 text-[13px] text-slate-500">
+        Assign available assets to active employees.
+      </p>
 
-      <div className={`mt-6 grid gap-6 ${isAdminOnly ? "lg:grid-cols-3" : ""}`}>
+      <div className={`mt-4 grid gap-4 ${isAdminOnly ? "lg:grid-cols-3" : ""}`}>
         {isAdminOnly && (
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-1">
-            <h3 className="text-base font-semibold text-slate-900">
-              New Assignment
-            </h3>
-            <p className="mt-1 text-sm text-slate-500">
-              Select an available asset and assign it to an active employee.
-            </p>
-
-            <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Asset
-                </label>
-                <select
-                  name="asset_id"
+          <div className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-1">
+            <h2 className="text-sm font-semibold text-slate-900">
+              New assignment
+            </h2>
+            <form onSubmit={handleSubmit} className="mt-3 space-y-3">
+              <div className="space-y-1.5">
+                <Label>Asset</Label>
+                <Select
                   value={formData.asset_id}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  onValueChange={(value) =>
+                    handleFieldChange("asset_id", value)
+                  }
                 >
-                  <option value="">Select available asset</option>
-                  {availableAssets.map((asset) => (
-                    <option key={asset.id} value={asset.id}>
-                      {asset.asset_code} ({asset.name})
-                    </option>
-                  ))}
-                </select>
-                {validationErrors.asset_id && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {validationErrors.asset_id}
-                  </p>
-                )}
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select available asset" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableAssets.map((asset) => (
+                      <SelectItem key={asset.id} value={String(asset.id)}>
+                        {asset.asset_code} ({asset.name})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Employee
-                </label>
-                <select
-                  name="employee_id"
+              <div className="space-y-1.5">
+                <Label>Employee</Label>
+                <Select
                   value={formData.employee_id}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  onValueChange={(value) =>
+                    handleFieldChange("employee_id", value)
+                  }
                 >
-                  <option value="">Select employee</option>
-                  {employees.map((employee) => (
-                    <option key={employee.id} value={employee.id}>
-                      {employee.name} ({employee.employee_number})
-                    </option>
-                  ))}
-                </select>
-                {validationErrors.employee_id && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {validationErrors.employee_id}
-                  </p>
-                )}
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select employee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map((employee) => (
+                      <SelectItem key={employee.id} value={String(employee.id)}>
+                        {employee.name} ({employee.employee_number})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Notes
-                </label>
-                <textarea
-                  name="notes"
+              <div className="space-y-1.5">
+                <Label>Notes</Label>
+                <Textarea
                   value={formData.notes}
-                  onChange={handleChange}
-                  rows="3"
-                  placeholder="Optional assignment notes..."
-                  className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  onChange={(e) => handleFieldChange("notes", e.target.value)}
+                  rows={2}
+                  placeholder="Optional notes..."
                 />
               </div>
 
-              {successMessage && (
-                <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-                  {successMessage}
-                </div>
-              )}
-              {submitError && (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                  {submitError}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
-              >
-                {isSubmitting ? "Assigning..." : "Assign Asset"}
-              </button>
+              <Button type="submit" disabled={isSubmitting} className="w-full">
+                {isSubmitting ? "Assigning..." : "Assign asset"}
+              </Button>
             </form>
           </div>
         )}
 
         <div
-          className={`rounded-xl border border-slate-200 bg-white p-6 shadow-sm ${isAdminOnly ? "lg:col-span-2" : ""}`}
+          className={`overflow-hidden rounded-lg border border-slate-200 bg-white ${isAdminOnly ? "lg:col-span-2" : ""}`}
         >
-          <h3 className="text-base font-semibold text-slate-900">
-            Assignment Overview
-          </h3>
-
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-              <p className="text-sm text-slate-500">Assignments</p>
-              <p className="mt-1 text-xl font-semibold text-slate-900">
+          <div className="flex divide-x divide-slate-200 border-b border-slate-200">
+            <div className="flex-1 px-4 py-2.5">
+              <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+                Assignments
+              </p>
+              <p className="text-lg font-bold text-slate-900 tabular-nums">
                 {assignments.length}
               </p>
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-              <p className="text-sm text-slate-500">Available Assets</p>
-              <p className="mt-1 text-xl font-semibold text-slate-900">
+            <div className="flex-1 px-4 py-2.5">
+              <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+                Available
+              </p>
+              <p className="text-lg font-bold text-slate-900 tabular-nums">
                 {availableAssets.length}
               </p>
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-              <p className="text-sm text-slate-500">Available Employees</p>
-              <p className="mt-1 text-xl font-semibold text-slate-900">
+            <div className="flex-1 px-4 py-2.5">
+              <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+                Employees
+              </p>
+              <p className="text-lg font-bold text-slate-900 tabular-nums">
                 {employees.length}
               </p>
             </div>
           </div>
 
-          {actionError && (
-            <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {actionError}
-            </div>
-          )}
-
-          <div className="mt-6 overflow-hidden rounded-xl border border-slate-200">
-            <table className="w-full border-collapse text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Asset</th>
-                  <th className="px-4 py-3 font-semibold">Employee</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 font-semibold">Assigned At</th>
-                  <th className="px-4 py-3 font-semibold">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {assignments.length > 0 ? (
-                  assignments.map((assignment) => (
-                    <tr key={assignment.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-slate-800">
-                        <Link
-                          to={`/assignments/${assignment.id}`}
-                          className="font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+          {assignments.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Asset</TableHead>
+                  <TableHead>Employee</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Assigned</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {assignments.map((assignment) => (
+                  <TableRow key={assignment.id}>
+                    <TableCell>
+                      <Link
+                        to={`/assignments/${assignment.id}`}
+                        className="font-mono font-medium text-primary hover:underline"
+                      >
+                        {assignment.asset_code ||
+                          `Asset #${assignment.asset_id}`}
+                      </Link>
+                      <div className="text-xs text-slate-500">
+                        {assignment.asset_name || "-"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium text-slate-800">
+                        {assignment.employee_name ||
+                          `Employee #${assignment.employee_id}`}
+                      </div>
+                      <div className="font-mono text-xs text-slate-400">
+                        {assignment.employee_number || "-"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={assignment.status} />
+                    </TableCell>
+                    <TableCell className="text-slate-500 tabular-nums">
+                      {assignment.assigned_at?.slice(0, 10) || "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {assignment.status === "active" && isAdminOnly ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleReturnAssignment(assignment)}
+                          disabled={returningId === assignment.id}
                         >
-                          {assignment.asset_code ||
-                            `Asset #${assignment.asset_id}`}
-                        </Link>
-                        <div className="text-xs text-slate-500">
-                          {assignment.asset_name || "-"}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-slate-800">
-                        <div className="font-medium">
-                          {assignment.employee_name ||
-                            `Employee #${assignment.employee_id}`}
-                        </div>
-                        <div className="text-xs text-slate-500">
-                          {assignment.employee_number || "-"}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <StatusBadge status={assignment.status}/>
-                      </td>
-                      <td className="px-4 py-3 text-slate-600">
-                        {assignment.assigned_at?.slice(0, 10) || "-"}
-                      </td>
-                      <td className="px-4 py-3">
-                        {assignment.status === "active" && isAdminOnly ? (
-                          <button
-                            type="button"
-                            onClick={() => handleReturnAssignment(assignment)}
-                            disabled={returningId === assignment.id}
-                            className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100"
-                          >
-                            {returningId === assignment.id
-                              ? "Returning..."
-                              : "Return Asset"}
-                          </button>
-                        ) : (
-                          <span className="text-xs text-slate-400">-</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan="5"
-                      className="px-4 py-8 text-center text-slate-500"
-                    >
-                      No assignments found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                          {returningId === assignment.id
+                            ? "Returning..."
+                            : "Return"}
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-slate-300">-</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="p-8 text-center text-[13px] text-slate-400">
+              No assignments found.
+            </p>
+          )}
         </div>
       </div>
     </section>

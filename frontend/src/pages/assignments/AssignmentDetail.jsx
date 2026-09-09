@@ -1,39 +1,33 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import PageHeader from "../../components/ui/PageHeader";
+import { toast } from "sonner";
+import { ChevronLeft } from "lucide-react";
 import StatusBadge from "../../components/ui/StatusBadge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AssignmentDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [assignment, setAssignment] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [isReturning, setIsReturning] = useState(false);
-  const [actionError, setActionError] = useState("");
-  const [localSuccessMessage, setLocalSuccessMessage] = useState("");
 
   useEffect(() => {
     async function fetchAssignmentDetail() {
       try {
         const token = localStorage.getItem("token");
-
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/api/asset-assignments/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
+          { headers: { Authorization: `Bearer ${token}` } },
         );
-
         const result = await response.json();
-
         if (!response.ok) {
           throw new Error(
             result.message || "Failed to fetch assignment detail",
           );
         }
-
         setAssignment(result.data);
       } catch (error) {
         setErrorMessage(error.message);
@@ -41,7 +35,6 @@ export default function AssignmentDetail() {
         setIsLoading(false);
       }
     }
-
     fetchAssignmentDetail();
   }, [id]);
 
@@ -49,41 +42,26 @@ export default function AssignmentDetail() {
     const confirmed = window.confirm(
       `Return asset ${assignment.asset_code} from ${assignment.employee_name}?`,
     );
-
     if (!confirmed) return;
-
     try {
       setIsReturning(true);
-      setActionError("");
-      setLocalSuccessMessage("");
-
       const token = localStorage.getItem("token");
-
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/asset-assignments/${id}/return`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { method: "PATCH", headers: { Authorization: `Bearer ${token}` } },
       );
-
       const result = await response.json();
-
       if (!response.ok) {
         throw new Error(result.message || "Failed to return asset");
       }
-
       setAssignment({
         ...assignment,
         status: "returned",
         returned_at: new Date().toISOString().slice(0, 10),
       });
-
-      setLocalSuccessMessage("Asset returned successfully.");
+      toast.success("Asset returned successfully.");
     } catch (error) {
-      setActionError(error.message);
+      toast.error(error.message);
     } finally {
       setIsReturning(false);
     }
@@ -91,14 +69,9 @@ export default function AssignmentDetail() {
 
   if (isLoading) {
     return (
-      <section>
-        <PageHeader
-          title="Assignment Detail"
-          description="View detailed information for this asset assignment."
-        />
-        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 text-slate-600 shadow-sm">
-          Loading assignment detail...
-        </div>
+      <section className="space-y-4">
+        <Skeleton className="h-8 w-56" />
+        <Skeleton className="h-64 w-full" />
       </section>
     );
   }
@@ -106,121 +79,86 @@ export default function AssignmentDetail() {
   if (errorMessage) {
     return (
       <section>
-        <PageHeader
-          title="Assignment Detail"
-          description="View detailed information for this asset assignment."
-        />
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
+        <h1 className="text-xl font-bold text-slate-900">Assignment</h1>
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {errorMessage}
         </div>
       </section>
     );
   }
 
+  const details = [
+    ["Asset code", <span className="font-mono">{assignment.asset_code}</span>],
+    ["Asset name", assignment.asset_name],
+    [
+      "Employee",
+      <>
+        {assignment.employee_name}{" "}
+        <span className="font-mono text-xs text-slate-400">
+          ({assignment.employee_number})
+        </span>
+      </>,
+    ],
+    ["Assigned by", assignment.assigned_by_name],
+    [
+      "Assigned at",
+      <span className="tabular-nums">
+        {assignment.assigned_at?.slice(0, 10)}
+      </span>,
+    ],
+    [
+      "Returned at",
+      <span className="tabular-nums">
+        {assignment.returned_at?.slice(0, 10) || "-"}
+      </span>,
+    ],
+    ["Notes", assignment.notes || <span className="text-slate-400">-</span>],
+  ];
+
   return (
     <section>
-      <PageHeader
-        title="Assignment Detail"
-        description="View detailed information for this asset assignment."
-      />
-      {localSuccessMessage && (
-        <div className="mt-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-          {localSuccessMessage}
-        </div>
-      )}
-
-      {actionError && (
-        <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-          {actionError}
-        </div>
-      )}
-
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-5">
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900">
-              {assignment.asset_code}
-            </h3>
-            <p className="mt-1 text-sm text-slate-500">
-              {assignment.asset_name}
-            </p>
-          </div>
-          <StatusBadge status={assignment.status} />
-        </div>
-
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <div>
-            <p className="text-sm font-medium text-slate-500">Asset Code</p>
-            <p className="mt-1 text-sm text-slate-900">
-              {assignment.asset_code}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm font-medium text-slate-500">Asset Name</p>
-            <p className="mt-1 text-sm text-slate-900">
-              {assignment.asset_name}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm font-medium text-slate-500">Employee</p>
-            <p className="mt-1 text-sm text-slate-900">
-              {assignment.employee_name}
-            </p>
-            <p className="text-xs text-slate-500">
-              {assignment.employee_number}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm font-medium text-slate-500">Assigned By</p>
-            <p className="mt-1 text-sm text-slate-900">
-              {assignment.assigned_by_name}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm font-medium text-slate-500">Assigned At</p>
-            <p className="mt-1 text-sm text-slate-900">
-              {assignment.assigned_at?.slice(0, 10)}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm font-medium text-slate-500">Returned At</p>
-            <p className="mt-1 text-sm text-slate-900">
-              {assignment.returned_at?.slice(0, 10) || "-"}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 border-t border-slate-100 pt-5">
-          <p className="text-sm font-medium text-slate-500">Notes</p>
-          <p className="mt-1 text-sm text-slate-900">
-            {assignment.notes || "No notes provided."}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-mono text-xl font-bold text-slate-900">
+            {assignment.asset_code}
+          </h1>
+          <p className="mt-0.5 text-[13px] text-slate-500">
+            {assignment.asset_name}
           </p>
         </div>
-
-        <div className="mt-6 flex items-center justify-between gap-3">
-          <Link
-            to="/assignments"
-            className="inline-flex rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Back to Assignments
-          </Link>
-
+        <div className="flex items-center gap-2">
+          <StatusBadge status={assignment.status} />
           {assignment.status === "active" && (
-            <button
-              type="button"
+            <Button
+              variant="outline"
               onClick={handleReturnAssignment}
               disabled={isReturning}
-              className="inline-flex rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isReturning ? "Returning..." : "Return Asset"}
-            </button>
+              {isReturning ? "Returning..." : "Return asset"}
+            </Button>
           )}
         </div>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
+        <dl className="grid gap-3 md:grid-cols-2">
+          {details.map(([label, value]) => (
+            <div key={label}>
+              <dt className="text-xs text-slate-400">{label}</dt>
+              <dd className="mt-0.5 text-[13px] text-slate-700">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div className="mt-4">
+        <Link
+          to="/assignments"
+          className="inline-flex items-center gap-1 text-[13px] text-slate-500 hover:text-slate-700"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Back to assignments
+        </Link>
       </div>
     </section>
   );

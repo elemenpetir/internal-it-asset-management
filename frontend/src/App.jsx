@@ -22,7 +22,7 @@ import Departments from "./pages/departments/Departments";
 function App() {
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster position="top-center" richColors />
       <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/activate-account" element={<ActivateAccount />} />

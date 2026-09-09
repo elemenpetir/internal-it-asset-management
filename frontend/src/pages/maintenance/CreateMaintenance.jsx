@@ -1,7 +1,18 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { getRoleFromToken } from "../../utils/auth";
-import PageHeader from "../../components/ui/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function CreateMaintenance() {
   const navigate = useNavigate();
@@ -14,7 +25,6 @@ export default function CreateMaintenance() {
   const [isLoadingAssets, setIsLoadingAssets] = useState(false);
   const [assetError, setAssetError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     if (role === "manager") {
@@ -22,7 +32,6 @@ export default function CreateMaintenance() {
     }
   }, [role, navigate]);
 
-  // Auto-fetch assets for employee
   useEffect(() => {
     if (role !== "employee") return;
     fetchAssets();
@@ -67,22 +76,18 @@ export default function CreateMaintenance() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!assetId || !issueDescription) {
-      setSubmitError("Asset and issue description are required.");
+    if (!assetId || !issueDescription.trim()) {
+      toast.error("Asset and issue description are required.");
       return;
     }
 
     try {
       setIsSubmitting(true);
-      setSubmitError("");
-
       const token = localStorage.getItem("token");
-
       const body = {
         asset_id: Number(assetId),
         issue_description: issueDescription,
       };
-
       if (role === "asset_admin") {
         body.employee_number = employeeNumber;
       }
@@ -100,18 +105,16 @@ export default function CreateMaintenance() {
       );
 
       const result = await response.json();
-
       if (!response.ok) {
         throw new Error(
           result.message || "Failed to create maintenance request",
         );
       }
 
-      navigate("/maintenance", {
-        state: { successMessage: "Maintenance request created successfully." },
-      });
+      toast.success("Maintenance request created successfully.");
+      navigate("/maintenance");
     } catch (error) {
-      setSubmitError(error.message);
+      toast.error(error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -119,154 +122,117 @@ export default function CreateMaintenance() {
 
   return (
     <section>
-      <PageHeader
-        title="Create Maintenance Request"
-        description="Report a technical issue with your assigned equipment."
-      />
+      <h1 className="text-xl font-bold text-slate-900">New request</h1>
+      <p className="mt-0.5 text-[13px] text-slate-500">
+        Report a technical issue with assigned equipment.
+      </p>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        {/* Form */}
-        <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Employee Number — admin only */}
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <div className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-2">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {role === "asset_admin" && (
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Employee Number
-                </label>
-                <div className="flex gap-3">
-                  <input
-                    type="text"
+              <div className="space-y-1.5">
+                <Label>Employee number</Label>
+                <div className="flex gap-2">
+                  <Input
                     value={employeeNumber}
                     onChange={(e) => setEmployeeNumber(e.target.value)}
-                    placeholder="e.g. EMP-0001"
-                    className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                    placeholder="EMP-0001"
+                    className="font-mono"
                   />
-                  <button
+                  <Button
                     type="button"
                     onClick={() => fetchAssets(employeeNumber)}
                     disabled={!employeeNumber || isLoadingAssets}
-                    className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
                   >
                     {isLoadingAssets ? "Loading..." : "Search"}
-                  </button>
+                  </Button>
                 </div>
                 {assetError && (
-                  <p className="mt-2 text-sm text-red-600">{assetError}</p>
+                  <p className="text-xs text-red-600">{assetError}</p>
                 )}
               </div>
             )}
 
-            {/* Asset Dropdown */}
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Select Asset
-              </label>
-              <select
+            <div className="space-y-1.5">
+              <Label>Asset</Label>
+              <Select
                 value={assetId}
-                onChange={(e) => setAssetId(e.target.value)}
+                onValueChange={setAssetId}
                 disabled={assets.length === 0}
-                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-50 disabled:text-slate-400"
               >
-                <option value="">
-                  {isLoadingAssets
-                    ? "Loading assets..."
-                    : assets.length === 0
-                      ? "No assets available"
-                      : "Select your asset"}
-                </option>
-                {assets.map((asset) => (
-                  <option key={asset.asset_id} value={asset.asset_id}>
-                    {asset.asset_code} ({asset.asset_name})
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={
+                      isLoadingAssets
+                        ? "Loading assets..."
+                        : assets.length === 0
+                          ? "No assets available"
+                          : "Select asset"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {assets.map((asset) => (
+                    <SelectItem
+                      key={asset.asset_id}
+                      value={String(asset.asset_id)}
+                    >
+                      {asset.asset_code} ({asset.asset_name})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {role === "employee" && assetError && (
-                <p className="mt-2 text-sm text-red-600">{assetError}</p>
+                <p className="text-xs text-red-600">{assetError}</p>
               )}
             </div>
 
-            {/* Issue Description */}
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Issue Description
-              </label>
-              <textarea
+            <div className="space-y-1.5">
+              <Label>Issue description</Label>
+              <Textarea
                 value={issueDescription}
                 onChange={(e) => setIssueDescription(e.target.value)}
-                rows="5"
-                placeholder="Describe the symptoms, when the issue started, and any troubleshooting steps you've already taken..."
-                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                rows={4}
+                placeholder="Symptoms, when it started, steps already taken..."
               />
             </div>
 
-            {submitError && (
-              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                {submitError}
-              </div>
-            )}
-
-            <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
-              <Link
-                to="/maintenance"
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate("/maintenance")}
               >
                 Cancel
-              </Link>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="rounded-lg bg-indigo-600 px-6 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
-              >
-                {isSubmitting ? "Submitting..." : "Submit Request"}
-              </button>
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Submit request"}
+              </Button>
             </div>
           </form>
         </div>
 
-        {/* How it works */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-base font-semibold text-slate-900">
-            How it works
-          </h3>
-          <ol className="mt-4 space-y-4">
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">
-                1
-              </span>
-              <div>
-                <p className="text-sm font-medium text-slate-800">
-                  Ticket Triage
-                </p>
-                <p className="text-xs text-slate-500">
-                  Our team reviews your request and assigns a technician.
-                </p>
-              </div>
-            </li>
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">
-                2
-              </span>
-              <div>
-                <p className="text-sm font-medium text-slate-800">Assessment</p>
-                <p className="text-xs text-slate-500">
-                  A technician may contact you for remote diagnostics or to
-                  schedule a physical drop-off.
-                </p>
-              </div>
-            </li>
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">
-                3
-              </span>
-              <div>
-                <p className="text-sm font-medium text-slate-800">Resolution</p>
-                <p className="text-xs text-slate-500">
-                  Your asset is repaired or replaced. You'll receive a
-                  notification once the asset is ready.
-                </p>
-              </div>
-            </li>
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
+          <h2 className="text-sm font-semibold text-slate-900">How it works</h2>
+          <ol className="mt-3 space-y-3">
+            {[
+              ["Triage", "The team reviews your request."],
+              ["Assessment", "A technician diagnoses the issue."],
+              ["Resolution", "Repaired or replaced, then returned."],
+            ].map(([title, text], i) => (
+              <li key={title} className="flex gap-2.5">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-accent-foreground tabular-nums">
+                  {i + 1}
+                </span>
+                <div>
+                  <p className="text-[13px] font-medium text-slate-800">
+                    {title}
+                  </p>
+                  <p className="text-xs text-slate-500">{text}</p>
+                </div>
+              </li>
+            ))}
           </ol>
         </div>
       </div>

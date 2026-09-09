@@ -1,16 +1,24 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
 import { getRoleFromToken } from "../../utils/auth";
-import PageHeader from "../../components/ui/PageHeader";
 import StatusBadge from "../../components/ui/StatusBadge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function Maintenance() {
   const [maintenanceRequests, setMaintenanceRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const location = useLocation();
   const navigate = useNavigate();
-  const [flashMessage] = useState(location.state?.successMessage || "");
   const role = getRoleFromToken();
 
   useEffect(() => {
@@ -40,12 +48,6 @@ export default function Maintenance() {
     loadMaintenanceData();
   }, [role]);
 
-  useEffect(() => {
-    if (location.state?.successMessage) {
-      navigate(location.pathname, { replace: true, state: null });
-    }
-  }, [location.state, location.pathname, navigate]);
-
   const reportedCount = maintenanceRequests.filter(
     (r) => r.status === "reported",
   ).length;
@@ -56,28 +58,11 @@ export default function Maintenance() {
     (r) => r.status === "completed",
   ).length;
 
-  if (isLoading) {
-    return (
-      <section>
-        <PageHeader
-          title="Maintenance Requests"
-          description="Track and manage asset maintenance requests."
-        />
-        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
-          Loading maintenance data...
-        </div>
-      </section>
-    );
-  }
-
   if (errorMessage) {
     return (
       <section>
-        <PageHeader
-          title="Maintenance Requests"
-          description="Track and manage asset maintenance requests."
-        />
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+        <h1 className="text-xl font-bold text-slate-900">Maintenance</h1>
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {errorMessage}
         </div>
       </section>
@@ -86,114 +71,104 @@ export default function Maintenance() {
 
   return (
     <section>
-      <PageHeader
-        title="Maintenance Requests"
-        description="Track and manage asset maintenance requests."
-      />
-
-      <div className="mt-6 flex items-center justify-between">
-        <div /> {/* spacer */}
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900">Maintenance</h1>
+          <p className="mt-0.5 text-[13px] text-slate-500">
+            Track asset maintenance requests.
+          </p>
+        </div>
         {(role === "employee" || role === "asset_admin") && (
-          <Link
-            to="/maintenance/new"
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-          >
-            + New Request
-          </Link>
+          <Button onClick={() => navigate("/maintenance/new")}>
+            <Plus className="h-4 w-4" />
+            New request
+          </Button>
         )}
       </div>
 
-      {flashMessage && (
-        <div className="mt-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-          {flashMessage}
-        </div>
-      )}
-
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Reported</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">
-            {reportedCount}
-          </p>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">In Progress</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">
-            {inProgressCount}
-          </p>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Completed</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">
-            {completedCount}
-          </p>
-        </div>
+      <div className="mt-4 flex divide-x divide-slate-200 rounded-lg border border-slate-200 bg-white">
+        {[
+          ["Reported", reportedCount],
+          ["In progress", inProgressCount],
+          ["Completed", completedCount],
+        ].map(([label, count]) => (
+          <div key={label} className="flex-1 px-4 py-2.5">
+            <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+              {label}
+            </p>
+            <p className="text-lg font-bold text-slate-900 tabular-nums">
+              {count}
+            </p>
+          </div>
+        ))}
       </div>
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-              <tr>
-                <th className="px-4 py-3 font-semibold">ID</th>
-                <th className="px-4 py-3 font-semibold">Asset</th>
-                <th className="px-4 py-3 font-semibold">Requested By</th>
-                <th className="px-4 py-3 font-semibold">Issue Description</th>
-                <th className="px-4 py-3 font-semibold">Date</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {maintenanceRequests.length > 0 ? (
-                maintenanceRequests.map((request) => (
-                  <tr key={request.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-mono text-xs text-indigo-600 font-bold">
-                      <Link to={`/maintenance/${request.id}`}>
-                        #{request.id}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-slate-800">
-                        {request.asset_name}
-                      </div>
-                      <div className="text-xs text-slate-500">
-                        {request.asset_code || "-"}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-slate-800">
-                      <div className="font-medium text-slate-800">
-                        {request.requested_by_name}
-                      </div>
-                      <div className="text-xs text-slate-500">
-                        {request.employee_number || "-"}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-slate-500 max-w-60 truncate">
-                      {request.issue_description}
-                    </td>
-                    <td className="px-4 py-3 text-slate-500">
-                      {request.created_at
-                        ? request.created_at.slice(0, 10)
-                        : "-"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={request.status} />
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="px-4 py-8 text-center text-slate-500"
-                  >
-                    No maintenance requests found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white">
+        {isLoading ? (
+          <div className="space-y-2 p-4">
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-full" />
+          </div>
+        ) : maintenanceRequests.length > 0 ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-14">ID</TableHead>
+                <TableHead>Asset</TableHead>
+                <TableHead>Requested by</TableHead>
+                <TableHead>Issue</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {maintenanceRequests.map((request) => (
+                <TableRow key={request.id}>
+                  <TableCell>
+                    <Link
+                      to={`/maintenance/${request.id}`}
+                      className="font-mono font-medium text-primary tabular-nums hover:underline"
+                    >
+                      #{request.id}
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    <div className="font-medium text-slate-800">
+                      {request.asset_name}
+                    </div>
+                    <div className="font-mono text-xs text-slate-400">
+                      {request.asset_code || "-"}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="font-medium text-slate-800">
+                      {request.requested_by_name}
+                    </div>
+                    <div className="font-mono text-xs text-slate-400">
+                      {request.employee_number || "-"}
+                    </div>
+                  </TableCell>
+                  <TableCell className="max-w-60 truncate text-slate-500">
+                    {request.issue_description}
+                  </TableCell>
+                  <TableCell className="text-slate-500 tabular-nums">
+                    {request.created_at
+                      ? request.created_at.slice(0, 10)
+                      : "-"}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={request.status} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <p className="p-8 text-center text-[13px] text-slate-400">
+            No maintenance requests found.
+          </p>
+        )}
       </div>
     </section>
   );

@@ -1,17 +1,28 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { ChevronLeft, Monitor } from "lucide-react";
 import { getRoleFromToken } from "../../utils/auth";
-import PageHeader from "../../components/ui/PageHeader";
 import StatusBadge from "../../components/ui/StatusBadge";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function MaintenanceDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [maintenanceRequest, setMaintenanceRequest] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
-  const [updateError, setUpdateError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [formStatus, setFormStatus] = useState("");
   const [resolutionNote, setResolutionNote] = useState("");
   const role = getRoleFromToken();
@@ -45,8 +56,6 @@ export default function MaintenanceDetail() {
     if (!formStatus) return;
     try {
       setIsUpdating(true);
-      setUpdateError("");
-      setSuccessMessage("");
       const token = localStorage.getItem("token");
       const body = { status: formStatus };
       if (formStatus === "completed") body.resolution_note = resolutionNote;
@@ -76,11 +85,11 @@ export default function MaintenanceDetail() {
             ? new Date().toISOString()
             : maintenanceRequest.completed_at,
       });
-      setSuccessMessage("Status updated successfully.");
+      toast.success("Status updated successfully.");
       setFormStatus("");
       setResolutionNote("");
     } catch (error) {
-      setUpdateError(error.message);
+      toast.error(error.message);
     } finally {
       setIsUpdating(false);
     }
@@ -88,11 +97,9 @@ export default function MaintenanceDetail() {
 
   if (isLoading) {
     return (
-      <section>
-        <PageHeader title="Request Details" description="" />
-        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 text-slate-600 shadow-sm">
-          Loading...
-        </div>
+      <section className="space-y-4">
+        <Skeleton className="h-8 w-56" />
+        <Skeleton className="h-64 w-full" />
       </section>
     );
   }
@@ -100,203 +107,142 @@ export default function MaintenanceDetail() {
   if (errorMessage) {
     return (
       <section>
-        <PageHeader title="Request Details" description="" />
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
+        <h1 className="text-xl font-bold text-slate-900">Request #{id}</h1>
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {errorMessage}
         </div>
       </section>
     );
   }
 
+  const meta = [
+    ["Submitted", maintenanceRequest.created_at?.slice(0, 10) || "-"],
+    ["Completed", maintenanceRequest.completed_at?.slice(0, 10) || "-"],
+    [
+      "Requested by",
+      `${maintenanceRequest.requested_by_name} (${maintenanceRequest.employee_number})`,
+    ],
+    ["Handled by", maintenanceRequest.handled_by_name || "-"],
+  ];
+
   return (
     <section>
-      {/* Header */}
-      <div className="mb-6 flex items-end justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <nav className="mb-1 flex items-center gap-1 text-xs text-slate-500">
-            <Link to="/maintenance" className="hover:text-indigo-600">
+          <div className="flex items-center gap-1.5 text-[13px] text-slate-400">
+            <Link to="/maintenance" className="hover:text-slate-600">
               Maintenance
             </Link>
             <span>/</span>
-            <span className="font-medium text-slate-700">#{id}</span>
-          </nav>
-          <h2 className="text-2xl font-bold text-slate-900">Request Details</h2>
+            <span className="font-mono text-slate-600 tabular-nums">
+              #{id}
+            </span>
+          </div>
+          <h1 className="mt-1 text-xl font-bold text-slate-900">
+            Request #{id}
+          </h1>
         </div>
-        <div className="flex items-center gap-3">
-          <StatusBadge status={maintenanceRequest.status} />
-          <Link
-            to="/maintenance"
-            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Back
-          </Link>
-        </div>
+        <StatusBadge status={maintenanceRequest.status} />
       </div>
 
-      {successMessage && (
-        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-          {successMessage}
-        </div>
-      )}
-      {updateError && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-          {updateError}
-        </div>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Overview Card */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-base font-semibold text-slate-900">
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
+          <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             Overview
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs font-medium uppercase text-slate-400">
-                Status
-              </p>
-              <div className="mt-1">
-                <StatusBadge status={maintenanceRequest.status} />
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase text-slate-400">
-                Submitted
-              </p>
-              <p className="mt-1 text-sm font-semibold text-slate-800">
-                {maintenanceRequest.created_at?.slice(0, 10)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase text-slate-400">
-                Completed At
-              </p>
-              <p className="mt-1 text-sm font-semibold text-slate-800">
-                {maintenanceRequest.completed_at?.slice(0, 10) || "-"}
-              </p>
-            </div>
-            <div className="border-t border-slate-100 pt-4">
-              <p className="text-xs font-medium uppercase text-slate-400">
-                Requested By
-              </p>
-              <div className="mt-2">
-                <p className="text-sm font-bold text-slate-800">
-                  {maintenanceRequest.requested_by_name}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {maintenanceRequest.employee_number}
+          </p>
+          <div className="mt-3 space-y-3">
+            {meta.map(([label, value]) => (
+              <div key={label}>
+                <p className="text-xs text-slate-400">{label}</p>
+                <p className="mt-0.5 text-[13px] text-slate-700 tabular-nums">
+                  {value}
                 </p>
               </div>
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase text-slate-400">
-                Handled By
-              </p>
-              <p className="mt-1 text-sm font-semibold text-slate-800">
-                {maintenanceRequest.handled_by_name || "-"}
-              </p>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="space-y-6 lg:col-span-2">
-          {/* Asset Card */}
-          <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
+        <div className="space-y-4 lg:col-span-2">
+          <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground">
+              <Monitor className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-medium uppercase text-slate-400">
-                Linked Asset
-              </p>
-              <p className="text-base font-bold text-slate-900">
+              <p className="text-sm font-semibold text-slate-900">
                 {maintenanceRequest.asset_name}
               </p>
-              <p className="text-sm font-semibold text-indigo-600">
+              <p className="font-mono text-xs text-primary">
                 {maintenanceRequest.asset_code}
               </p>
             </div>
           </div>
 
-          {/* Issue Description */}
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="mb-3 text-base font-semibold text-slate-900">
-              Issue Description
-            </h3>
-            <div className="rounded-lg border-l-4 border-red-400 bg-slate-50 p-4">
-              <p className="text-sm text-slate-700 leading-relaxed">
-                {maintenanceRequest.issue_description}
-              </p>
-            </div>
+          <div className="rounded-lg border border-slate-200 bg-white p-4">
+            <h2 className="text-sm font-semibold text-slate-900">Issue</h2>
+            <p className="mt-1.5 border-l-2 border-red-400 pl-3 text-[13px] leading-relaxed text-slate-700">
+              {maintenanceRequest.issue_description}
+            </p>
           </div>
 
-          {/* Resolution Note */}
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="mb-3 text-base font-semibold text-slate-900">
-              Resolution Note
-            </h3>
-            <div className="rounded-lg border-l-4 border-indigo-400 bg-slate-50 p-4">
-              <p className="text-sm text-slate-700 leading-relaxed italic">
-                {maintenanceRequest.resolution_note ||
-                  "No resolution note provided yet."}
-              </p>
-            </div>
-          </div>
-
-          {/* Update Status */}
-          {statusOptions[maintenanceRequest.status] && role === "asset_admin" && (
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h3 className="mb-4 text-base font-semibold text-slate-900">
-                Update Status
-              </h3>
-              <div className="flex items-center gap-3">
-                <select
-                  value={formStatus}
-                  onChange={(e) => setFormStatus(e.target.value)}
-                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                >
-                  <option value="">Select new status</option>
-                  {statusOptions[maintenanceRequest.status].map((s) => (
-                    <option key={s} value={s}>
-                      {s.replace("_", " ")}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  onClick={handleUpdateStatus}
-                  disabled={!formStatus || isUpdating}
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
-                >
-                  {isUpdating ? "Updating..." : "Update Status"}
-                </button>
-              </div>
-              {formStatus === "completed" && (
-                <textarea
-                  value={resolutionNote}
-                  onChange={(e) => setResolutionNote(e.target.value)}
-                  rows="3"
-                  placeholder="Resolution notes..."
-                  className="mt-3 w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                />
+          <div className="rounded-lg border border-slate-200 bg-white p-4">
+            <h2 className="text-sm font-semibold text-slate-900">Resolution</h2>
+            <p className="mt-1.5 border-l-2 border-primary pl-3 text-[13px] leading-relaxed text-slate-700">
+              {maintenanceRequest.resolution_note || (
+                <span className="text-slate-400">No resolution yet.</span>
               )}
-            </div>
-          )}
+            </p>
+          </div>
+
+          {statusOptions[maintenanceRequest.status] &&
+            role === "asset_admin" && (
+              <div className="rounded-lg border border-slate-200 bg-white p-4">
+                <h2 className="text-sm font-semibold text-slate-900">
+                  Update status
+                </h2>
+                <div className="mt-2.5 flex gap-2">
+                  <Select value={formStatus} onValueChange={setFormStatus}>
+                    <SelectTrigger className="max-w-56">
+                      <SelectValue placeholder="Select new status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statusOptions[maintenanceRequest.status].map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s.replace("_", " ")}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    onClick={handleUpdateStatus}
+                    disabled={!formStatus || isUpdating}
+                  >
+                    {isUpdating ? "Updating..." : "Update"}
+                  </Button>
+                </div>
+                {formStatus === "completed" && (
+                  <div className="mt-2.5 space-y-1.5">
+                    <Label>Resolution note</Label>
+                    <Textarea
+                      value={resolutionNote}
+                      onChange={(e) => setResolutionNote(e.target.value)}
+                      rows={3}
+                      placeholder="What was done to resolve the issue..."
+                    />
+                  </div>
+                )}
+              </div>
+            )}
         </div>
+      </div>
+
+      <div className="mt-4">
+        <Link
+          to="/maintenance"
+          className="inline-flex items-center gap-1 text-[13px] text-slate-500 hover:text-slate-700"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Back to maintenance
+        </Link>
       </div>
     </section>
   );

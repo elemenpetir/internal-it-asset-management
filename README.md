@@ -334,6 +334,12 @@ Key points:
 | POST   | `/api/auth/activate` | Public        | Activate employee account    |
 | GET    | `/api/auth/me`       | Authenticated | Get currently logged-in user |
 
+### Users
+
+| Method | Endpoint     | Access         | Description                          |
+| ------ | ------------ | -------------- | ------------------------------------ |
+| GET    | `/api/users` | admin, manager | Minimal user directory (`id`, `name`) |
+
 ### Employees
 
 | Method | Endpoint             | Access         | Description               |

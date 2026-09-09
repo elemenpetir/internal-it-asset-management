@@ -42,8 +42,15 @@ const activateEmployeeWithTransaction = async (employeeId, userData) => {
   }
 };
 
+const getAllUsersMinimal = async () => {
+  const sql = `SELECT id, name FROM users ORDER BY name`;
+  const [rows] = await db.query(sql);
+  return rows;
+};
+
 module.exports = {
   findUserByEmail,
   findEmployeeForActivation,
   activateEmployeeWithTransaction,
+  getAllUsersMinimal,
 };

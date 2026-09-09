@@ -177,7 +177,7 @@ export default function CreateMaintenance() {
                 </option>
                 {assets.map((asset) => (
                   <option key={asset.asset_id} value={asset.asset_id}>
-                    {asset.asset_code} — {asset.asset_name}
+                    {asset.asset_code} ({asset.asset_name})
                   </option>
                 ))}
               </select>

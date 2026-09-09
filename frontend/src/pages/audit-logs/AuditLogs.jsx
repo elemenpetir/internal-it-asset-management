@@ -26,10 +26,9 @@ function parseJson(value) {
 }
 
 // Foreign keys stored as technical IDs in old_value/new_value JSON.
-// Resolve the known ones to human-readable labels; user IDs have no
-// list endpoint, so they fall back to a labeled "User #id".
+// Resolve the known ones to human-readable labels via lookup maps.
 function resolveValue(key, value, lookups) {
-  if (value === null || value === undefined) return "—";
+  if (value === null || value === undefined) return "-";
   const id = String(value);
   if (key === "asset_id" && lookups.assets.has(id)) return lookups.assets.get(id);
   if (
@@ -39,6 +38,11 @@ function resolveValue(key, value, lookups) {
     return lookups.employees.get(id);
   if (key === "category_id" && lookups.categories.has(id))
     return lookups.categories.get(id);
+  if (
+    (key === "assigned_by" || key === "handled_by" || key === "changed_by") &&
+    lookups.users.has(id)
+  )
+    return lookups.users.get(id);
   if (
     (key === "assigned_by" || key === "handled_by" || key === "changed_by") &&
     /^\d+$/.test(id)
@@ -51,7 +55,7 @@ function ChangeDetail({ oldValue, newValue, lookups }) {
   const oldData = parseJson(oldValue);
   const newData = parseJson(newValue);
 
-  if (!newData) return <span className="text-slate-400 text-sm">—</span>;
+  if (!newData) return <span className="text-slate-400 text-sm">-</span>;
 
   if (!oldData) {
     return (
@@ -110,6 +114,7 @@ export default function AuditLogs() {
     assets: new Map(),
     employees: new Map(),
     categories: new Map(),
+    users: new Map(),
   });
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -128,12 +133,13 @@ export default function AuditLogs() {
         const token = localStorage.getItem("token");
         const headers = { Authorization: `Bearer ${token}` };
         const base = import.meta.env.VITE_API_URL;
-        const [logsRes, assetsRes, employeesRes, categoriesRes] =
+        const [logsRes, assetsRes, employeesRes, categoriesRes, usersRes] =
           await Promise.all([
             fetch(`${base}/api/audit-logs`, { headers }),
             fetch(`${base}/api/assets?limit=all`, { headers }),
             fetch(`${base}/api/employees`, { headers }),
             fetch(`${base}/api/asset-categories`, { headers }),
+            fetch(`${base}/api/users`, { headers }),
           ]);
         const result = await logsRes.json();
         if (!logsRes.ok) {
@@ -141,17 +147,18 @@ export default function AuditLogs() {
         }
         setAuditLogs(result.data);
         // ponytail: best-effort lookups, table still renders on failure
-        const [assetsResult, employeesResult, categoriesResult] =
+        const [assetsResult, employeesResult, categoriesResult, usersResult] =
           await Promise.all([
             assetsRes.ok ? assetsRes.json() : null,
             employeesRes.ok ? employeesRes.json() : null,
             categoriesRes.ok ? categoriesRes.json() : null,
+            usersRes.ok ? usersRes.json() : null,
           ]);
         setLookups({
           assets: new Map(
             (assetsResult?.data || []).map((a) => [
               String(a.id),
-              `${a.asset_code} — ${a.name}`,
+              `${a.asset_code} (${a.name})`,
             ]),
           ),
           employees: new Map(
@@ -162,6 +169,9 @@ export default function AuditLogs() {
           ),
           categories: new Map(
             (categoriesResult?.data || []).map((c) => [String(c.id), c.name]),
+          ),
+          users: new Map(
+            (usersResult?.data || []).map((u) => [String(u.id), u.name]),
           ),
         });
       } catch (error) {

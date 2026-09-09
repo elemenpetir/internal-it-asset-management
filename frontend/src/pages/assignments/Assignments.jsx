@@ -303,7 +303,7 @@ export default function Assignments() {
                   <option value="">Select available asset</option>
                   {availableAssets.map((asset) => (
                     <option key={asset.id} value={asset.id}>
-                      {asset.asset_code} — {asset.name}
+                      {asset.asset_code} ({asset.name})
                     </option>
                   ))}
                 </select>
@@ -327,7 +327,7 @@ export default function Assignments() {
                   <option value="">Select employee</option>
                   {employees.map((employee) => (
                     <option key={employee.id} value={employee.id}>
-                      {employee.name} — {employee.employee_number}
+                      {employee.name} ({employee.employee_number})
                     </option>
                   ))}
                 </select>
@@ -463,7 +463,7 @@ export default function Assignments() {
                               : "Return Asset"}
                           </button>
                         ) : (
-                          <span className="text-xs text-slate-400">—</span>
+                          <span className="text-xs text-slate-400">-</span>
                         )}
                       </td>
                     </tr>

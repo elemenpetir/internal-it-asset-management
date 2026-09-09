@@ -11,6 +11,7 @@ const employeeRoutes = require("./routes/employeeRoutes");
 const maintenanceRequestRoutes = require("./routes/maintenanceRequestRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const departmentRoutes = require("./routes/departmentRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173").split(",");
 
@@ -39,6 +40,7 @@ app.use("/api/employees", employeeRoutes);
 app.use("/api/maintenance-requests", maintenanceRequestRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/departments", departmentRoutes);
+app.use("/api/users", userRoutes);
 app.use(errorMiddleware);
 
 module.exports = app;

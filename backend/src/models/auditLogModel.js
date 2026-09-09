@@ -6,9 +6,9 @@ const getAuditLogs = async () => {
       audit_logs.entity_type,
       audit_logs.entity_id,
       CASE
-        WHEN audit_logs.entity_type = 'asset' THEN CONCAT(direct_asset.asset_code, ' — ', direct_asset.name)
-        WHEN audit_logs.entity_type = 'asset_assignment' THEN CONCAT(assign_asset.asset_code, ' → ', assign_emp.name)
-        WHEN audit_logs.entity_type = 'maintenance_requests' THEN CONCAT(maint_asset.asset_code, ' — ', maint_asset.name)
+        WHEN audit_logs.entity_type = 'asset' THEN CONCAT(direct_asset.asset_code, ' (', direct_asset.name, ')')
+        WHEN audit_logs.entity_type = 'asset_assignment' THEN CONCAT(assign_asset.asset_code, ' / ', assign_emp.name)
+        WHEN audit_logs.entity_type = 'maintenance_requests' THEN CONCAT(maint_asset.asset_code, ' (', maint_asset.name, ')')
         ELSE NULL
       END AS entity_label,
       audit_logs.action,

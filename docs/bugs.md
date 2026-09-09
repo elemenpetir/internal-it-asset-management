@@ -10,7 +10,7 @@
 
 ## Kritis — Batch 1
 
-- [ ] **B1. Transisi asset status bebas.** `PATCH /assets/:id/status`
+- [x] **B1. Transisi asset status bebas.** `PATCH /assets/:id/status`
       (backend/src/controllers/assetController.js) hanya whitelist nilai,
       tanpa matriks transisi. Repro: `PATCH {status:available}` saat aset
       masih `assigned` aktif → status berubah, `asset_assignments` tetap `active`.

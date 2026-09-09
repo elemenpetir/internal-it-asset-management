@@ -102,4 +102,13 @@
   html {
     @apply font-sans;
   }
+  /* Override Chromium autofill paint so saved credentials follow the dark theme */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 100px #0f172a inset;
+    -webkit-text-fill-color: #f1f5f9;
+    caret-color: #f1f5f9;
+    transition: background-color 0s;
+  }
 }

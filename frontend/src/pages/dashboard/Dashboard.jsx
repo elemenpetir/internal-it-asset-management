@@ -1,31 +1,99 @@
-import DashboardCard from "../../components/ui/DashboardCard";
-import PageHeader from "../../components/ui/PageHeader";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getRoleFromToken } from "../../utils/auth";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  BarChart,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  Legend,
-  PieChart,
-  Pie,
 } from "recharts";
 
-const PIE_COLORS = [
-  "#6366f1",
-  "#22c55e",
-  "#f59e0b",
-  "#ef4444",
-  "#8b5cf6",
-  "#14b8a6",
-];
+const CATEGORY_COLORS = ["#2563eb", "#16a34a", "#d97706", "#0891b2", "#dc2626", "#64748b"];
+
+const riskBadgeClass = {
+  high: "bg-red-100 text-red-700",
+  medium: "bg-amber-100 text-amber-700",
+  low: "bg-green-100 text-green-700",
+};
+
+function SectionHeader({ title, description }) {
+  return (
+    <div>
+      <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+      {description && (
+        <p className="mt-0.5 text-[13px] text-slate-500">{description}</p>
+      )}
+    </div>
+  );
+}
+
+function SummaryStrip({ items }) {
+  return (
+    <div className="flex flex-wrap items-stretch divide-x divide-slate-200 rounded-lg border border-slate-200 bg-white">
+      {items.map((item) => (
+        <div key={item.title} className="min-w-36 flex-1 px-5 py-3.5">
+          <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+            {item.title}
+          </p>
+          <p className="mt-1 text-2xl font-bold text-slate-900 tabular-nums">
+            {item.value}
+          </p>
+          <p className="mt-0.5 text-xs text-slate-500">{item.description}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AssetCell({ asset }) {
+  return (
+    <div>
+      <Link
+        to={`/assets/${asset.asset_id}`}
+        className="font-medium text-primary hover:underline"
+      >
+        {asset.asset_name}
+      </Link>
+      <p className="font-mono text-xs text-slate-400">{asset.asset_code}</p>
+    </div>
+  );
+}
+
+function RiskCell({ score, level }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className="font-bold text-slate-900 tabular-nums">{score}</span>
+      <Badge className={riskBadgeClass[level] || riskBadgeClass.low}>
+        {level}
+      </Badge>
+    </span>
+  );
+}
 
 export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [dashboardCards, setDashboardCards] = useState([]);
+  const [summaryItems, setSummaryItems] = useState([]);
   const [highRiskAssets, setHighRiskAssets] = useState([]);
   const [assetsByCategory, setAssetsByCategory] = useState([]);
   const [assetsByDepartment, setAssetsByDepartment] = useState([]);
@@ -107,19 +175,14 @@ export default function Dashboard() {
         );
 
       setHighRiskAssets(highRiskResult.data);
-      setAssetsByCategory(
-        byCategoryResult.data.map((item, index) => ({
-          ...item,
-          fill: PIE_COLORS[index % PIE_COLORS.length],
-        })),
-      );
+      setAssetsByCategory(byCategoryResult.data);
       setAssetsByDepartment(byDepartmentResult.data);
       setMaintenanceSummary(maintenanceResult.data);
       setReplacementCandidates(replacementResult.data);
 
       return [
         {
-          title: "Total Assets",
+          title: "Total assets",
           value: data.total_assets,
           description: "All registered assets",
         },
@@ -131,12 +194,12 @@ export default function Dashboard() {
         {
           title: "Assigned",
           value: data.assigned,
-          description: "Currently used by employees",
+          description: "In use by employees",
         },
         {
-          title: "Under Maintenance",
+          title: "Maintenance",
           value: data.under_maintenance,
-          description: "Undergoing active repair",
+          description: "Undergoing repair",
         },
       ];
     }
@@ -170,31 +233,31 @@ export default function Dashboard() {
 
       return [
         {
-          title: "My Assets",
+          title: "My assets",
           value: myAssets.length,
-          description: "Assets currently assigned to you",
+          description: "Currently assigned to you",
         },
         {
-          title: "Active Requests",
+          title: "Active requests",
           value: activeRequests,
-          description: "Maintenance requests in progress",
+          description: "Awaiting resolution",
         },
         {
-          title: "Completed Requests",
+          title: "Completed",
           value: completedRequests,
-          description: "Maintenance requests resolved",
+          description: "Resolved requests",
         },
       ];
     }
 
     async function loadDashboard() {
       try {
-        const cards =
+        const items =
           role === "employee"
             ? await fetchEmployeeOverview()
             : await fetchAdminOverview();
 
-        setDashboardCards(cards);
+        setSummaryItems(items);
       } catch (error) {
         setErrorMessage(error.message);
       } finally {
@@ -207,10 +270,10 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <section>
-        <p className="rounded-xl border border-slate-200 bg-white p-5 text-slate-600 shadow-sm">
-          Loading dashboard data...
-        </p>
+      <section className="space-y-4">
+        <Skeleton className="h-8 w-56" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-64 w-full" />
       </section>
     );
   }
@@ -218,11 +281,8 @@ export default function Dashboard() {
   if (errorMessage) {
     return (
       <section>
-        <PageHeader
-          title="Dashboard Overview"
-          description="Monitor asset status, assignment activity, and risk indicators."
-        />
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-5 text-red-700">
+        <h1 className="text-xl font-bold text-slate-900">Dashboard</h1>
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {errorMessage}
         </div>
       </section>
@@ -231,235 +291,218 @@ export default function Dashboard() {
 
   return (
     <section>
-      <PageHeader
-        title="Dashboard Overview"
-        description={
-          role === "employee"
-            ? "Track your assigned assets and maintenance requests."
-            : "Monitor asset status, assignment activity, and risk indicators."
-        }
-      />
+      <h1 className="text-xl font-bold text-slate-900">Dashboard</h1>
+      <p className="mt-0.5 text-[13px] text-slate-500">
+        {role === "employee"
+          ? "Your assigned assets and maintenance requests."
+          : "Asset status, maintenance activity, and risk indicators."}
+      </p>
 
-      <div
-        className={`mt-6 grid gap-4 md:grid-cols-2 ${role === "employee" ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}
-      >
-        {dashboardCards.map((card) => (
-          <DashboardCard
-            key={card.title}
-            title={card.title}
-            value={card.value}
-            description={card.description}
-          />
-        ))}
+      <div className="mt-4">
+        <SummaryStrip items={summaryItems} />
       </div>
 
       {role !== "employee" && (
         <>
-          {/* High Risk Assets */}
-          <div className="mt-8">
-            <h2 className="text-base font-semibold text-slate-800">
-              High Risk Assets
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Assets flagged for maintenance or replacement review.
-            </p>
-            <div className="mt-3 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="mt-6">
+            <SectionHeader
+              title="High risk assets"
+              description="Flagged for maintenance or replacement review."
+            />
+            <div className="mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white">
               {highRiskAssets.length === 0 ? (
-                <p className="p-5 text-sm text-slate-400">
+                <p className="p-4 text-[13px] text-slate-400">
                   No high risk assets found.
                 </p>
               ) : (
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      <th className="px-5 py-3">Asset</th>
-                      <th className="px-5 py-3">Status</th>
-                      <th className="px-5 py-3">Risk Score</th>
-                      <th className="px-5 py-3">Recommendation</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Asset</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Risk</TableHead>
+                      <TableHead>Recommendation</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {highRiskAssets.slice(0, 5).map((asset) => (
-                      <tr key={asset.asset_id} className="hover:bg-slate-50">
-                        <td className="px-5 py-3">
-                          <p className="font-medium text-slate-800">
-                            {asset.asset_name}
-                          </p>
-                          <p className="text-xs text-slate-400">
-                            {asset.asset_code}
-                          </p>
-                        </td>
-                        <td className="px-5 py-3 text-slate-600">
+                      <TableRow key={asset.asset_id}>
+                        <TableCell>
+                          <AssetCell asset={asset} />
+                        </TableCell>
+                        <TableCell className="text-slate-600">
                           {asset.status}
-                        </td>
-                        <td className="px-5 py-3">
-                          <span className="inline-flex items-center gap-1.5">
-                            <span className="font-bold text-red-600">
-                              {asset.risk_score}
-                            </span>
-                            <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
-                              high
-                            </span>
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-slate-500">
+                        </TableCell>
+                        <TableCell>
+                          <RiskCell
+                            score={asset.risk_score}
+                            level={asset.risk_level}
+                          />
+                        </TableCell>
+                        <TableCell className="text-slate-500">
                           {asset.recommendation}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               )}
             </div>
           </div>
 
-          {/* Replacement Candidates */}
-          <div className="mt-8">
-            <h2 className="text-base font-semibold text-slate-800">
-              Replacement Candidates
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Assets over 2 years old with medium or high risk score.
-            </p>
-            <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="mt-6">
+            <SectionHeader
+              title="Replacement candidates"
+              description="Over 2 years old with medium or high risk score."
+            />
+            <div className="mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white">
               {replacementCandidates.length === 0 ? (
-                <p className="p-5 text-sm text-slate-400">
+                <p className="p-4 text-[13px] text-slate-400">
                   No replacement candidates found.
                 </p>
               ) : (
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      <th className="px-5 py-3">Asset</th>
-                      <th className="px-5 py-3">Status</th>
-                      <th className="px-5 py-3">Purchase Date</th>
-                      <th className="px-5 py-3">Risk Score</th>
-                      <th className="px-5 py-3">Recommendation</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Asset</TableHead>
+                      <TableHead>Purchased</TableHead>
+                      <TableHead>Risk</TableHead>
+                      <TableHead>Recommendation</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {replacementCandidates.slice(0, 5).map((asset) => (
-                      <tr key={asset.asset_id} className="hover:bg-slate-50">
-                        <td className="px-5 py-3">
-                          <p className="font-medium text-slate-800">
-                            {asset.asset_name}
-                          </p>
-                          <p className="text-xs text-slate-400">
-                            {asset.asset_code}
-                          </p>
-                        </td>
-                        <td className="px-5 py-3 text-slate-600">
-                          {asset.status}
-                        </td>
-                        <td className="px-5 py-3 text-slate-500">
+                      <TableRow key={asset.asset_id}>
+                        <TableCell>
+                          <AssetCell asset={asset} />
+                        </TableCell>
+                        <TableCell className="text-slate-500 tabular-nums">
                           {asset.purchase_date
                             ? asset.purchase_date.toString().slice(0, 10)
                             : "-"}
-                        </td>
-                        <td className="px-5 py-3">
-                          <span className="inline-flex items-center gap-1.5">
-                            <span
-                              className={`font-bold ${asset.risk_level === "high" ? "text-red-600" : "text-amber-600"}`}
-                            >
-                              {asset.risk_score}
-                            </span>
-                            <span
-                              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                                asset.risk_level === "high"
-                                  ? "bg-red-100 text-red-700"
-                                  : "bg-amber-100 text-amber-700"
-                              }`}
-                            >
-                              {asset.risk_level}
-                            </span>
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-slate-500">
+                        </TableCell>
+                        <TableCell>
+                          <RiskCell
+                            score={asset.risk_score}
+                            level={asset.risk_level}
+                          />
+                        </TableCell>
+                        <TableCell className="text-slate-500">
                           {asset.recommendation}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               )}
             </div>
           </div>
 
-          {/* Charts row */}
-          <div className="mt-8 grid gap-6 lg:grid-cols-2">
-            {/* Assets by Category */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-base font-semibold text-slate-800">
-                Assets by Category
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Distribution of active assets per category.
-              </p>
-              <div className="mt-4">
-                <PieChart width={420} height={250}>
-                  <Pie
-                    data={assetsByCategory}
-                    dataKey="total_assets"
-                    nameKey="category_name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={70}
-                    label={({ category_name, total_assets }) =>
-                      `${category_name} (${total_assets})`
-                    }
-                  ></Pie>
-                  <Tooltip />
-                </PieChart>
+          <div className="mt-6 grid gap-4 lg:grid-cols-5">
+            <div className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-2">
+              <SectionHeader
+                title="Assets by category"
+                description="Active assets per category."
+              />
+              <div className="mt-2 h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={assetsByCategory}
+                      dataKey="total_assets"
+                      nameKey="category_name"
+                      innerRadius={55}
+                      outerRadius={80}
+                      paddingAngle={2}
+                      strokeWidth={0}
+                    >
+                      {assetsByCategory.map((_, index) => (
+                        <Cell
+                          key={index}
+                          fill={
+                            CATEGORY_COLORS[index % CATEGORY_COLORS.length]
+                          }
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend
+                      layout="vertical"
+                      align="right"
+                      verticalAlign="middle"
+                      wrapperStyle={{ fontSize: 12 }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Assets by Department */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-base font-semibold text-slate-800">
-                Assets by Department
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Active asset assignments per department.
-              </p>
-              <div className="mt-4">
-                <BarChart width={340} height={220} data={assetsByDepartment}>
-                  <XAxis dataKey="department_name" tick={{ fontSize: 12 }} />
+            <div className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-3">
+              <SectionHeader
+                title="Assets by department"
+                description="Active assignments per department."
+              />
+              <div className="mt-2 h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={assetsByDepartment}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                    <XAxis dataKey="department_name" tick={{ fontSize: 12 }} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Bar
+                      dataKey="total_assets"
+                      fill="#2563eb"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
+            <SectionHeader
+              title="Maintenance trend"
+              description="Monthly requests over the last 6 months."
+            />
+            <div className="mt-2 h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={[...maintenanceSummary].reverse()}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                   <Tooltip />
-                  <Bar
-                    dataKey="total_assets"
-                    fill="#6366f1"
-                    radius={[4, 4, 0, 0]}
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Line
+                    type="monotone"
+                    dataKey="completed"
+                    stroke="#16a34a"
+                    strokeWidth={2}
+                    dot={false}
                   />
-                </BarChart>
-              </div>
+                  <Line
+                    type="monotone"
+                    dataKey="ongoing"
+                    stroke="#d97706"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="canceled"
+                    stroke="#94a3b8"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Maintenance Summary */}
-          <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-base font-semibold text-slate-800">
-              Maintenance Trend
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Monthly maintenance requests over the last 6 months.
-            </p>
-            <div className="mt-4">
-              <BarChart
-                width={700}
-                height={220}
-                data={[...maintenanceSummary].reverse()}
-              >
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="completed" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="ongoing" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="canceled" fill="#94a3b8" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </div>
-          </div>
+          <Separator className="mt-6" />
+          <p className="mt-2 text-xs text-slate-400">
+            Risk levels: low (0–30), medium (31–60), high (61+).
+          </p>
         </>
       )}
     </section>

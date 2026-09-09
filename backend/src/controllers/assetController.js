@@ -222,6 +222,27 @@ const updateStatus = async (req, res, next) => {
       });
     }
 
+    // B1: legal transitions only; assign/return must go through assignment flow
+    const allowedTransitions = {
+      available: ["under_maintenance", "retired"],
+      assigned: ["under_maintenance", "retired"],
+      under_maintenance: ["assigned", "available", "retired"],
+      retired: [],
+    };
+    const asset = await assetModel.getAssetById(id);
+    if (!asset) {
+      return res.status(404).json({
+        status: "failed",
+        message: "asset not found",
+      });
+    }
+    if (!allowedTransitions[asset.status].includes(status)) {
+      return res.status(400).json({
+        status: "failed",
+        message: `cannot change status from ${asset.status} to ${status}`,
+      });
+    }
+
     const result = await assetModel.updateAssetStatusWithAuditLog(
       id,
       status,

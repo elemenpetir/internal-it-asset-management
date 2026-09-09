@@ -1,5 +1,6 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner";
 import AppLayout from "./components/layout/AppLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Dashboard from "./pages/dashboard/Dashboard";
@@ -20,7 +21,9 @@ import Departments from "./pages/departments/Departments";
 
 function App() {
   return (
-    <Routes>
+    <>
+      <Toaster position="top-center" />
+      <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/activate-account" element={<ActivateAccount />} />
 
@@ -45,7 +48,8 @@ function App() {
         <Route path="/employees" element={<Employees />} />
         <Route path="/departments" element={<Departments />} />
       </Route>
-    </Routes>
+      </Routes>
+    </>
   );
 }
 

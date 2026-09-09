@@ -125,12 +125,13 @@ export default function Assignments() {
       const result = await response.json();
       if (!response.ok)
         throw new Error(result.message || "Failed to assign asset");
+      const assignedAssetId = Number(formData.asset_id);
       setSuccessMessage("Asset assigned successfully.");
       setFormData({ asset_id: "", employee_id: "", notes: "" });
-      setAssignments([result.data, ...assignments]);
-      setAssets(
-        assets.map((asset) =>
-          asset.id === Number(formData.asset_id)
+      setAssignments((current) => [result.data, ...current]);
+      setAssets((current) =>
+        current.map((asset) =>
+          asset.id === assignedAssetId
             ? { ...asset, status: "assigned" }
             : asset,
         ),

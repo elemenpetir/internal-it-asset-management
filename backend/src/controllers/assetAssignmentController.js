@@ -111,13 +111,7 @@ const createAssetAssignment = async (req, res, next) => {
     return res.status(201).json({
       status: "success",
       message: "asset assigned successfully",
-      data: {
-        id: result.insertId,
-        asset_id,
-        employee_id,
-        assigned_by,
-        notes: notes || null,
-      },
+      data: result,
     });
   } catch (error) {
     next(error);

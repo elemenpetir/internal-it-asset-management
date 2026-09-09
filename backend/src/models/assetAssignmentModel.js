@@ -169,7 +169,33 @@ const createAssetAssignmentWithTransaction = async (data) => {
 
     await connection.commit();
 
-    return assignmentResult;
+    // ponytail: extra SELECT, keeps POST response shape identical to GET list
+    const detailSql = `SELECT
+        asset_assignments.id,
+        asset_assignments.asset_id,
+        assets.asset_code,
+        assets.name AS asset_name,
+        asset_assignments.employee_id,
+        employees.name AS employee_name,
+        employees.employee_number AS employee_number,
+        asset_assignments.assigned_by,
+        users.name AS assigned_by_name,
+        asset_assignments.assigned_at,
+        asset_assignments.returned_at,
+        asset_assignments.status,
+        asset_assignments.notes,
+        asset_assignments.created_at,
+        asset_assignments.updated_at
+    FROM asset_assignments
+    JOIN assets ON asset_assignments.asset_id = assets.id
+    JOIN employees ON asset_assignments.employee_id = employees.id
+    JOIN users ON asset_assignments.assigned_by = users.id
+    WHERE asset_assignments.id = ?`;
+    const [detailRows] = await connection.query(detailSql, [
+      assignmentResult.insertId,
+    ]);
+
+    return detailRows[0];
   } catch (error) {
     await connection.rollback();
     throw error;

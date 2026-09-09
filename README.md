@@ -19,8 +19,11 @@ A fullstack web application for managing internal IT assets. Covers asset tracki
 **Frontend**
 
 - React + React Router
-- Tailwind CSS
-- Recharts
+- Tailwind CSS v4
+- shadcn/ui (Radix primitives) + Lucide icons
+- Sonner (toast notifications)
+- Inter typeface
+- Recharts (donut, bar, line)
 
 **DevOps**
 
@@ -44,7 +47,7 @@ A fullstack web application for managing internal IT assets. Covers asset tracki
 - Maintenance request workflow (`reported` → `in_progress` → `completed` / `canceled`)
 - Audit log for every significant operation
 - Rule-based asset risk scoring
-- Analytics dashboard (overview, by category, by department, maintenance trend, high-risk assets, replacement candidates)
+- Analytics dashboard (summary strip, donut by category, bar by department, line maintenance trend, high-risk assets, replacement candidates)
 - Database transactions for critical workflows
 - Unit tests for core endpoints
 
@@ -139,8 +142,9 @@ Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
 │   │   └── utils/
 │   └── package.json
 ├── docs/
+│   ├── design.md
 │   ├── erd.png
-│   └── screenshots/
+│   └── PRD_Internal_IT_Asset_Management.md
 └── README.md
 ```
 
@@ -154,37 +158,8 @@ Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
 
 ## Screenshots
 
-### Dashboard Overview
-
-![Dashboard Overview](docs/screenshots/dashboard-overview.png)
-
-### Dashboard Charts
-
-![Dashboard Charts](docs/screenshots/dashboard-charts.png)
-
-### Asset Inventory
-
-![Asset Inventory](docs/screenshots/assets.png)
-
-### Asset Detail
-
-![Asset Detail](docs/screenshots/asset-detail.png)
-
-### Assignments
-
-![Assignments](docs/screenshots/assignments.png)
-
-### Maintenance Requests
-
-![Maintenance](docs/screenshots/maintenance.png)
-
-### Audit Logs
-
-![Audit Logs](docs/screenshots/audit-logs.png)
-
-### Employees
-
-![Employees](docs/screenshots/employees.png)
+Screenshots will be refreshed to match the redesigned UI (see `docs/design.md`
+for the visual direction).
 
 ---
 

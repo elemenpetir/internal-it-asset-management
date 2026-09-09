@@ -378,7 +378,7 @@ export default function Assignments() {
                   <TableHead>Employee</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Assigned</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -411,7 +411,7 @@ export default function Assignments() {
                     <TableCell className="text-slate-400 tabular-nums">
                       {assignment.assigned_at?.slice(0, 10) || "-"}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell>
                       {assignment.status === "active" && isAdminOnly ? (
                         <Button
                           variant="outline"

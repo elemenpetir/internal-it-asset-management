@@ -224,7 +224,7 @@ export default function Employees() {
                 <TableHead>Position</TableHead>
                 <TableHead>Status</TableHead>
                 {role === "asset_admin" && (
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Actions</TableHead>
                 )}
               </TableRow>
             </TableHeader>
@@ -248,8 +248,8 @@ export default function Employees() {
                     <StatusBadge status={emp.status} />
                   </TableCell>
                   {role === "asset_admin" && (
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1.5">
+                    <TableCell>
+                      <div className="flex gap-1.5">
                         <Button
                           variant="outline"
                           size="sm"

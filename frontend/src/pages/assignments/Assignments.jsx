@@ -395,7 +395,7 @@ export default function Assignments() {
               </p>
             </div>
             <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-              <p className="text-sm text-slate-500">Active Employees</p>
+              <p className="text-sm text-slate-500">Available Employees</p>
               <p className="mt-1 text-xl font-semibold text-slate-900">
                 {employees.length}
               </p>

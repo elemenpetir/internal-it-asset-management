@@ -1,22 +1,38 @@
-import StatusBadge from "../../components/ui/StatusBadge";
-import PageHeader from "../../components/ui/PageHeader";
-import ArrowIcon from "../../components/ui/ArrowIcon";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
 import { getRoleFromToken } from "../../utils/auth";
+import StatusBadge from "../../components/ui/StatusBadge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function Assets() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [assets, setAssets] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const token = localStorage.getItem("token");
-  const location = useLocation();
   const navigate = useNavigate();
-  const [flashMessage] = useState(location.state?.successMessage || "");
   const role = getRoleFromToken();
   const limit = 10;
 
@@ -26,7 +42,7 @@ export default function Assets() {
         setIsLoading(true);
         const params = new URLSearchParams();
         if (searchTerm) params.append("search", searchTerm);
-        if (statusFilter) params.append("status", statusFilter);
+        if (statusFilter !== "all") params.append("status", statusFilter);
         params.append("page", page);
         params.append("limit", limit);
 
@@ -49,20 +65,11 @@ export default function Assets() {
     fetchAssets();
   }, [token, searchTerm, statusFilter, page]);
 
-  useEffect(() => {
-    if (location.state?.successMessage) {
-      navigate(location.pathname, { replace: true, state: null });
-    }
-  }, [location.state, location.pathname, navigate]);
-
   if (errorMessage) {
     return (
       <section>
-        <PageHeader
-          title="Asset Inventory"
-          description="Monitor, update, and track all IT hardware assets."
-        />
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-5 text-red-700">
+        <h1 className="text-xl font-bold text-slate-900">Asset inventory</h1>
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {errorMessage}
         </div>
       </section>
@@ -71,148 +78,143 @@ export default function Assets() {
 
   return (
     <section>
-      <div className="flex items-end justify-between gap-4">
-        <PageHeader
-          title="Asset Inventory"
-          description="Monitor, update, and track all IT hardware assets."
-        />
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900">Asset inventory</h1>
+          <p className="mt-0.5 text-[13px] text-slate-500">
+            Monitor and track company IT assets.
+          </p>
+        </div>
         {role === "asset_admin" && (
-          <Link
-            to="/assets/new"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-          >
-            + New Asset
-          </Link>
+          <Button onClick={() => navigate("/assets/new")}>
+            <Plus className="h-4 w-4" />
+            New asset
+          </Button>
         )}
       </div>
 
-      {flashMessage && (
-        <div className="mt-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-          {flashMessage}
+      <div className="mt-4 flex flex-col gap-2 md:flex-row">
+        <div className="relative md:max-w-sm md:flex-1">
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Input
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(1);
+            }}
+            placeholder="Search code, name, brand, serial..."
+            className="bg-white pl-9"
+          />
         </div>
-      )}
-
-      <div className="mt-6 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setPage(1);
-          }}
-          placeholder="Search by asset code, name, brand, or serial number..."
-          className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 md:max-w-md"
-        />
-        <select
+        <Select
           value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
+          onValueChange={(value) => {
+            setStatusFilter(value);
             setPage(1);
           }}
-          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
         >
-          <option value="">All Statuses</option>
-          <option value="available">Available</option>
-          <option value="assigned">Assigned</option>
-          <option value="under_maintenance">Under Maintenance</option>
-          <option value="retired">Retired</option>
-        </select>
+          <SelectTrigger className="bg-white md:w-48">
+            <SelectValue placeholder="All statuses" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="available">Available</SelectItem>
+            <SelectItem value="assigned">Assigned</SelectItem>
+            <SelectItem value="under_maintenance">Maintenance</SelectItem>
+            <SelectItem value="retired">Retired</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <table className="w-full border-collapse text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-            <tr>
-              <th className="px-5 py-3 font-semibold">Asset Code</th>
-              <th className="px-5 py-3 font-semibold">Name</th>
-              <th className="px-5 py-3 font-semibold">Category</th>
-              <th className="px-5 py-3 font-semibold">Brand</th>
-              <th className="px-5 py-3 font-semibold">Serial Number</th>
-              <th className="px-5 py-3 font-semibold">Location</th>
-              <th className="px-5 py-3 font-semibold">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {isLoading ? (
-              <tr>
-                <td
-                  colSpan="7"
-                  className="px-5 py-8 text-center text-slate-400"
-                >
-                  Loading assets...
-                </td>
-              </tr>
-            ) : assets.length > 0 ? (
-              assets.map((asset) => (
-                <tr key={asset.id} className="hover:bg-slate-50">
-                  <td className="px-5 py-4 font-medium">
+      <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white">
+        {isLoading ? (
+          <div className="space-y-2 p-4">
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-full" />
+          </div>
+        ) : assets.length > 0 ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Code</TableHead>
+                <TableHead>Asset</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Serial</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {assets.map((asset) => (
+                <TableRow key={asset.id}>
+                  <TableCell>
                     <Link
                       to={`/assets/${asset.id}`}
-                      className="text-indigo-600 hover:text-indigo-800 hover:underline"
+                      className="font-mono font-medium text-primary hover:underline"
                     >
                       {asset.asset_code}
                     </Link>
-                  </td>
-                  <td className="px-5 py-4 text-slate-800">{asset.name}</td>
-                  <td className="px-5 py-4 text-slate-600">
-                    {asset.category_name}
-                  </td>
-                  <td className="px-5 py-4">
+                  </TableCell>
+                  <TableCell>
                     <div className="font-medium text-slate-800">
-                      {asset.brand}
+                      {asset.name}
                     </div>
-                    <div className="text-xs text-slate-500">{asset.model}</div>
-                  </td>
-                  <td className="px-5 py-4 text-slate-600">
+                    <div className="text-xs text-slate-500">
+                      {asset.brand} {asset.model}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-slate-600">
+                    {asset.category_name}
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-slate-500">
                     {asset.serial_number}
-                  </td>
-                  <td className="px-5 py-4 text-slate-600">{asset.location}</td>
-                  <td className="px-5 py-4">
+                  </TableCell>
+                  <TableCell className="text-slate-600">
+                    {asset.location}
+                  </TableCell>
+                  <TableCell>
                     <StatusBadge status={asset.status} />
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="7"
-                  className="px-5 py-8 text-center text-slate-500"
-                >
-                  No assets found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <p className="p-8 text-center text-[13px] text-slate-400">
+            No assets found.
+          </p>
+        )}
 
-        {/* Footer pagination */}
         {pagination && (
-          <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3 text-sm text-slate-500">
-            <span>
-              Showing {assets.length} of {pagination.total} assets
+          <div className="flex items-center justify-between border-t border-slate-200 px-4 py-2.5 text-[13px] text-slate-500">
+            <span className="tabular-nums">
+              {assets.length} of {pagination.total}
             </span>
-            <div className="flex items-center gap-2">
-              <button
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setPage((p) => Math.max(p - 1, 1))}
                 disabled={page === 1}
-                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1 text-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                <ArrowIcon direction="left" className="h-3 w-3" />
+                <ChevronLeft className="h-3.5 w-3.5" />
                 Prev
-              </button>
-              <span className="text-xs">
-                Page {pagination.page} of {pagination.total_pages}
+              </Button>
+              <span className="px-1 tabular-nums">
+                {pagination.page} / {pagination.total_pages}
               </span>
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() =>
                   setPage((p) => Math.min(p + 1, pagination.total_pages))
                 }
                 disabled={page === pagination.total_pages}
-                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1 text-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next
-                <ArrowIcon direction="right" className="h-3 w-3" />
-              </button>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
             </div>
           </div>
         )}

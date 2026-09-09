@@ -1,37 +1,28 @@
-export default function StatusBadge({ status }) {
-  const statusStyles = {
-    available: "bg-green-50 text-green-700 border-green-200",
-    assigned: "bg-blue-50 text-blue-700 border-blue-200",
-    under_maintenance: "bg-amber-50 text-amber-700 border-amber-200",
-    retired: "bg-red-50 text-red-700 border-red-200",
-    active: "bg-blue-50 text-blue-700 border-blue-200",
-    returned: "bg-slate-50 text-slate-700 border-slate-200",
-    reported: "bg-blue-50 text-blue-700 border-blue-200",
-    in_progress: "bg-amber-50 text-amber-700 border-amber-200",
-    completed: "bg-green-50 text-green-700 border-green-200",
-    canceled: "bg-slate-50 text-slate-500 border-slate-200",
-  };
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
-  const statusLabels = {
-    available: "Available",
-    assigned: "Assigned",
-    under_maintenance: "Under Maintenance",
-    retired: "Retired",
-    active: "Active",
-    returned: "Returned",
-    reported: "Reported",
-    in_progress: "In Progress",
-    completed: "Completed",
-    canceled: "Canceled",
-  };
+const styles = {
+  available: "bg-green-100 text-green-700",
+  assigned: "bg-blue-100 text-blue-700",
+  under_maintenance: "bg-amber-100 text-amber-700",
+  retired: "bg-slate-200 text-slate-600",
+  active: "bg-green-100 text-green-700",
+  returned: "bg-slate-200 text-slate-600",
+  reported: "bg-blue-100 text-blue-700",
+  in_progress: "bg-amber-100 text-amber-700",
+  completed: "bg-green-100 text-green-700",
+  canceled: "bg-slate-200 text-slate-600",
+};
 
+const labels = {
+  under_maintenance: "Maintenance",
+  in_progress: "In progress",
+};
+
+export default function StatusBadge({ status, className }) {
   return (
-    <span
-      className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium ${
-        statusStyles[status] || "bg-slate-50 text-slate-700 border-slate-200"
-      }`}
-    >
-      {statusLabels[status] || status}
-    </span>
+    <Badge className={cn(styles[status] || "bg-slate-200 text-slate-600", className)}>
+      {labels[status] || status}
+    </Badge>
   );
 }

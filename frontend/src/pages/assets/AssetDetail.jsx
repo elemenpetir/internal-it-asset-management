@@ -1,9 +1,21 @@
-import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { ChevronLeft } from "lucide-react";
 import { formatDateForDisplay } from "../../utils/date";
 import { getRoleFromToken } from "../../utils/auth";
 import StatusBadge from "../../components/ui/StatusBadge";
-import ArrowIcon from "../../components/ui/ArrowIcon";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 function getAgeScore(purchaseDate) {
   const d = new Date(purchaseDate);
@@ -11,19 +23,33 @@ function getAgeScore(purchaseDate) {
   return yrs < 2 ? 5 : yrs <= 4 ? 15 : 30;
 }
 
+const riskBadgeClass = {
+  high: "bg-red-100 text-red-700",
+  medium: "bg-amber-100 text-amber-700",
+  low: "bg-green-100 text-green-700",
+};
+
+function DetailItem({ label, children, mono = false }) {
+  return (
+    <div>
+      <p className="text-xs text-slate-400">{label}</p>
+      <div
+        className={`mt-1 text-[13px] text-slate-700 ${mono ? "font-mono" : ""}`}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function AssetDetail() {
   const { id } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
   const [asset, setAsset] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [flashMessage] = useState(location.state?.successMessage || "");
   const [isRetiring, setIsRetiring] = useState(false);
-  const [actionError, setActionError] = useState("");
-  const [localSuccessMessage, setLocalSuccessMessage] = useState("");
   const [riskScore, setRiskScore] = useState(null);
-  const [riskScoreError, setRiskScoreError] = useState("");
   const [assignments, setAssignments] = useState([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(true);
   const role = getRoleFromToken();
@@ -32,9 +58,10 @@ export default function AssetDetail() {
     async function fetchAssetDetail() {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/assets/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/assets/${id}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
         const result = await response.json();
         if (!response.ok)
           throw new Error(result.message || "Failed to fetch asset detail");
@@ -49,27 +76,23 @@ export default function AssetDetail() {
   }, [id]);
 
   useEffect(() => {
-    if (role === "employee") return;
+    if (role === "employee") {
+      setAssignmentsLoading(false);
+      return;
+    }
     async function fetchRiskScore() {
       try {
         const token = localStorage.getItem("token");
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/api/assets/${id}/risk-score`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         const result = await response.json();
         if (response.ok) setRiskScore(result.data);
       } catch {
-        setRiskScoreError("Failed to load risk score.");
+        // silent fail, risk section hidden
       }
     }
-    fetchRiskScore();
-  }, [id, role]);
-
-  useEffect(() => {
-    if (role === "employee") return;
     async function fetchAssignments() {
       try {
         const token = localStorage.getItem("token");
@@ -80,19 +103,14 @@ export default function AssetDetail() {
         const result = await response.json();
         if (response.ok) setAssignments(result.data);
       } catch {
-        // silent fail, tabel akan kosong
+        // silent fail, table empty
       } finally {
         setAssignmentsLoading(false);
       }
     }
+    fetchRiskScore();
     fetchAssignments();
   }, [id, role]);
-
-  useEffect(() => {
-    if (location.state?.successMessage) {
-      navigate(location.pathname, { replace: true, state: null });
-    }
-  }, [location.state, location.pathname, navigate]);
 
   async function handleRetireAsset() {
     const confirmed = window.confirm(
@@ -101,8 +119,6 @@ export default function AssetDetail() {
     if (!confirmed) return;
     try {
       setIsRetiring(true);
-      setActionError("");
-      setLocalSuccessMessage("");
       const token = localStorage.getItem("token");
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/assets/${id}/status`,
@@ -119,9 +135,9 @@ export default function AssetDetail() {
       if (!response.ok)
         throw new Error(result.message || "Failed to retire asset");
       setAsset({ ...asset, status: "retired" });
-      setLocalSuccessMessage("Asset retired successfully.");
+      toast.success("Asset retired successfully.");
     } catch (error) {
-      setActionError(error.message);
+      toast.error(error.message);
     } finally {
       setIsRetiring(false);
     }
@@ -129,51 +145,32 @@ export default function AssetDetail() {
 
   if (isLoading) {
     return (
-      <section className="p-1">
-        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 text-slate-500 shadow-sm">
-          Loading asset detail...
-        </div>
+      <section className="space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-64 w-full" />
       </section>
     );
   }
 
   if (errorMessage) {
     return (
-      <section className="p-1">
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
+      <section>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {errorMessage}
         </div>
       </section>
     );
   }
 
-  const riskColors = {
-    high: {
-      badge: "bg-red-100 text-red-700",
-      bar: "bg-red-500",
-      label: "text-red-600",
-    },
-    medium: {
-      badge: "bg-amber-100 text-amber-700",
-      bar: "bg-amber-400",
-      label: "text-amber-600",
-    },
-    low: {
-      badge: "bg-green-100 text-green-700",
-      bar: "bg-green-500",
-      label: "text-green-600",
-    },
-  };
-
   const scoreBreakdown = riskScore
     ? [
         {
-          label: "Age Score",
+          label: "Age",
           value: getAgeScore(asset.purchase_date),
           max: 30,
         },
         {
-          label: "Maintenance Score",
+          label: "Maintenance",
           value:
             riskScore.maintenance_count === 0
               ? 0
@@ -183,7 +180,7 @@ export default function AssetDetail() {
           max: 30,
         },
         {
-          label: "Assignment Score",
+          label: "Assignment",
           value:
             riskScore.assignment_count <= 2
               ? 5
@@ -193,7 +190,7 @@ export default function AssetDetail() {
           max: 15,
         },
         {
-          label: "Status Score",
+          label: "Status",
           value:
             asset.status === "under_maintenance"
               ? 20
@@ -207,277 +204,193 @@ export default function AssetDetail() {
 
   return (
     <section>
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-sm text-slate-400">
+          <div className="flex items-center gap-1.5 text-[13px] text-slate-400">
             <Link to="/assets" className="hover:text-slate-600">
-              Asset Inventory
+              Inventory
             </Link>
-            <span>›</span>
-            <span className="text-slate-600">{asset.asset_code}</span>
+            <span>/</span>
+            <span className="font-mono text-slate-600">{asset.asset_code}</span>
           </div>
-          <h1 className="mt-1 text-2xl font-bold text-slate-900">
+          <h1 className="mt-1 text-xl font-bold text-slate-900">
             {asset.name}
           </h1>
         </div>
 
         {asset.status !== "retired" && role === "asset_admin" && (
           <div className="flex gap-2">
-            <Link
-              to={`/assets/${asset.id}/edit`}
-              className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/assets/${asset.id}/edit`)}
             >
-              Edit Asset
-            </Link>
-            <button
-              type="button"
+              Edit
+            </Button>
+            <Button
+              variant="destructive"
               onClick={handleRetireAsset}
               disabled={isRetiring}
-              className="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
             >
-              {isRetiring ? "Retiring..." : "Retire Asset"}
-            </button>
+              {isRetiring ? "Retiring..." : "Retire"}
+            </Button>
           </div>
         )}
       </div>
 
-      {/* Flash messages */}
-      {flashMessage && (
-        <div className="mt-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-          {flashMessage}
-        </div>
-      )}
-      {localSuccessMessage && (
-        <div className="mt-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-          {localSuccessMessage}
-        </div>
-      )}
-      {actionError && (
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-          {actionError}
-        </div>
-      )}
-
-      {/* 3-column cards */}
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        {/* Card 1 — Overview */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
+          <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             Overview
           </p>
-
-          <div className="mt-4 space-y-4">
-            <div>
-              <p className="text-xs text-slate-400">Status</p>
-              <div className="mt-1">
-                <StatusBadge status={asset.status} />
-              </div>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Asset Code</p>
-              <p className="mt-1 font-mono text-sm font-semibold text-slate-800">
-                {asset.asset_code}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Category</p>
-              <p className="mt-1 text-sm text-slate-700">
-                {asset.category_name}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Location</p>
-              <p className="mt-1 text-sm text-slate-700">{asset.location}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Purchase Date</p>
-              <p className="mt-1 text-sm text-slate-700">
+          <div className="mt-3 space-y-3">
+            <DetailItem label="Status">
+              <StatusBadge status={asset.status} />
+            </DetailItem>
+            <DetailItem label="Asset code" mono>
+              {asset.asset_code}
+            </DetailItem>
+            <DetailItem label="Category">{asset.category_name}</DetailItem>
+            <DetailItem label="Location">{asset.location}</DetailItem>
+            <DetailItem label="Purchase date">
+              <span className="tabular-nums">
                 {formatDateForDisplay(asset.purchase_date)}
-              </p>
-            </div>
+              </span>
+            </DetailItem>
           </div>
         </div>
 
-        {/* Card 2 — Specifications */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
+          <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             Specifications
           </p>
-
-          <div className="mt-4 space-y-4">
-            <div>
-              <p className="text-xs text-slate-400">Brand</p>
-              <p className="mt-1 text-sm font-medium text-slate-800">
-                {asset.brand}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Model</p>
-              <p className="mt-1 text-sm text-slate-700">{asset.model}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Serial Number</p>
-              <p className="mt-1 font-mono text-sm text-slate-700">
-                {asset.serial_number}
-              </p>
-            </div>
-            <div className="border-t border-slate-100 pt-4">
-              <p className="text-xs text-slate-400">Notes</p>
-              <p className="mt-1 text-sm text-slate-600">
-                {asset.notes || "No notes provided."}
-              </p>
-            </div>
+          <div className="mt-3 space-y-3">
+            <DetailItem label="Brand">{asset.brand}</DetailItem>
+            <DetailItem label="Model">{asset.model}</DetailItem>
+            <DetailItem label="Serial number" mono>
+              {asset.serial_number}
+            </DetailItem>
+            <DetailItem label="Notes">
+              {asset.notes || <span className="text-slate-400">-</span>}
+            </DetailItem>
           </div>
         </div>
 
-        {/* Card 3 — Risk Analysis */}
-        {riskScore ? (
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-              Risk Analysis
+        {riskScore && (
+          <div className="rounded-lg border border-slate-200 bg-white p-4">
+            <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+              Risk analysis
             </p>
-
-            <div className="mt-4 flex items-end gap-3">
-              <span className="text-5xl font-bold text-slate-900">
+            <div className="mt-3 flex items-center gap-2.5">
+              <span className="text-4xl font-bold text-slate-900 tabular-nums">
                 {riskScore.risk_score}
               </span>
-              <div className="mb-1">
-                <span
-                  className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide ${riskColors[riskScore.risk_level]?.badge}`}
-                >
-                  {riskScore.risk_level} risk
-                </span>
-              </div>
+              <Badge className={riskBadgeClass[riskScore.risk_level]}>
+                {riskScore.risk_level}
+              </Badge>
             </div>
-
-            <div className="mt-5 space-y-3">
+            <div className="mt-3 flex h-2 w-full overflow-hidden rounded-full bg-slate-100">
               {scoreBreakdown.map((item) => (
-                <div key={item.label}>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-500">{item.label}</span>
-                    <span className="font-semibold text-slate-700">
-                      +{item.value}
-                    </span>
-                  </div>
-                  <div className="mt-1 h-1.5 w-full rounded-full bg-slate-100">
-                    <div
-                      className={`h-1.5 rounded-full ${riskColors[riskScore.risk_level]?.bar}`}
-                      style={{ width: `${(item.value / item.max) * 100}%` }}
-                    />
-                  </div>
+                <div
+                  key={item.label}
+                  className={
+                    riskScore.risk_level === "high"
+                      ? "bg-red-500"
+                      : riskScore.risk_level === "medium"
+                        ? "bg-amber-400"
+                        : "bg-green-500"
+                  }
+                  style={{ width: `${(item.value / 115) * 100}%` }}
+                  title={`${item.label}: +${item.value}`}
+                />
+              ))}
+            </div>
+            <div className="mt-3 space-y-1.5">
+              {scoreBreakdown.map((item) => (
+                <div
+                  key={item.label}
+                  className="flex justify-between text-xs text-slate-500"
+                >
+                  <span>{item.label}</span>
+                  <span className="font-semibold text-slate-700 tabular-nums">
+                    +{item.value}
+                  </span>
                 </div>
               ))}
             </div>
-
-            <div className="mt-5 rounded-lg bg-slate-50 px-3 py-2.5">
-              <p className="text-xs text-slate-500">
-                {riskScore.recommendation}
-              </p>
-            </div>
-
-            <div className="mt-4 flex gap-4 border-t border-slate-100 pt-4 text-xs text-slate-400">
-              <span>
-                {riskScore.maintenance_count} maintenance request
-                {riskScore.maintenance_count !== 1 ? "s" : ""}
-              </span>
-              <span>·</span>
-              <span>
-                {riskScore.assignment_count} assignment
-                {riskScore.assignment_count !== 1 ? "s" : ""}
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="mt-4 text-sm text-slate-400">
-              {riskScoreError || "Not available for your role."}
+            <p className="mt-3 rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-500">
+              {riskScore.recommendation}
             </p>
           </div>
         )}
       </div>
 
-      {/* Retired warning */}
       {asset.status === "retired" && (
-        <div className="mt-4 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
-          This asset is retired and kept for historical records. Editing is
-          disabled.
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700">
+          Retired. Kept for historical records; editing is disabled.
         </div>
       )}
 
-      {/* Assignment History */}
       {role !== "employee" && (
-        <div className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-100 px-5 py-4">
-            <h2 className="text-sm font-semibold text-slate-700">
-              Assignment History
-            </h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Employee</th>
-                  <th className="px-4 py-3 font-semibold">Employee Number</th>
-                  <th className="px-4 py-3 font-semibold">Assigned At</th>
-                  <th className="px-4 py-3 font-semibold">Returned At</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {assignmentsLoading ? (
-                  <tr>
-                    <td
-                      colSpan="5"
-                      className="px-4 py-6 text-center text-slate-400"
-                    >
-                      Loading...
-                    </td>
-                  </tr>
-                ) : assignments.length > 0 ? (
-                  assignments.map((a) => (
-                    <tr key={a.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 font-medium text-slate-800">
-                        {a.employee_name}
-                      </td>
-                      <td className="px-4 py-3 font-mono text-xs text-slate-500">
-                        {a.employee_number}
-                      </td>
-                      <td className="px-4 py-3 text-slate-500">
+        <div className="mt-4">
+          <h2 className="text-base font-semibold text-slate-900">
+            Assignment history
+          </h2>
+          <div className="mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white">
+            {assignmentsLoading ? (
+              <div className="space-y-2 p-4">
+                <Skeleton className="h-9 w-full" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+            ) : assignments.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    <TableHead>Assigned</TableHead>
+                    <TableHead>Returned</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {assignments.map((a) => (
+                    <TableRow key={a.id}>
+                      <TableCell>
+                        <div className="font-medium text-slate-800">
+                          {a.employee_name}
+                        </div>
+                        <div className="font-mono text-xs text-slate-400">
+                          {a.employee_number}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-slate-500 tabular-nums">
                         {a.assigned_at ? a.assigned_at.slice(0, 10) : "-"}
-                      </td>
-                      <td className="px-4 py-3 text-slate-500">
+                      </TableCell>
+                      <TableCell className="text-slate-500 tabular-nums">
                         {a.returned_at ? a.returned_at.slice(0, 10) : "-"}
-                      </td>
-                      <td className="px-4 py-3">
+                      </TableCell>
+                      <TableCell>
                         <StatusBadge status={a.status} />
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan="5"
-                      className="px-4 py-8 text-center text-slate-400"
-                    >
-                      No assignment history found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="p-8 text-center text-[13px] text-slate-400">
+                No assignment history found.
+              </p>
+            )}
           </div>
         </div>
       )}
 
-      {/* Back link */}
-      <div className="mt-6">
+      <div className="mt-4">
         <Link
           to="/assets"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700"
+          className="inline-flex items-center gap-1 text-[13px] text-slate-500 hover:text-slate-700"
         >
-          <ArrowIcon direction="left" className="h-3.5 w-3.5" />
-          Back to Asset Inventory
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Back to inventory
         </Link>
       </div>
     </section>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getRoleFromToken } from "../../utils/auth";
 import { Badge } from "@/components/ui/badge";
 import StatusBadge from "../../components/ui/StatusBadge";
@@ -71,12 +71,29 @@ function AssetCell({ asset }) {
     <div>
       <Link
         to={`/assets/${asset.asset_id}`}
+        onClick={(e) => e.stopPropagation()}
         className="font-medium text-link hover:underline"
       >
         {asset.asset_name}
       </Link>
       <p className="font-mono text-xs text-slate-400">{asset.asset_code}</p>
     </div>
+  );
+}
+
+function ClickableRow({ to, children }) {
+  const navigate = useNavigate();
+  return (
+    <TableRow
+      className="cursor-pointer"
+      onClick={() => navigate(to)}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") navigate(to);
+      }}
+    >
+      {children}
+    </TableRow>
   );
 }
 
@@ -327,7 +344,10 @@ export default function Dashboard() {
                   </TableHeader>
                   <TableBody>
                     {highRiskAssets.slice(0, 5).map((asset) => (
-                      <TableRow key={asset.asset_id}>
+                      <ClickableRow
+                        key={asset.asset_id}
+                        to={`/assets/${asset.asset_id}`}
+                      >
                         <TableCell>
                           <AssetCell asset={asset} />
                         </TableCell>
@@ -343,7 +363,7 @@ export default function Dashboard() {
                         <TableCell className="text-slate-400 capitalize">
                           {asset.recommendation}
                         </TableCell>
-                      </TableRow>
+                      </ClickableRow>
                     ))}
                   </TableBody>
                 </Table>
@@ -373,7 +393,10 @@ export default function Dashboard() {
                   </TableHeader>
                   <TableBody>
                     {replacementCandidates.slice(0, 5).map((asset) => (
-                      <TableRow key={asset.asset_id}>
+                      <ClickableRow
+                        key={asset.asset_id}
+                        to={`/assets/${asset.asset_id}`}
+                      >
                         <TableCell>
                           <AssetCell asset={asset} />
                         </TableCell>
@@ -391,7 +414,7 @@ export default function Dashboard() {
                         <TableCell className="text-slate-400 capitalize">
                           {asset.recommendation}
                         </TableCell>
-                      </TableRow>
+                      </ClickableRow>
                     ))}
                   </TableBody>
                 </Table>

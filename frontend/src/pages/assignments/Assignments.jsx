@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { getRoleFromToken } from "../../utils/auth";
 import StatusBadge from "../../components/ui/StatusBadge";
@@ -38,6 +38,7 @@ export default function Assignments() {
   const [returningId, setReturningId] = useState(null);
 
   const role = getRoleFromToken();
+  const navigate = useNavigate();
   const isEmployee = role === "employee";
   const isAdminOnly = role === "asset_admin";
   const token = localStorage.getItem("token");
@@ -225,7 +226,16 @@ export default function Assignments() {
               </TableHeader>
               <TableBody>
                 {assignments.map((assignment) => (
-                  <TableRow key={assignment.id}>
+                  <TableRow
+                    key={assignment.id}
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/assignments/${assignment.id}`)}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter")
+                        navigate(`/assignments/${assignment.id}`);
+                    }}
+                  >
                     <TableCell>
                       <div className="font-medium text-slate-200">
                         {assignment.asset_name}

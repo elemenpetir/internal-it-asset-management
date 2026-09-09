@@ -124,10 +124,20 @@ export default function Maintenance() {
             </TableHeader>
             <TableBody>
               {maintenanceRequests.map((request) => (
-                <TableRow key={request.id}>
+                <TableRow
+                  key={request.id}
+                  className="cursor-pointer"
+                  onClick={() => navigate(`/maintenance/${request.id}`)}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter")
+                      navigate(`/maintenance/${request.id}`);
+                  }}
+                >
                   <TableCell>
                     <Link
                       to={`/maintenance/${request.id}`}
+                      onClick={(e) => e.stopPropagation()}
                       className="font-mono font-medium text-link tabular-nums hover:underline"
                     >
                       #{request.id}

@@ -159,10 +159,19 @@ export default function Assets() {
             </TableHeader>
             <TableBody>
               {assets.map((asset) => (
-                <TableRow key={asset.id}>
+                <TableRow
+                  key={asset.id}
+                  className="cursor-pointer"
+                  onClick={() => navigate(`/assets/${asset.id}`)}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") navigate(`/assets/${asset.id}`);
+                  }}
+                >
                   <TableCell>
                     <Link
                       to={`/assets/${asset.id}`}
+                      onClick={(e) => e.stopPropagation()}
                       className="font-mono font-medium text-link hover:underline"
                     >
                       {asset.asset_code}

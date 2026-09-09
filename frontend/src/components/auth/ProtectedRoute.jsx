@@ -1,4 +1,5 @@
 import { Navigate } from "react-router-dom";
+import { getRoleFromToken } from "../../utils/auth";
 
 function isTokenValid(token) {
   try {
@@ -9,13 +10,18 @@ function isTokenValid(token) {
   }
 }
 
-export default function ProtectedRoute({ children }) {
+export default function ProtectedRoute({ children, roles }) {
   const token = localStorage.getItem("token");
 
   if (!token || !isTokenValid(token)) {
     localStorage.removeItem("token");
     localStorage.removeItem("name");
     return <Navigate to="/login" replace />;
+  }
+
+  // B8: guard staff-only pages; employee gets redirected, no wasted 403 fetches
+  if (roles && !roles.includes(getRoleFromToken())) {
+    return <Navigate to="/" replace />;
   }
 
   return children;

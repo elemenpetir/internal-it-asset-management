@@ -36,17 +36,52 @@ function App() {
       >
         <Route path="/" element={<Dashboard />} />
         <Route path="/assets" element={<Assets />} />
-        <Route path="/assets/new" element={<CreateAsset />} />
+        <Route
+          path="/assets/new"
+          element={
+            <ProtectedRoute roles={["asset_admin"]}>
+              <CreateAsset />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/assets/:id" element={<AssetDetail />} />
-        <Route path="/assets/:id/edit" element={<EditAsset />} />
+        <Route
+          path="/assets/:id/edit"
+          element={
+            <ProtectedRoute roles={["asset_admin"]}>
+              <EditAsset />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/assignments" element={<Assignments />} />
         <Route path="/assignments/:id" element={<AssignmentDetail />} />
         <Route path="/maintenance" element={<Maintenance />} />
         <Route path="/maintenance/new" element={<CreateMaintenance />} />
         <Route path="/maintenance/:id" element={<MaintenanceDetail />} />
-        <Route path="/audit-logs" element={<AuditLogs />} />
-        <Route path="/employees" element={<Employees />} />
-        <Route path="/departments" element={<Departments />} />
+        <Route
+          path="/audit-logs"
+          element={
+            <ProtectedRoute roles={["asset_admin", "manager"]}>
+              <AuditLogs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/employees"
+          element={
+            <ProtectedRoute roles={["asset_admin"]}>
+              <Employees />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/departments"
+          element={
+            <ProtectedRoute roles={["asset_admin"]}>
+              <Departments />
+            </ProtectedRoute>
+          }
+        />
       </Route>
       </Routes>
     </>

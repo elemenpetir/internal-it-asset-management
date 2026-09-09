@@ -25,7 +25,29 @@ function parseJson(value) {
   }
 }
 
-function ChangeDetail({ oldValue, newValue }) {
+// Foreign keys stored as technical IDs in old_value/new_value JSON.
+// Resolve the known ones to human-readable labels; user IDs have no
+// list endpoint, so they fall back to a labeled "User #id".
+function resolveValue(key, value, lookups) {
+  if (value === null || value === undefined) return "—";
+  const id = String(value);
+  if (key === "asset_id" && lookups.assets.has(id)) return lookups.assets.get(id);
+  if (
+    (key === "employee_id" || key === "requested_by") &&
+    lookups.employees.has(id)
+  )
+    return lookups.employees.get(id);
+  if (key === "category_id" && lookups.categories.has(id))
+    return lookups.categories.get(id);
+  if (
+    (key === "assigned_by" || key === "handled_by" || key === "changed_by") &&
+    /^\d+$/.test(id)
+  )
+    return `User #${id}`;
+  return String(value).slice(0, 30);
+}
+
+function ChangeDetail({ oldValue, newValue, lookups }) {
   const oldData = parseJson(oldValue);
   const newData = parseJson(newValue);
 
@@ -40,7 +62,7 @@ function ChangeDetail({ oldValue, newValue }) {
             <div key={key}>
               <span className="font-medium text-slate-500">{key}:</span>{" "}
               <span className="truncate block max-w-40">
-                {String(val).slice(0, 30)}
+                {resolveValue(key, val, lookups)}
               </span>
             </div>
           ))}
@@ -61,11 +83,11 @@ function ChangeDetail({ oldValue, newValue }) {
         <div key={key} className="flex items-center gap-1">
           <span className="font-medium text-slate-500">{key}:</span>
           <span className="text-red-500 line-through truncate max-w-15 block">
-            {String(oldData[key]).slice(0, 20)}...
+            {resolveValue(key, oldData[key], lookups).slice(0, 20)}...
           </span>
           <span className="text-slate-400">→</span>
           <span className="text-green-600 truncate max-w-15 block">
-            {String(newData[key]).slice(0, 20)}...
+            {resolveValue(key, newData[key], lookups).slice(0, 20)}...
           </span>
         </div>
       ))}
@@ -84,6 +106,11 @@ function formatEntityType(entityType) {
 
 export default function AuditLogs() {
   const [auditLogs, setAuditLogs] = useState([]);
+  const [lookups, setLookups] = useState({
+    assets: new Map(),
+    employees: new Map(),
+    categories: new Map(),
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const role = getRoleFromToken();
@@ -99,14 +126,44 @@ export default function AuditLogs() {
     async function loadAuditLogs() {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/audit-logs`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const result = await response.json();
-        if (!response.ok) {
+        const headers = { Authorization: `Bearer ${token}` };
+        const base = import.meta.env.VITE_API_URL;
+        const [logsRes, assetsRes, employeesRes, categoriesRes] =
+          await Promise.all([
+            fetch(`${base}/api/audit-logs`, { headers }),
+            fetch(`${base}/api/assets?limit=all`, { headers }),
+            fetch(`${base}/api/employees`, { headers }),
+            fetch(`${base}/api/asset-categories`, { headers }),
+          ]);
+        const result = await logsRes.json();
+        if (!logsRes.ok) {
           throw new Error(result.message || "Failed to fetch audit logs");
         }
         setAuditLogs(result.data);
+        // ponytail: best-effort lookups, table still renders on failure
+        const [assetsResult, employeesResult, categoriesResult] =
+          await Promise.all([
+            assetsRes.ok ? assetsRes.json() : null,
+            employeesRes.ok ? employeesRes.json() : null,
+            categoriesRes.ok ? categoriesRes.json() : null,
+          ]);
+        setLookups({
+          assets: new Map(
+            (assetsResult?.data || []).map((a) => [
+              String(a.id),
+              `${a.asset_code} — ${a.name}`,
+            ]),
+          ),
+          employees: new Map(
+            (employeesResult?.data || []).map((e) => [
+              String(e.id),
+              `${e.name} (${e.employee_number})`,
+            ]),
+          ),
+          categories: new Map(
+            (categoriesResult?.data || []).map((c) => [String(c.id), c.name]),
+          ),
+        });
       } catch (error) {
         setErrorMessage(error.message);
       } finally {
@@ -220,6 +277,11 @@ export default function AuditLogs() {
                       <div className="text-sm text-slate-400">
                         #{log.entity_id}
                       </div>
+                      {log.entity_label && (
+                        <div className="text-xs text-slate-500">
+                          {log.entity_label}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -232,6 +294,7 @@ export default function AuditLogs() {
                       <ChangeDetail
                         oldValue={log.old_value}
                         newValue={log.new_value}
+                        lookups={lookups}
                       />
                     </td>
                     <td className="px-4 py-3 text-sm text-slate-700">

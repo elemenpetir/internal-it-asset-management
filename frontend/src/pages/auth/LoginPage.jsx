@@ -84,10 +84,10 @@ export default function Login() {
           <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-white">
             <ShieldCheck className="h-6 w-6" />
           </div>
-          <h2 className="mt-4 text-xl font-bold text-slate-900">
+          <h2 className="mt-4 text-xl font-bold text-slate-100">
             Welcome back
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-400">
             Sign in to AssetShield
           </p>
         </div>
@@ -120,7 +120,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
+                    className="absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-200"
                   >
                     {showPassword ? "Hide" : "Show"}
                   </button>
@@ -169,7 +169,7 @@ export default function Login() {
           </CardContent>
         </Card>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-slate-400">
           Don&apos;t have an account?{" "}
           <Link
             to="/activate-account"

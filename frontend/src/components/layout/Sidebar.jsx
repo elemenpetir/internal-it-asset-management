@@ -21,7 +21,7 @@ function NavItem({ to, icon: Icon, children, end = false }) {
         end={end}
         className={({ isActive }) =>
           cn(
-            "relative flex items-center gap-2.5 rounded-md px-3 py-1.5 text-[13px] text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+            "relative flex items-center gap-2.5 rounded-md px-3 py-1.5 text-[13px] text-slate-400 hover:bg-white/5 hover:text-slate-100",
             isActive && "bg-accent font-medium text-accent-foreground",
           )
         }
@@ -42,7 +42,7 @@ function NavItem({ to, icon: Icon, children, end = false }) {
 
 function NavLabel({ children }) {
   return (
-    <p className="px-3 pt-4 pb-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+    <p className="px-3 pt-4 pb-1 text-[11px] font-semibold tracking-wider text-slate-500 uppercase">
       {children}
     </p>
   );
@@ -59,12 +59,12 @@ function Sidebar() {
   }
 
   return (
-    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-border bg-white">
+    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
       <div className="px-5 pt-5 pb-4">
-        <p className="text-[11px] font-semibold tracking-widest text-slate-400">
+        <p className="text-[11px] font-semibold tracking-widest text-slate-500">
           INTERNAL IT ASSET
         </p>
-        <p className="mt-0.5 text-base font-bold text-slate-900">AssetShield</p>
+        <p className="mt-0.5 text-base font-bold text-slate-100">AssetShield</p>
       </div>
 
       <Separator />
@@ -121,7 +121,7 @@ function Sidebar() {
         <button
           type="button"
           onClick={handleLogout}
-          className="flex w-full items-center gap-2.5 rounded-md px-3 py-1.5 text-[13px] text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+          className="flex w-full items-center gap-2.5 rounded-md px-3 py-1.5 text-[13px] text-slate-400 hover:bg-white/5 hover:text-slate-100"
         >
           <LogOut className="h-4 w-4 shrink-0" />
           Logout

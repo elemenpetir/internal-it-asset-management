@@ -74,10 +74,10 @@ export default function ActivateAccount() {
           <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-white">
             <KeyRound className="h-6 w-6" />
           </div>
-          <h2 className="mt-4 text-xl font-bold text-slate-900">
+          <h2 className="mt-4 text-xl font-bold text-slate-100">
             Activate your account
           </h2>
-          <p className="mt-1 text-center text-sm text-slate-500">
+          <p className="mt-1 text-center text-sm text-slate-400">
             Set your password to complete your profile registration.
           </p>
         </div>
@@ -121,7 +121,7 @@ export default function ActivateAccount() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
+                    className="absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-200"
                   >
                     {showPassword ? "Hide" : "Show"}
                   </button>
@@ -142,14 +142,14 @@ export default function ActivateAccount() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
+                    className="absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-200"
                   >
                     {showConfirmPassword ? "Hide" : "Show"}
                   </button>
                 </div>
               </div>
 
-              <p className="rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-500">
+              <p className="rounded-md bg-muted px-3 py-2 text-xs text-slate-400">
                 Password must be at least 8 characters long.
               </p>
 
@@ -160,7 +160,7 @@ export default function ActivateAccount() {
           </CardContent>
         </Card>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-slate-400">
           Already have an account?{" "}
           <Link
             to="/login"

@@ -1,13 +1,18 @@
+// B19: malformed tokens must yield null, never throw (blank page crash)
+function decodePayload() {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch {
+    return null;
+  }
+}
+
 export function getRoleFromToken() {
-  const token = localStorage.getItem("token");
-  if (!token) return null;
-  const payload = JSON.parse(atob(token.split(".")[1]));
-  return payload.role;
+  return decodePayload()?.role ?? null;
 }
 
 export function getUserIdFromToken() {
-  const token = localStorage.getItem("token");
-  if (!token) return null;
-  const payload = JSON.parse(atob(token.split(".")[1]));
-  return payload.id;
+  return decodePayload()?.id ?? null;
 }

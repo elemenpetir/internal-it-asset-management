@@ -223,7 +223,9 @@ export default function Assets() {
                 Prev
               </Button>
               <span className="px-1 tabular-nums">
-                {pagination.page} / {pagination.total_pages}
+                {pagination.total === 0
+                  ? "0 / 0"
+                  : `${pagination.page} / ${pagination.total_pages}`}
               </span>
               <Button
                 variant="outline"
@@ -231,7 +233,11 @@ export default function Assets() {
                 onClick={() =>
                   setPage((p) => Math.min(p + 1, pagination.total_pages))
                 }
-                disabled={page === pagination.total_pages}
+                // B20: no next page when there are zero pages
+                disabled={
+                  page >= pagination.total_pages ||
+                  pagination.total_pages === 0
+                }
               >
                 Next
                 <ChevronRight className="h-3.5 w-3.5" />

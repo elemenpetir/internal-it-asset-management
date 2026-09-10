@@ -1,5 +1,5 @@
 import "./App.css";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import AppLayout from "./components/layout/AppLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -83,6 +83,8 @@ function App() {
           }
         />
       </Route>
+      {/* B25: unknown URLs go home instead of rendering an empty shell */}
+      <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );

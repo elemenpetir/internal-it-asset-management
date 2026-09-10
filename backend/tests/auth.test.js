@@ -94,13 +94,13 @@ describe("AUTH API", () => {
   });
 
   afterAll(async () => {
-    // cleanup T3: remove the activated user and unlink the employee row
+    // cleanup T3: unlink first (FK), then delete the user
     const [users] = await db.query(
       `SELECT id FROM users WHERE email = 'hendro.wijaya@company.com'`,
     );
     if (users.length > 0) {
-      await db.query(`DELETE FROM users WHERE id = ?`, [users[0].id]);
       await db.query(`UPDATE employees SET user_id = NULL WHERE id = 7`);
+      await db.query(`DELETE FROM users WHERE id = ?`, [users[0].id]);
     }
     await db.end();
   });

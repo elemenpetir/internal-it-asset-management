@@ -45,7 +45,6 @@ describe("MAINTENANCE API", () => {
         issue_description: "Test issue from unit test",
       });
 
-    console.log(res.body);
     expect(res.statusCode).toBe(201);
     expect(res.body.status).toBe("success");
     maintenanceId = res.body.data?.id;

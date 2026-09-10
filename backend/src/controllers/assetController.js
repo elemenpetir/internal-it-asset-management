@@ -11,14 +11,20 @@ const getAssets = async (req, res, next) => {
       limit = 10,
     } = req.query;
 
+    // B12: sanitize pagination — non-numeric/zero/negative values must not
+    // reach LIMIT/OFFSET or produce NaN total_pages
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum =
+      limit === "all" ? "all" : Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
+
     const [rows, total] = await Promise.all([
       assetModel.getAssets({
         status,
         category_id,
         department_id,
         search,
-        page,
-        limit,
+        page: pageNum,
+        limit: limitNum,
       }),
       assetModel.countAssets({ status, category_id, department_id, search }),
     ]);
@@ -29,9 +35,9 @@ const getAssets = async (req, res, next) => {
       data: rows,
       pagination: {
         total: Number(total),
-        page: limit === "all" ? 1 : Number(page),
-        limit: limit === "all" ? Number(total) : Number(limit),
-        total_pages: limit === "all" ? 1 : Math.ceil(total / limit),
+        page: limitNum === "all" ? 1 : pageNum,
+        limit: limitNum === "all" ? Number(total) : limitNum,
+        total_pages: limitNum === "all" ? 1 : Math.ceil(total / limitNum),
       },
     });
   } catch (error) {

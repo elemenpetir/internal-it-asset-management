@@ -44,25 +44,29 @@ export default function CreateAsset() {
   }, [role, navigate]);
 
   useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/asset-categories`,
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        const result = await response.json();
-        if (!response.ok)
-          throw new Error(result.message || "Failed to fetch categories");
-        setCategories(result.data);
-      } catch (error) {
-        setCategoryError(error.message);
-      } finally {
-        setIsCategoryLoading(false);
-      }
-    }
     fetchCategories();
   }, []);
+
+  // B31: hoisted so the form can offer it as a retry handler
+  async function fetchCategories() {
+    try {
+      setIsCategoryLoading(true);
+      setCategoryError("");
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/asset-categories`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.message || "Failed to fetch categories");
+      setCategories(result.data);
+    } catch (error) {
+      setCategoryError(error.message);
+    } finally {
+      setIsCategoryLoading(false);
+    }
+  }
 
   function handleFieldChange(name, value) {
     setFormData((current) => ({ ...current, [name]: value }));
@@ -122,6 +126,7 @@ export default function CreateAsset() {
           categories={categories}
           categoryLoading={isCategoryLoading}
           categoryError={categoryError}
+          onRetryCategories={fetchCategories}
           isSubmitting={isSubmitting}
           submitLabel="Create asset"
           onFieldChange={handleFieldChange}

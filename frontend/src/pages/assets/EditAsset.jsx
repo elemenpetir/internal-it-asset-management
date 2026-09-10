@@ -24,6 +24,7 @@ export default function EditAsset() {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [categoryError, setCategoryError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const role = getRoleFromToken();
@@ -76,6 +77,25 @@ export default function EditAsset() {
     }
     loadEditData();
   }, [id]);
+
+  // B31: standalone category refetch so a failed load can be retried
+  // without reloading the whole edit page (asset data is already here)
+  async function retryCategories() {
+    try {
+      setCategoryError("");
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/asset-categories`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.message || "Failed to fetch asset categories");
+      setCategories(result.data);
+    } catch (error) {
+      setCategoryError(error.message);
+    }
+  }
 
   function handleFieldChange(name, value) {
     setFormData((current) => ({ ...current, [name]: value }));
@@ -153,6 +173,8 @@ export default function EditAsset() {
           formData={formData}
           validationErrors={validationErrors}
           categories={categories}
+          categoryError={categoryError}
+          onRetryCategories={retryCategories}
           isSubmitting={isSubmitting}
           submitLabel="Save changes"
           onFieldChange={handleFieldChange}

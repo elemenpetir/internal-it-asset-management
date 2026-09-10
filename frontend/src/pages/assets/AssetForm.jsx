@@ -26,6 +26,7 @@ export default function AssetForm({
   categories = [],
   categoryLoading = false,
   categoryError = "",
+  onRetryCategories,
   isSubmitting = false,
   submitLabel = "Save",
   onFieldChange,
@@ -78,7 +79,19 @@ export default function AssetForm({
             </SelectContent>
           </Select>
           {categoryError && (
-            <p className="text-xs text-red-400">{categoryError}</p>
+            <p className="text-xs text-red-400">
+              {categoryError}{" "}
+              {/* B31: failed category load must offer retry, not a dead end */}
+              {onRetryCategories && (
+                <button
+                  type="button"
+                  onClick={onRetryCategories}
+                  className="font-medium text-link hover:underline"
+                >
+                  Retry
+                </button>
+              )}
+            </p>
           )}
         </Field>
 

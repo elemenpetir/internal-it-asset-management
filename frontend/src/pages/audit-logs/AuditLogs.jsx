@@ -137,6 +137,11 @@ export default function AuditLogs() {
   }, [role, navigate]);
 
   useEffect(() => {
+    // B30: employees are redirected anyway — don't fire doomed 403 fetches
+    if (role === "employee") {
+      setIsLoading(false);
+      return;
+    }
     async function loadAuditLogs() {
       try {
         const token = localStorage.getItem("token");
@@ -190,7 +195,7 @@ export default function AuditLogs() {
       }
     }
     loadAuditLogs();
-  }, []);
+  }, [role]);
 
   if (errorMessage) {
     return (

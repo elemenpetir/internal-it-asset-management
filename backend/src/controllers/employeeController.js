@@ -79,6 +79,13 @@ const updateEmployee = async (req, res, next) => {
         .json({ status: "failed", message: "All fields are required" });
     }
 
+    // B11: reject invalid status with 400 instead of DB 500
+    if (!["active", "inactive"].includes(status)) {
+      return res
+        .status(400)
+        .json({ status: "failed", message: "status must be active or inactive" });
+    }
+
     await employeeModel.updateEmployee(id, {
       name,
       email,

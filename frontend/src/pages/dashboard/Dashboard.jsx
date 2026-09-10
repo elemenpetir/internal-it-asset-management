@@ -51,9 +51,9 @@ function SectionHeader({ title, description }) {
 
 function SummaryStrip({ items }) {
   return (
-    <div className="flex flex-wrap items-stretch divide-x divide-border rounded-lg border border-border bg-card">
+    <div className="flex flex-wrap gap-px overflow-hidden rounded-lg border border-border bg-border">
       {items.map((item) => (
-        <div key={item.title} className="min-w-36 flex-1 px-5 py-3.5">
+        <div key={item.title} className="min-w-36 flex-1 bg-card px-5 py-3.5">
           <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             {item.title}
           </p>

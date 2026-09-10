@@ -343,8 +343,8 @@ export default function Assignments() {
         <div
           className={`overflow-hidden rounded-lg border border-border bg-card ${isAdminOnly ? "lg:col-span-2" : ""}`}
         >
-          <div className="flex divide-x divide-border border-b border-border">
-            <div className="flex-1 px-4 py-2.5">
+          <div className="flex flex-wrap gap-px border-b border-border bg-border">
+            <div className="min-w-28 flex-1 bg-card px-4 py-2.5">
               <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
                 Assignments
               </p>
@@ -352,7 +352,7 @@ export default function Assignments() {
                 {assignments.length}
               </p>
             </div>
-            <div className="flex-1 px-4 py-2.5">
+            <div className="min-w-28 flex-1 bg-card px-4 py-2.5">
               <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
                 Available
               </p>
@@ -360,7 +360,7 @@ export default function Assignments() {
                 {availableAssets.length}
               </p>
             </div>
-            <div className="flex-1 px-4 py-2.5">
+            <div className="min-w-28 flex-1 bg-card px-4 py-2.5">
               <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
                 Employees
               </p>

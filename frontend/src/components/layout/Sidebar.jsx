@@ -48,7 +48,7 @@ function NavLabel({ children }) {
   );
 }
 
-function Sidebar() {
+function Sidebar({ open = false, onClose = () => {} }) {
   const navigate = useNavigate();
   const role = getRoleFromToken();
 
@@ -59,7 +59,23 @@ function Sidebar() {
   }
 
   return (
-    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
+    <>
+      {/* backdrop, mobile only */}
+      {open && (
+        <div
+          onClick={onClose}
+          aria-hidden="true"
+          className="fixed inset-0 z-40 bg-black/60 md:hidden"
+        />
+      )}
+      <aside
+        className={cn(
+          "top-0 z-50 h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar",
+          // drawer on mobile, static column on desktop
+          "fixed md:sticky",
+          open ? "flex" : "hidden md:flex",
+        )}
+      >
       <div className="px-5 pt-5 pb-4">
         <p className="text-[11px] font-semibold tracking-widest text-slate-500">
           INTERNAL IT ASSET
@@ -69,7 +85,7 @@ function Sidebar() {
 
       <Separator />
 
-      <nav className="flex-1 overflow-y-auto px-3 py-2">
+      <nav className="flex-1 overflow-y-auto px-3 py-2" onClick={onClose}>
         <ul className="space-y-0.5">
           <NavItem to="/" icon={LayoutDashboard} end>
             Overview
@@ -127,7 +143,8 @@ function Sidebar() {
           Logout
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 

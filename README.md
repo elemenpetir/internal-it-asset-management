@@ -158,8 +158,25 @@ Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
 
 ## Screenshots
 
-Screenshots will be refreshed to match the redesigned UI (see `docs/design.md`
-for the visual direction).
+### Dashboard
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Asset Inventory
+
+![Asset Inventory](docs/screenshots/assets.png)
+
+### Asset Detail
+
+![Asset Detail](docs/screenshots/asset-detail.png)
+
+### Maintenance Requests
+
+![Maintenance](docs/screenshots/maintenance.png)
+
+### Audit Logs
+
+![Audit Logs](docs/screenshots/audit-logs.png)
 
 ---
 

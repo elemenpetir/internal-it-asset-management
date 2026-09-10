@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
 import { getRoleFromToken } from "../../utils/auth";
@@ -24,11 +24,14 @@ import {
 } from "@/components/ui/table";
 
 export default function Assets() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  // B29: restore list context when returning from a detail page
+  const location = useLocation();
+  const fromDetail = location.state?.fromList || {};
+  const [searchTerm, setSearchTerm] = useState(fromDetail.searchTerm || "");
+  const [statusFilter, setStatusFilter] = useState(fromDetail.statusFilter || "all");
   const [assets, setAssets] = useState([]);
   const [pagination, setPagination] = useState(null);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(fromDetail.page || 1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const token = localStorage.getItem("token");
@@ -162,15 +165,23 @@ export default function Assets() {
                 <TableRow
                   key={asset.id}
                   className="cursor-pointer"
-                  onClick={() => navigate(`/assets/${asset.id}`)}
+                  onClick={() =>
+                    navigate(`/assets/${asset.id}`, {
+                      state: { fromList: { searchTerm, statusFilter, page } },
+                    })
+                  }
                   tabIndex={0}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") navigate(`/assets/${asset.id}`);
+                    if (e.key === "Enter")
+                      navigate(`/assets/${asset.id}`, {
+                        state: { fromList: { searchTerm, statusFilter, page } },
+                      });
                   }}
                 >
                   <TableCell>
                     <Link
                       to={`/assets/${asset.id}`}
+                      state={{ fromList: { searchTerm, statusFilter, page } }}
                       onClick={(e) => e.stopPropagation()}
                       className="font-mono font-medium text-link hover:underline"
                     >

@@ -1,4 +1,4 @@
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ChevronLeft } from "lucide-react";
@@ -47,6 +47,7 @@ function DetailItem({ label, children, mono = false }) {
 export default function AssetDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [asset, setAsset] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -394,6 +395,12 @@ export default function AssetDetail() {
       <div className="mt-4">
         <Link
           to="/assets"
+          // B29: carry the list context back so filter/search/page survive
+          state={
+            location.state?.fromList
+              ? { fromList: location.state.fromList }
+              : undefined
+          }
           className="inline-flex items-center gap-1 text-[13px] text-slate-400 hover:text-slate-300"
         >
           <ChevronLeft className="h-3.5 w-3.5" />

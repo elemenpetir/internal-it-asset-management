@@ -1,4 +1,5 @@
 const employeeModel = require("../models/employeeModel");
+const assetAssignmentModel = require("../models/assetAssignmentModel");
 
 const getEmployees = async (req, res, next) => {
   try {
@@ -114,6 +115,16 @@ const deleteEmployee = async (req, res, next) => {
       return res
         .status(404)
         .json({ status: "failed", message: "Employee not found" });
+    }
+
+    // B14: refuse deactivation while the employee still holds active assignments
+    const activeAssets =
+      await assetAssignmentModel.getActiveAssetsByEmployeeId(id);
+    if (activeAssets.length > 0) {
+      return res.status(409).json({
+        status: "failed",
+        message: "Employee still has active asset assignments",
+      });
     }
 
     await employeeModel.deleteEmployee(id);

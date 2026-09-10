@@ -23,6 +23,14 @@ const errorMiddleware = (err, req, res, next) => {
         })
     }
 
+    // B15: deleting a row still referenced elsewhere (e.g. department in use)
+    if(err.code === 'ER_ROW_IS_REFERENCED_2'){
+        return res.status(409).json({
+            status: 'failed',
+            message: 'cannot delete: data is still referenced elsewhere'
+        })
+    }
+
     return res.status(500).json({
         status: 'failed',
         message: 'internal server error'

@@ -115,4 +115,25 @@ const activateEmployee = async (req, res, next) => {
 module.exports = {
   login,
   activateEmployee,
+  me,
 };
+
+async function me(req, res, next) {
+  try {
+    // B33: return the profile, not just the token payload
+    const user = await userModel.findUserById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        status: "failed",
+        message: "user not found",
+      });
+    }
+    return res.status(200).json({
+      status: "success",
+      message: "authenticated user",
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+}

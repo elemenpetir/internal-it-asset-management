@@ -6,6 +6,13 @@ const findUserByEmail = async (email) => {
   return rows[0];
 };
 
+// B33: /me needs the profile (token only carries id+role)
+const findUserById = async (id) => {
+  const sql = `SELECT id, name, email, role FROM users WHERE id = ?`;
+  const [rows] = await db.query(sql, [id]);
+  return rows[0];
+};
+
 const findEmployeeForActivation = async (email, employeeNum) => {
   const sql = `SELECT * FROM employees WHERE email = ? AND employee_number = ?`;
   const values = [email, employeeNum];
@@ -50,6 +57,7 @@ const getAllUsersMinimal = async () => {
 
 module.exports = {
   findUserByEmail,
+  findUserById,
   findEmployeeForActivation,
   activateEmployeeWithTransaction,
   getAllUsersMinimal,

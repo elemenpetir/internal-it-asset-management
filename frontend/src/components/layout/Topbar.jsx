@@ -23,7 +23,7 @@ function Topbar({ onMenu }) {
 
   return (
     <header className="border-b border-sidebar-border bg-sidebar px-4 py-3 md:px-6">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 md:justify-end">
         <button
           type="button"
           onClick={onMenu}

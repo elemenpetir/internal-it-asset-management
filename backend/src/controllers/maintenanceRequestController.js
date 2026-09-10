@@ -107,17 +107,11 @@ const getMyActiveAssets = async (req, res, next) => {
     const myActiveAssets =
       await assetAssignmentModel.getActiveAssetsByEmployeeId(employee_id);
 
-    if (!myActiveAssets || myActiveAssets.length === 0) {
-      return res.status(404).json({
-        status: "failed",
-        message: "my active assets not found",
-      });
-    }
-
+    // B16: empty is a valid state — return 200 [] instead of 404
     return res.status(200).json({
       status: "success",
       message: "get my active assets successfully",
-      data: myActiveAssets,
+      data: myActiveAssets || [],
     });
   } catch (error) {
     next(error);

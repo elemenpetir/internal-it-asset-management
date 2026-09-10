@@ -48,6 +48,8 @@ A fullstack web application for managing internal IT assets. Covers asset tracki
 - Audit log for every significant operation
 - Rule-based asset risk scoring
 - Analytics dashboard (summary strip, donut by category, bar by department, line maintenance trend, high-risk assets, replacement candidates)
+- Dark slate UI with mobile drawer navigation
+- Toast notifications and dialog-based forms
 - Database transactions for critical workflows
 - Unit tests for core endpoints
 
@@ -86,7 +88,7 @@ Employees cannot self-register or choose their own role.
 - No duplicate active requests are allowed for the same asset.
 - Status flow: `reported` → `in_progress` → `completed` / `canceled`
 - On `in_progress`: asset status automatically changes to `under_maintenance`.
-- On `completed` / `canceled`: asset status reverts to `assigned`.
+- On `completed` / `canceled`: asset status reverts to `assigned`, but only if the asset is currently `under_maintenance`; otherwise its status is left untouched.
 
 ### Risk Scoring
 
@@ -142,8 +144,10 @@ Risk level: `low` (0–30) · `medium` (31–60) · `high` (61+)
 │   │   └── utils/
 │   └── package.json
 ├── docs/
+│   ├── bugs.md
 │   ├── design.md
 │   ├── erd.png
+│   ├── screenshots/
 │   └── PRD_Internal_IT_Asset_Management.md
 └── README.md
 ```
@@ -280,7 +284,7 @@ cd backend
 npm test
 ```
 
-Current coverage: 13 test cases covering auth, assets, assignments, maintenance, and analytics.
+Current coverage: 33 test cases covering auth (incl. activation), assets (incl. case-insensitive search), assignments (incl. return flow), maintenance (incl. transitions and guards), risk scoring boundaries, and analytics.
 
 > Tests run sequentially (`--runInBand`) in CI because all suites share a single database. Running them in parallel causes race conditions between suites that mutate shared data (see CI/CD Pipeline section for details).
 
@@ -453,7 +457,7 @@ Also ensure the deployment platform is configured to forward the dashboard env v
 
 ## Known Limitations
 
-- Audit logs resolve entity names and known foreign keys to human-readable labels; user IDs (`assigned_by`, `handled_by`) have no list endpoint and still display as `User #id`.
+- Free-tier cold start: both services sleep when idle. The first visit after idleness can take ~30–60 seconds (backend wake-up + first DB connection); this is Render platform behavior, not an application bug.
 - The "duration under maintenance" factor is not yet implemented in risk scoring.
 - Test suite runs sequentially rather than in parallel because all suites share a single database per run. Per-file isolation with dedicated transactions is not yet in place.
 - No frontend unit tests; the CI build check only verifies that the code compiles, not behavioral correctness.

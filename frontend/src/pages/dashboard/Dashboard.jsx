@@ -120,6 +120,9 @@ export default function Dashboard() {
   const role = getRoleFromToken();
 
   useEffect(() => {
+    // B21: abort in-flight analytics when leaving the page mid-load
+    const controller = new AbortController();
+    const signal = controller.signal;
     async function fetchAdminOverview() {
       const token = localStorage.getItem("token");
       const headers = { Authorization: `Bearer ${token}` };
@@ -132,21 +135,26 @@ export default function Dashboard() {
         maintenanceRes,
         replacementRes,
       ] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_URL}/api/analytics/overview`, { headers }),
+        fetch(`${import.meta.env.VITE_API_URL}/api/analytics/overview`, { headers, signal }),
         fetch(`${import.meta.env.VITE_API_URL}/api/analytics/high-risk-assets`, {
           headers,
+          signal,
         }),
         fetch(`${import.meta.env.VITE_API_URL}/api/analytics/assets-by-category`, {
           headers,
+          signal,
         }),
         fetch(`${import.meta.env.VITE_API_URL}/api/analytics/assets-by-department`, {
           headers,
+          signal,
         }),
         fetch(`${import.meta.env.VITE_API_URL}/api/analytics/maintenance-summary`, {
           headers,
+          signal,
         }),
         fetch(`${import.meta.env.VITE_API_URL}/api/analytics/replacement-candidates`, {
           headers,
+          signal,
         }),
       ]);
 
@@ -229,9 +237,11 @@ export default function Dashboard() {
         fetch(`${import.meta.env.VITE_API_URL}/api/maintenance-requests/my-assets`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
+          signal,
         }),
         fetch(`${import.meta.env.VITE_API_URL}/api/maintenance-requests/my-requests`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal,
         }),
       ]);
 
@@ -277,13 +287,15 @@ export default function Dashboard() {
 
         setSummaryItems(items);
       } catch (error) {
-        setErrorMessage(error.message);
+        // abort on unmount is not an error
+        if (error.name !== "AbortError") setErrorMessage(error.message);
       } finally {
-        setIsLoading(false);
+        if (!signal.aborted) setIsLoading(false);
       }
     }
 
     loadDashboard();
+    return () => controller.abort();
   }, [role]);
 
   if (isLoading) {

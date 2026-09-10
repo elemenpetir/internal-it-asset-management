@@ -80,17 +80,21 @@ export default function AssetDetail() {
       setAssignmentsLoading(false);
       return;
     }
+    // B21: abort stale requests when id changes fast (dashboard hopping)
+    const controller = new AbortController();
+    const signal = controller.signal;
     async function fetchRiskScore() {
       try {
         const token = localStorage.getItem("token");
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/api/assets/${id}/risk-score`,
-          { headers: { Authorization: `Bearer ${token}` } },
+          { headers: { Authorization: `Bearer ${token}` }, signal },
         );
         const result = await response.json();
         if (response.ok) setRiskScore(result.data);
-      } catch {
-        // silent fail, risk section hidden
+      } catch (error) {
+        // silent fail, risk section hidden (abort is not an error)
+        if (error.name !== "AbortError") setRiskScoreError("Failed to load risk score.");
       }
     }
     async function fetchAssignments() {
@@ -98,18 +102,19 @@ export default function AssetDetail() {
         const token = localStorage.getItem("token");
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/api/assets/${id}/assignments`,
-          { headers: { Authorization: `Bearer ${token}` } },
+          { headers: { Authorization: `Bearer ${token}` }, signal },
         );
         const result = await response.json();
         if (response.ok) setAssignments(result.data);
       } catch {
         // silent fail, table empty
       } finally {
-        setAssignmentsLoading(false);
+        if (!signal.aborted) setAssignmentsLoading(false);
       }
     }
     fetchRiskScore();
     fetchAssignments();
+    return () => controller.abort();
   }, [id, role]);
 
   async function handleRetireAsset() {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { getRoleFromToken } from "../../utils/auth";
@@ -25,6 +25,8 @@ export default function CreateMaintenance() {
   const [isLoadingAssets, setIsLoadingAssets] = useState(false);
   const [assetError, setAssetError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // B21: latest search wins — a new Search aborts the previous request
+  const searchController = useRef(null);
 
   useEffect(() => {
     if (role === "manager") {
@@ -38,6 +40,10 @@ export default function CreateMaintenance() {
   }, [role]);
 
   async function fetchAssets(empNumber = null) {
+    // cancel any in-flight search before starting a new one
+    searchController.current?.abort();
+    const controller = new AbortController();
+    searchController.current = controller;
     try {
       setIsLoadingAssets(true);
       setAssetError("");
@@ -56,6 +62,7 @@ export default function CreateMaintenance() {
             Authorization: `Bearer ${token}`,
           },
           ...(body && { body: JSON.stringify(body) }),
+          signal: controller.signal,
         },
       );
 
@@ -67,9 +74,9 @@ export default function CreateMaintenance() {
 
       setAssets(result.data);
     } catch (error) {
-      setAssetError(error.message);
+      if (error.name !== "AbortError") setAssetError(error.message);
     } finally {
-      setIsLoadingAssets(false);
+      if (!controller.signal.aborted) setIsLoadingAssets(false);
     }
   }
 

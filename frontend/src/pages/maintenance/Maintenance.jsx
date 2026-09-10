@@ -57,6 +57,10 @@ export default function Maintenance() {
   const completedCount = maintenanceRequests.filter(
     (r) => r.status === "completed",
   ).length;
+  // B24: canceled requests were missing from the strip totals
+  const canceledCount = maintenanceRequests.filter(
+    (r) => r.status === "canceled",
+  ).length;
 
   if (errorMessage) {
     return (
@@ -91,6 +95,7 @@ export default function Maintenance() {
           ["Reported", reportedCount],
           ["In progress", inProgressCount],
           ["Completed", completedCount],
+          ["Canceled", canceledCount],
         ].map(([label, count]) => (
           <div key={label} className="flex-1 px-4 py-2.5">
             <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">

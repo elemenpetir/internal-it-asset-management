@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/table";
 
 function getAgeScore(purchaseDate) {
+  // B23: unknown purchase date scores 0 (unknown), never 30 (old)
+  if (!purchaseDate) return 0;
   const d = new Date(purchaseDate);
   const yrs = (Date.now() - d) / (1000 * 60 * 60 * 24 * 365);
   return yrs < 2 ? 5 : yrs <= 4 ? 15 : 30;

@@ -134,6 +134,35 @@ const updateAsset = async (req, res, next) => {
   try {
     const { id } = req.params;
 
+    const existing = await assetModel.getAssetById(id);
+    if (!existing) {
+      return res.status(404).json({
+        status: "failed",
+        message: "asset not found",
+      });
+    }
+
+    // B17: identity fields are frozen while the asset is out (assigned) or
+    // in repair — changing them would orphan the assignment history
+    if (existing.status === "assigned" || existing.status === "under_maintenance") {
+      const identityFields = [
+        "asset_code",
+        "serial_number",
+        "category_id",
+        "brand",
+        "model",
+      ];
+      const changed = identityFields.filter(
+        (f) => req.body[f] !== undefined && String(req.body[f]) !== String(existing[f]),
+      );
+      if (changed.length > 0) {
+        return res.status(400).json({
+          status: "failed",
+          message: `cannot change ${changed.join(", ")} while asset is ${existing.status}`,
+        });
+      }
+    }
+
     const {
       asset_code,
       name,

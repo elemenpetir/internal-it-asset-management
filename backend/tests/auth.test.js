@@ -49,7 +49,59 @@ describe("AUTH API", () => {
     expect(res.body.status).toBe("failed");
   });
 
+  test("T3: should return 400 on activation with invalid employee data", async () => {
+    const res = await request(app).post("/api/auth/activate").send({
+      email: "nobody@company.com",
+      employee_number: "EMP-9999",
+      password: "testpass123",
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.status).toBe("failed");
+  });
+
+  test("T3: should activate Hendro Wijaya (EMP-0006) as employee", async () => {
+    const res = await request(app).post("/api/auth/activate").send({
+      email: "hendro.wijaya@company.com",
+      employee_number: "EMP-0006",
+      password: "testpass123",
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.status).toBe("success");
+    expect(res.body.data.user.role).toBe("employee");
+  });
+
+  test("T3: should return 400 on double activation", async () => {
+    const res = await request(app).post("/api/auth/activate").send({
+      email: "hendro.wijaya@company.com",
+      employee_number: "EMP-0006",
+      password: "testpass123",
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.status).toBe("failed");
+  });
+
+  test("T3: activated account can log in", async () => {
+    const res = await request(app).post("/api/auth/login").send({
+      email: "hendro.wijaya@company.com",
+      password: "testpass123",
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.user.role).toBe("employee");
+  });
+
   afterAll(async () => {
+    // cleanup T3: remove the activated user and unlink the employee row
+    const [users] = await db.query(
+      `SELECT id FROM users WHERE email = 'hendro.wijaya@company.com'`,
+    );
+    if (users.length > 0) {
+      await db.query(`DELETE FROM users WHERE id = ?`, [users[0].id]);
+      await db.query(`UPDATE employees SET user_id = NULL WHERE id = 7`);
+    }
     await db.end();
   });
 });

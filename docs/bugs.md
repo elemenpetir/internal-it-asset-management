@@ -95,24 +95,28 @@
 
 ## Rendah + Test — Batch 3
 
-- [ ] **B26. `Invalid Date`.** `Departments.jsx` tanpa fallback saat `created_at` null.
-- [ ] **B27. `undefined (undefined)`.** `MaintenanceDetail.jsx` tanpa fallback
-      saat employee pengaju dihapus.
-- [ ] **B28. RiskCell fallback hijau.** `risk_level` null/unknown → badge `low`,
-      menyesatkan.
-- [ ] **B29. Back link reset filter.** Detail → Back selalu ke page 1 tanpa
-      filter/search sebelumnya.
-- [ ] **B30. Audit fetch 403 sebelum redirect.** Employee buka `/audit-logs`:
-      redirect + fetch 403 jalan bersamaan.
-- [ ] **B31. Kategori gagal tanpa retry.** `AssetForm.jsx`: Select kosong,
-      user terkunci validasi.
-- [ ] **B32. Badge kosong.** `StatusBadge` status null → badge abu tanpa label.
-- [ ] **B33. `GET /me` tanpa nama.** Hanya `{id,role}`; Topbar butuh nama.
-- [ ] **T1. Test return assignment.** Happy-path + double-return 400 + tolak
+- [x] **B26. `Invalid Date`.** `Departments.jsx` tanpa fallback saat `created_at` null.
+      Sekarang tampil `-`.
+- [x] **B27. `undefined (undefined)`.** `MaintenanceDetail.jsx` tanpa fallback
+      saat employee pengaju dihapus. Sekarang "Unknown employee".
+- [x] **B28. RiskCell fallback hijau.** `risk_level` null/unknown → badge `low`,
+      menyesatkan. Sekarang badge netral `unknown`.
+- [x] **B29. Back link reset filter.** Detail → Back selalu ke page 1 tanpa
+      filter/search sebelumnya. Sekarang konteks list dibawa via route state.
+- [x] **B30. Audit fetch 403 sebelum redirect.** Employee buka `/audit-logs`:
+      redirect + fetch 403 jalan bersamaan. Sekarang fetch diskip untuk employee.
+- [x] **B31. Kategori gagal tanpa retry.** `AssetForm.jsx`: Select kosong,
+      user terkunci validasi. Sekarang ada tombol Retry (Create + Edit).
+- [x] **B32. Badge kosong.** `StatusBadge` status null → badge abu tanpa label.
+      Sekarang label eksplisit (`unknown` bila kosong).
+- [x] **B33. `GET /me` tanpa nama.** Hanya `{id,role}`; Topbar butuh nama.
+      Sekarang return profil lengkap via `findUserById`.
+- [x] **T1. Test return assignment.** Happy-path + double-return 400 + tolak
       saat `under_maintenance` (satu-satunya penulis status kembali, nol test).
-- [ ] **T2. Test transisi maintenance.** Full transisi + `completed` tanpa
+- [x] **T2. Test transisi maintenance.** Full transisi + `completed` tanpa
       `resolution_note` → 400.
-- [ ] **T3. Test aktivasi.** Sukses + aktivasi ganda 400.
-- [ ] **T4. Test guard maintenance.** Tolak aset bukan miliknya + tolak duplikat
+- [x] **T3. Test aktivasi.** Sukses + aktivasi ganda 400.
+- [x] **T4. Test guard maintenance.** Tolak aset bukan miliknya + tolak duplikat
       active-request.
-- [ ] **T5. Test risk score.** Unit `calculateRiskScore` + boundary low/medium/high.
+- [x] **T5. Test risk score.** Unit `calculateRiskScore` + boundary low/medium/high.
+      6/6 hijau lokal (tanpa DB).

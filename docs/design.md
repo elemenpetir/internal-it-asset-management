@@ -113,3 +113,13 @@ dekoratif di luar daftar ini tanpa update dokumen.
   Selesai jika: tiap area lolos cek 3 role + 403 + modal + pagination.
 - **Fase 3 — Finishing.** README (stack + tokens), screenshot ulang/hapus
   yang basi. Selesai jika: README akurat, CI hijau.
+
+## 8. Mobile (≤768px)
+
+- Sidebar jadi drawer: hidden default, hamburger di Topbar (`md:hidden`),
+  backdrop gelap, auto-close saat navigasi. Desktop tidak berubah.
+- Strip angka: `gap-px` di atas `bg-border` (bukan `divide-x`) agar wrap
+  2×2 rapi tanpa garis nyasar.
+- Tabel: geser horizontal dalam kartu (bawaan shadcn `Table`).
+- Grid → 1 kolom; toolbar → vertikal; dialog/auth sudah aman.
+- Verifikasi di 375px tiap ubah layout.

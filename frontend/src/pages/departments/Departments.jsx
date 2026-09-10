@@ -183,11 +183,14 @@ export default function Departments() {
                     {dept.name}
                   </TableCell>
                   <TableCell className="text-slate-400 tabular-nums">
-                    {new Date(dept.created_at).toLocaleDateString("id-ID", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
+                    {/* B26: null/invalid dates render "-", never "Invalid Date" */}
+                    {!dept.created_at || isNaN(new Date(dept.created_at))
+                      ? "-"
+                      : new Date(dept.created_at).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
                   </TableCell>
                   {role === "asset_admin" && (
                     <TableCell>

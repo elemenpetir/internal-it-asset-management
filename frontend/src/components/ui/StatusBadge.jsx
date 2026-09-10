@@ -20,10 +20,18 @@ const labels = {
 };
 
 export default function StatusBadge({ status, className }) {
+  // B32: null/unknown statuses render an explicit label, never an empty badge
+  if (!status || !styles[status]) {
+    return (
+      <Badge className={cn("bg-slate-500/15 text-slate-400", className)}>
+        {status || "unknown"}
+      </Badge>
+    );
+  }
   return (
     <Badge
       className={cn(
-        styles[status] || "bg-slate-500/15 text-slate-400",
+        styles[status],
         className,
       )}
     >

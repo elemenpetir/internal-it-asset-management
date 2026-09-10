@@ -35,6 +35,7 @@ const riskBadgeClass = {
   high: "bg-red-500/15 text-red-400",
   medium: "bg-amber-500/15 text-amber-400",
   low: "bg-green-500/15 text-green-400",
+  unknown: "bg-slate-500/15 text-slate-400",
 };
 
 function SectionHeader({ title, description }) {
@@ -98,12 +99,14 @@ function ClickableRow({ to, children }) {
 }
 
 function RiskCell({ score, level }) {
+  // B28: unknown levels render neutral, never misleading green "low"
+  const safeLevel = riskBadgeClass[level] ? level : "unknown";
   return (
     <span className="inline-flex items-center gap-2">
-      <span className="font-bold text-slate-100 tabular-nums">{score}</span>
-      <Badge className={riskBadgeClass[level] || riskBadgeClass.low}>
-        {level}
-      </Badge>
+      <span className="font-bold text-slate-100 tabular-nums">
+        {score ?? "-"}
+      </span>
+      <Badge className={riskBadgeClass[safeLevel]}>{safeLevel}</Badge>
     </span>
   );
 }

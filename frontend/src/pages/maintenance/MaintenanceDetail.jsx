@@ -120,13 +120,15 @@ export default function MaintenanceDetail() {
     );
   }
 
+  const requesterName = maintenanceRequest.requested_by_name || "Unknown employee";
+  const requesterNumber = maintenanceRequest.employee_number
+    ? ` (${maintenanceRequest.employee_number})`
+    : "";
   const meta = [
     ["Submitted", maintenanceRequest.created_at?.slice(0, 10) || "-"],
     ["Completed", maintenanceRequest.completed_at?.slice(0, 10) || "-"],
-    [
-      "Requested by",
-      `${maintenanceRequest.requested_by_name} (${maintenanceRequest.employee_number})`,
-    ],
+    // B27: deleted requesters render a placeholder, never "undefined (undefined)"
+    ["Requested by", `${requesterName}${requesterNumber}`],
     ["Handled by", maintenanceRequest.handled_by_name || "-"],
   ];
 
